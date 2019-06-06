@@ -11,18 +11,18 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
-# bot = commands.Bot(command_prefix=commands.when_mentioned_or())
+# assistant = commands.Bot(command_prefix=commands.when_mentioned_or())
 bot = commands.Bot(command_prefix='.')
 
 
-# @bot.command()
+# @assistant.command()
 # async def load(ctx, extension):
-#     bot.load_extension('cogs.{}'.format(extension))
+#     assistant.load_extension('cogs.{}'.format(extension))
 #
 #
-# @bot.command()
+# @assistant.command()
 # async def unload(ctx, extension):
-#     bot.unload_extension('cogs.{}'.format(extension))
+#     assistant.unload_extension('cogs.{}'.format(extension))
 
 
 for filename in os.listdir('./cogs'):

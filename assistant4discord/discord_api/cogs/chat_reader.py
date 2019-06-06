@@ -1,5 +1,6 @@
 from discord.ext import commands
 import logging
+from assistant4discord.assistant.listener import do_the_thing
 
 
 class ChatReader(commands.Cog):
@@ -16,7 +17,11 @@ class ChatReader(commands.Cog):
             return
 
         if message.content.startswith('<@{}>'.format(self.bot.user.id)):
-            await message.channel.send('You have summoned me!')
+            response = do_the_thing(message[22:])
+            if response:
+                await response()
+            else:
+                await message.channel.send("I dont't understand :(")
 
 
 def setup_chat_logger(name=__name__, log_name='new_log', level=logging.DEBUG, format='%(asctime)s: %(levelname)s: %(message)s'):
