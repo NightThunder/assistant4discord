@@ -26,9 +26,13 @@ bot = commands.Bot(command_prefix='.')
 
 
 for filename in os.listdir('./cogs'):
+
     if filename.endswith('.py'):
-        bot.load_extension('cogs.{}'.format(filename[:-3]))
-        print('loaded: {}'.format(filename))
+        if '__init__.py' in filename:
+            pass
+        else:
+            bot.load_extension('cogs.{}'.format(filename[:-3]))
+            print('loaded: {}'.format(filename))
 
 
 my_token = open('../token.txt', 'r').read()
