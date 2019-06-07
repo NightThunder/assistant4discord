@@ -1,6 +1,7 @@
 from discord.ext import commands
 import logging
 from assistant4discord.assistant.listener import do_the_thing
+from assistant4discord.assistant.commander import Ping
 
 
 class ChatReader(commands.Cog):
@@ -24,7 +25,7 @@ class ChatReader(commands.Cog):
                 await message.channel.send("I dont't understand :(")
 
 
-def setup_chat_logger(name=__name__, log_name='new_log', level=logging.DEBUG, format='%(asctime)s: %(levelname)s: %(message)s'):
+def setup_chat_logger(name=__name__, log_name='new_log.log', level=logging.DEBUG, format='%(asctime)s: %(levelname)s: %(message)s'):
     from pathlib import Path
 
     log_file = str(Path(__file__).parents[2]) + '/data/' + log_name
@@ -46,4 +47,4 @@ def setup(bot):
     bot.add_cog(ChatReader(bot))
 
 
-chat_logger = setup_chat_logger(log_name='chat_log')
+chat_logger = setup_chat_logger(log_name='chat_log.log')
