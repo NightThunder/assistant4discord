@@ -12,5 +12,27 @@ def replace_numbers(sent):
     return text_nonum
 
 
-def process_message(message):
-    return replace_numbers(remove_punctuation(message))
+def word_by_word(sent):
+    tokens = re.split(r'\W+', sent[0])
+    tokens_noempty = [word.lower() for word in tokens if word != '']
+    return tokens_noempty
+
+
+def word2vec_input(message):
+    """ Prepares message for word2vec.
+    notes:
+        sent_tokenize():  splits into sentences,
+        a: replaces numbers with stevilka, removes punctuation, replaces /n,
+        b: lowers,
+        c: splits sentence into words
+    Args:
+        message: message string
+    Returns: sentences word by word in list [[w1, w2, ...], [w1, w2, ...], ...]
+                                              sent1          sent2
+    """
+    # a = [replace_numbers(remove_punctuation(message)).replace('\n', ' ')]
+    # b = [i.lower() for i in a]
+    # c = word_by_word(b)
+    text_in_sent = (word_by_word([i.lower() for i in [replace_numbers(remove_punctuation(message)).replace('\n', ' ')]]))
+
+    return text_in_sent
