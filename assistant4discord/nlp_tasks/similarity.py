@@ -46,17 +46,33 @@ class Similarity:
 
         return post_mat
 
-    def sentence_sim(self, sentence, sentence_lst):
-        compare_vec = self.sentence2vec(sentence)
-        compare_with_vec = self.sentence2vec(sentence_lst)
+    def get_sentence2vec(self, content):
+        """Calls sentence2vec. Different for string or list of strings."""
+        if type(content) is list:
+            commands = [word2vec_input(i) for i in content]
+            return self.sentence2vec(commands)
+        else:
+            message = word2vec_input(content)
+            return self.sentence2vec(message)
 
-        return cosine_similarity(compare_vec, compare_with_vec).ravel()
+    def sentence_sim(self, sentence, compare_to_sentences):
+        """Return cosine similarity of vector and matrix rows."""
+        return cosine_similarity(sentence, compare_to_sentences).ravel()
 
-    def message_x_command_sim(self, message: str, commands: list):
-        message = word2vec_input(message)
-        commands = [word2vec_input(i) for i in commands]
+    def message_x_command_sim(self, message: str, commands: list, saved_command_vectors=False):
+        """ Compares message to list of commands or to sentence vectors.
 
-        return self.sentence_sim(message, commands)
+        Args:
+            message: string
+            commands: list of text commands or command sentence vectors if saved_command_vectors=True
+            saved_command_vectors: set True if already calculated vector commands (at start or in .pickle)
+
+        Returns: np.array of cosine similarities
+        """
+        if saved_command_vectors:
+            return self.sentence_sim(self.get_sentence2vec(message), commands)
+        else:
+            return self.sentence_sim(self.get_sentence2vec(message), self.get_sentence2vec(commands))
 
 
 # sim = Similarity('5days_askreddit_model.kv').message_x_command_sim('ping this please', ['whats my ping', 'remind me', 'google this'])
