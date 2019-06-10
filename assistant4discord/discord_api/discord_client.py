@@ -1,10 +1,6 @@
 import discord
-import asyncio
 import logging
 from assistant4discord.assistant.commander import Commander
-
-
-logging.basicConfig(level=logging.INFO)
 
 
 class MyClient(discord.Client):
@@ -19,24 +15,7 @@ class MyClient(discord.Client):
             return
 
         if message.content.startswith('<@{}>'.format(self.user.id)):
-            C.message_to_command(message).doit()
-            await message.channel.send('You have summoned me!')
-
-        # if message.content.startswith('ping'):
-        #     await ping(message)
-        #
-        # if message.content.startswith('sleep'):
-        #     await sleeper(message)
-
-
-async def ping(message):
-    await message.channel.send('{} ms'.format(round(client.latency * 1000)))
-
-
-async def sleeper(message):
-    await message.channel.send('going to sleep')
-    await asyncio.sleep(10)
-    await message.channel.send('slept for 10 s')
+            await C.message_to_command(message).doit()
 
 
 def setup_chat_logger(name=__name__, log_name='new.log', level=logging.DEBUG, format='%(asctime)s: %(levelname)s: %(message)s'):
@@ -57,6 +36,7 @@ def setup_chat_logger(name=__name__, log_name='new.log', level=logging.DEBUG, fo
     return logger
 
 
+logging.basicConfig(level=logging.INFO)
 chat_logger = setup_chat_logger(log_name='chat.log')
 
 my_token = open('../token.txt', 'r').read()
@@ -64,4 +44,4 @@ client = MyClient()
 
 C = Commander(client=client, model_name='5days_askreddit_model.kv')
 
-#client.run(my_token)
+client.run(my_token)
