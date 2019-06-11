@@ -2,12 +2,25 @@ import asyncio
 from assistant4discord.nlp_tasks.message_processing import word2vec_input
 
 
-class Ping:
+class Master:
 
-    def __init__(self, **kwargs):
-        if kwargs:
-            self.client = kwargs['client']
-            self.message = kwargs['message']
+    def __init__(self, client=None, message=None, similarity=None):
+        """ Base class for commands.
+
+        Args:
+            client: discord client object
+            message: discord message object
+            similarity: Similarity object from assistant4discord.nlp_tasks.similarity
+        """
+        self.client = client
+        self.message = message
+        self.sim = similarity
+
+
+class Ping(Master):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         self.call = 'ping'
 
@@ -15,12 +28,10 @@ class Ping:
         await self.message.channel.send('{} ms'.format(round(self.client.latency * 1000)))
 
 
-class After10:
+class After10(Master):
 
-    def __init__(self, **kwargs):
-        if kwargs:
-            self.message = kwargs['message']
-
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.call = 'sleep'
 
     async def doit(self):
@@ -29,21 +40,14 @@ class After10:
         await self.message.channel.send('woken up after 10')
 
 
-class WordSim:
+class WordSim(Master):
 
-    def __init__(self, **kwargs):
-        if kwargs:
-            self.message = kwargs['message']
-            self.sim = kwargs['similarity']
-
-        self.call = 'word similarity'
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.call = 'similarity'
 
     async def doit(self):
         sent = word2vec_input(self.message.content[22:])
-        print(sent)
         similarity = self.sim.model.similarity(sent[-1], sent[-2])
 
         await self.message.channel.send(str(similarity))
-
-
-# TODO fix similarities questions that have same input as command call (input: word similarity ping, latency)

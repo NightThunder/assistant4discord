@@ -1,6 +1,6 @@
 import discord
 import logging
-from assistant4discord.assistant.commander import Commander
+from assistant4discord.assistant.messenger import Messenger
 
 
 class MyClient(discord.Client):
@@ -15,7 +15,7 @@ class MyClient(discord.Client):
             return
 
         if message.content.startswith('<@{}>'.format(self.user.id)):
-            await C.message_to_command(message).doit()
+            await M.message_to_command(message).doit()
 
 
 def setup_chat_logger(name=__name__, log_name='new.log', level=logging.DEBUG, format='%(asctime)s: %(levelname)s: %(message)s'):
@@ -42,6 +42,6 @@ chat_logger = setup_chat_logger(log_name='chat.log')
 my_token = open('../token.txt', 'r').read()
 client = MyClient()
 
-C = Commander(client=client, model_name='5days_askreddit_model.kv')
+M = Messenger(client=client, model_name='5days_askreddit_model.kv')
 
 client.run(my_token)
