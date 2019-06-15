@@ -6,6 +6,9 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
 
+boosted = {'similar': 1000, 'similarity': 1000, 'help': 10}
+
+
 class Similarity:
 
     def __init__(self, model_name):
@@ -37,9 +40,9 @@ class Similarity:
 
             for word in sent:
                 try:
-                    if word == 'similarity' and is_message:     # boost
-                        print('boosted similarity')
-                        weight = 10
+                    if word in boosted and is_message:     # boost
+                        print('boosted')
+                        weight = boosted[word]
                     else:
                         weight = a / (a + self.model.vocab[word].count)
 
@@ -82,22 +85,3 @@ class Similarity:
             return self.sentence_sim(self.get_sentence2vec(message), commands)
         else:
             return self.sentence_sim(self.get_sentence2vec(message), self.get_sentence2vec(commands))
-
-
-# sim = Similarity('5days_askreddit_model.kv').message_x_command_sim('ping this please', ['whats my ping', 'remind me', 'google this'])
-# print(sim)
-
-
-# boost test:
-# no boost
-# command calls: ['sleep', 'ping', 'word similarity']
-# ping ping similarities: [0.07154188 0.96800114 0.27384004]
-# ping latency similarities: [0.08508781 0.79037144 0.51513806]
-# latency dog similarities: [0.0672977  0.0706988  0.80236408]
-# dof cat similarities: [0.06806762 0.05546356 0.9646198 ]
-
-# boost = 10
-#    similarities: [0.02809924 0.29108114 0.95242851]
-#    similarities: [0.02339426 0.15993421 0.9762784 ]
-#    similarities: [0.01550973 0.02204722 0.98508616]
-#    similarities: [0.01314699 0.01847625 0.9878561 ]
