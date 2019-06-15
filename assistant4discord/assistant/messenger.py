@@ -15,7 +15,7 @@ class Commander:
             model_name: w2v model
             dir_path: if commands not in assistant4discord.assistant.commands
 
-            self.commands: dict of commands from commands dir, {command: 'command', ...}
+            self.commands: dict of commands from commands dir, {'command': command obj, ...}
             self.calls: list of command calls from commands, ['command call', ...]
             self.sim: w2v model class
             self.command_vectors: pre calculate command text sentence vectors from self.calls
@@ -23,6 +23,8 @@ class Commander:
         self.client = client
         self.commands = self.get_commands(dir_path)
         self.calls = self.get_command_calls()
+        self.set_help_command()
+
         self.sim = Similarity(model_name)
         self.command_vectors = self.sim.get_sentence2vec(self.calls)
 
@@ -41,7 +43,7 @@ class Commander:
                 for name, obj in inspect.getmembers(module):
                     if inspect.isclass(obj) and name != 'Master':
                         print('imported command: {}'.format(name))
-                        command_dct['{}'.format(name)] = obj()
+                        command_dct['{}'.format(name).lower()] = obj()
 
         return command_dct
 
@@ -52,6 +54,9 @@ class Commander:
             command_calls.append(command.call)
 
         return command_calls
+
+    def set_help_command(self):
+        self.commands['help'].commands = self.commands
 
 
 class Messenger(Commander):
@@ -65,7 +70,10 @@ class Messenger(Commander):
         sim_arr = self.sim.message_x_command_sim(message.content[22:], self.command_vectors, saved_command_vectors=True)
         picked_command_str = self.calls[int(np.argmax(sim_arr))]
 
-        print('command calls: {} \nsimilarities: {}'.format(self.calls, sim_arr))
+        print('message: {}\n command calls: {} \nsimilarities: {}'.format(message.content[22:], self.calls, sim_arr))
+
+        if np.max(sim_arr) < 0.5:
+            return None
 
         for command_str, command in self.commands.items():
             if command.call == picked_command_str:
@@ -74,9 +82,3 @@ class Messenger(Commander):
                 command.sim = self.sim
 
                 return command
-
-        return None
-
-
-# C = Messenger(client='hey', model_name='5days_askreddit_model.kv')
-# print(C.message_to_command('whats my ping'))
