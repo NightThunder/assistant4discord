@@ -1,5 +1,7 @@
 import asyncio
 from assistant4discord.nlp_tasks.message_processing import word2vec_input
+import datetime
+import time
 
 
 class Master:
@@ -61,46 +63,63 @@ class Ping(Master):
         await self.message.channel.send('{} ms'.format(round(self.client.latency * 1000)))
 
 
-class After10(Master):
+class Reminder(Master):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.call = 'sleep'
-        self.help = 'asyncio.sleep() test'
+        self.call = 'reminder'
+        self.help = 'Sets reminder. Note: works with keyword "reminder" followed by time parameters.'
+        self.times = {'second': 1, 'seconds': 1, 'sec': 1, 's': 1, 'minute': 60, 'minutes': 60, 'min': 60, 'm': 60,
+                      'hour': 3600, 'hours': 3600, 'h': 3600, 'day': 86400, 'days': 86400, 'd': 86400, 'week': 604800,
+                      'weeks': 604800, 'w': 604800}
+
+    def get_message(self):
+        c = 0
+
+        for msg in reversed(self.client.cached_messages):
+            if msg.author == self.message.author:
+                c += 1
+
+            if c == 2:
+                to_remind = '<@{}> {}'.format(self.message.author.id, msg.content)
+                return to_remind
+
+        return None
+
+    def time_message(self):
+        message = word2vec_input(self.message.content[22:], replace_num=False)
+
+        time_to_message = 0
+        for i, word in enumerate(message):
+            if word in self.times:
+                try:
+                    time_to_message += self.times[word] * int(message[i-1])
+                except ValueError:
+                    return None
+
+        return time_to_message
 
     async def doit(self):
-        await self.message.channel.send('sleeping for 10')
-        await asyncio.sleep(10)
-        await self.message.channel.send('woken up after 10')
+        message = word2vec_input(self.message.content[22:], replace_num=False)
 
+        to_remind = self.get_message()
 
-class Word2WordSim(Master):
+        if not to_remind:
+            await self.message.channel.send('something went wrong')
+        else:
+            time_to_message = self.time_message()
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.call = 'similarity'
-        self.help = 'Returns cosine similarity between last two words in message.\nNote: only works with keyword similarity.'
+            if not time_to_message:
+                await self.message.channel.send('something went wrong')
+            else:
+                my_time = datetime.datetime.fromtimestamp(int(time.time() + time_to_message)).strftime('%d/%m/%Y @ %H:%M:%S')
+                await self.message.channel.send('reminder set for: {}'.format(my_time))
 
-    async def doit(self):
-        sent = word2vec_input(self.message.content[22:])
-        similarity = self.sim.model.similarity(sent[-1], sent[-2])
+                while True:
+                    await asyncio.sleep(time_to_message)
+                    await self.message.channel.send(to_remind)
 
-        await self.message.channel.send(str(similarity))
+                    if 'every' not in message:
+                        break
 
-
-class MostSimilarWords(Master):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.call = 'most similar'
-        self.help = 'Return 50 most similar words to last word in message.\nNote: only works with keyword most similar.'
-
-    async def doit(self):
-        sent = word2vec_input(self.message.content[22:])
-        sims = self.sim.model.similar_by_word(sent[-1], topn=50)
-
-        sim_str = ''
-        for i in sims:
-            sim_str += '{}: {:.2f} '.format(i[0], i[1])
-
-        await self.message.channel.send(sim_str)
+# TODO cancel reminders
