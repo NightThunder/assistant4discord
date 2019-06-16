@@ -18,7 +18,7 @@ def word_by_word(sent):
     return tokens_noempty
 
 
-def word2vec_input(message):
+def word2vec_input(message, replace_num=True):
     """ Prepares message for word2vec.
     notes:
         sent_tokenize():  splits into sentences,
@@ -27,12 +27,16 @@ def word2vec_input(message):
         c: splits sentence into words
     Args:
         message: message string
+        replace_num: True if you don't want to replace numbers
     Returns: sentences word by word in list [[w1, w2, ...], [w1, w2, ...], ...]
                                               sent1          sent2
     """
     # a = [replace_numbers(remove_punctuation(message)).replace('\n', ' ')]
     # b = [i.lower() for i in a]
     # c = word_by_word(b)
-    text_in_sent = (word_by_word([i.lower() for i in [replace_numbers(remove_punctuation(message)).replace('\n', ' ')]]))
+    if replace_num:
+        text_in_sent = (word_by_word([i.lower() for i in [replace_numbers(remove_punctuation(message)).replace('\n', ' ')]]))
+    else:
+        text_in_sent = (word_by_word([i.lower() for i in [remove_punctuation(message).replace('\n', ' ')]]))
 
     return text_in_sent
