@@ -25,9 +25,9 @@ class MyClient(discord.Client):
             return
 
         if message.content.startswith('<@{}>'.format(self.user.id)):
-            M = self.messenger.message_to_command(message)
-            if M:
-                await M.doit()
+            messenger = self.messenger.message_to_command(message)
+            if messenger:
+                await messenger.doit()
             else:
                 await message.channel.send('Error: not implemented')
 
