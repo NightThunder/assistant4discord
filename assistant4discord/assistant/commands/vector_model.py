@@ -1,4 +1,4 @@
-from assistant4discord.assistant.commands.basic import Master
+from assistant4discord.assistant.commands.master.master_class import Master
 from assistant4discord.nlp_tasks.message_processing import word2vec_input
 
 

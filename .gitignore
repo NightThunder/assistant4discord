@@ -1,3 +1,5 @@
 venv/
 .idea
 token.txt
+wolfram_token.txt
+chat.log
