@@ -39,9 +39,12 @@ class Commander:
 
         for file in file_lst:
             if file.endswith('.py') and '__init__' not in file:
-                module = import_module('assistant4discord.assistant.commands.{}'.format(file[:-3]))
+
+                module_name = 'assistant4discord.assistant.commands.{}'.format(file[:-3])
+                module = import_module(module_name)
+
                 for name, obj in inspect.getmembers(module):
-                    if inspect.isclass(obj) and name != 'Master':
+                    if inspect.isclass(obj) and str(obj.__module__).count('.') == 3:
                         print('imported command: {}'.format(name))
                         command_dct['{}'.format(name).lower()] = obj()
 
