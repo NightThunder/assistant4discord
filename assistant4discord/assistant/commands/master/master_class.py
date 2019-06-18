@@ -1,6 +1,6 @@
 class Master:
 
-    def __init__(self, client=None, message=None, similarity=None):
+    def __init__(self, client=None, message=None, similarity=None, commands=None):
         """ Base class for commands.
 
         Args:
@@ -11,3 +11,4 @@ class Master:
         self.client = client
         self.message = message
         self.sim = similarity
+        self.commands = commands

@@ -23,7 +23,6 @@ class Commander:
         self.client = client
         self.commands = self.get_commands(dir_path)
         self.calls = self.get_command_calls()
-        self.set_help_command()
 
         self.sim = Similarity(model_name)
         self.command_vectors = self.sim.get_sentence2vec(self.calls)
@@ -46,7 +45,7 @@ class Commander:
                 for name, obj in inspect.getmembers(module):
                     if inspect.isclass(obj) and str(obj.__module__).count('.') == 3:
                         print('imported command: {}'.format(name))
-                        command_dct['{}'.format(name).lower()] = obj()
+                        command_dct['{}'.format(name)] = obj()
 
         return command_dct
 
@@ -57,9 +56,6 @@ class Commander:
             command_calls.append(command.call)
 
         return command_calls
-
-    def set_help_command(self):
-        self.commands['help'].commands = self.commands
 
 
 class Messenger(Commander):
@@ -83,5 +79,6 @@ class Messenger(Commander):
                 command.client = self.client
                 command.message = message
                 command.sim = self.sim
+                command.commands = self.commands
 
                 return command
