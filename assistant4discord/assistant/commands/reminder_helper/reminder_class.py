@@ -16,7 +16,7 @@ class Reminder(Master):
         self.to_remind = self.get_message()
         self.time_to_message = self.time_message()
         self.every = self.every_t()
-        self.reminder_str = 'reminder: {}\nset for: {}'.format(self.to_remind[22:], datetime.datetime.fromtimestamp(int(time.time() + self.time_to_message)).strftime('%d/%m/%Y @ %H:%M:%S'))
+        self.reminder_str = '{}\nset for: {}'.format(self.to_remind[22:], datetime.datetime.fromtimestamp(int(time.time() + self.time_to_message)).strftime('%d/%m/%Y @ %H:%M:%S'))
         self.task = None
 
     def get_message(self):
