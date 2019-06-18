@@ -4,6 +4,7 @@ from assistant4discord.nlp_tasks.message_processing import word2vec_input
 import os
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
+import math
 
 
 boosted = {'similar': 1000, 'similarity': 1000, 'help': 10, 'number': 10}
@@ -25,7 +26,7 @@ class Similarity:
         else:
             raise ValueError('no model found')
 
-    def sentence2vec(self, content, a=100):
+    def sentence2vec(self, content):
         post_vec_lst = []
         size = self.model.vector_size
         is_message = False
@@ -44,7 +45,7 @@ class Similarity:
                         print('boosted')
                         weight = boosted[word]
                     else:
-                        weight = a / (a + self.model.vocab[word].count)
+                        weight = 1 / (1 + math.log(self.model.vocab[word].count))
 
                     sum_post += self.model[word] * weight
 
