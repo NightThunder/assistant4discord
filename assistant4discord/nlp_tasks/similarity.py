@@ -41,9 +41,8 @@ class Similarity:
 
             for word in sent:
                 try:
-                    if word in boosted and is_message:     # boost
-                        print('boosted')
-                        weight = boosted[word]
+                    if word in boosted and is_message:
+                        weight = boosted[word] / (1 + math.log(self.model.vocab[word].count))
                     else:
                         weight = 1 / (1 + math.log(self.model.vocab[word].count))
 
