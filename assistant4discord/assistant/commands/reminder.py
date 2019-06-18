@@ -9,7 +9,12 @@ class RemindMe(Master):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.call = 'reminder stevilka time'
-        self.help = 'Sets reminder. Note: works with keyword "reminder" followed by time parameters.'
+        self.help = '```***RemindMe help***\n' \
+                    'Set user\'s previous message as reminder text.\n' \
+                    'Use: reminder <number1> <time1> <number2> <time2> ...\n' \
+                    'Valid times: second, sec, s, minute, min, m, hour, h, day, d, week, w\n' \
+                    'Example: reminder 1 day 12 hours 15 min\n' \
+                    'Notes: use with ShowReminders and KillReminder```'
         self.all_reminders = []
 
     def remove_dead_reminders(self):
@@ -51,7 +56,9 @@ class ShowReminders(Master):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.call = 'show reminder'
-        self.help = 'Shows all active reminders.'
+        self.help = '```***ShowReminders help***\n' \
+                    'Display user\'s active reminders.\n' \
+                    'Example: see reminder | show reminder | get reminder etc.```'
 
     async def doit(self):
 
@@ -62,7 +69,7 @@ class ShowReminders(Master):
         n_reminders = 0
         for i, reminder in enumerate(self.commands['RemindMe'].all_reminders):
             if reminder.message.author == self.message.author and not reminder.task.done():
-                reminder_str += 'reminder {}: {}\n'.format(i, reminder.reminder_str)
+                reminder_str += '**reminder {}:** {}\n'.format(i, reminder.reminder_str)
                 n_reminders += 1
 
         if n_reminders != 0:
@@ -76,7 +83,9 @@ class KillReminder(Master):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.call = 'kill reminder stevilka'
-        self.help = 'Cancels active reminder.'
+        self.help = '```***KillReminder help***\n' \
+                    'Cancels user\'s active reminder.\n' \
+                    'Example: cancel reminder <reminder\'s number shown in ShowReminders>```'
 
     async def doit(self):
 

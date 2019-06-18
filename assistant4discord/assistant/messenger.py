@@ -69,9 +69,11 @@ class Messenger(Commander):
         sim_arr = self.sim.message_x_command_sim(message.content[22:], self.command_vectors, saved_command_vectors=True)
         picked_command_str = self.calls[int(np.argmax(sim_arr))]
 
-        print('>message: {}\n>command calls: {}\n>similarities: {}'.format(message.content[22:], self.calls, sim_arr))
+        print('message:', message.content[22:])
+        for i in range(len(self.calls)):
+            print('{}: {:.2f}'.format(self.calls[i], sim_arr[i]))
 
-        if np.max(sim_arr) < 0.5:
+        if np.max(sim_arr) < 0.3:
             return None
 
         for command_str, command in self.commands.items():
