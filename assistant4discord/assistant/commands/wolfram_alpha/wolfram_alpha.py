@@ -1,5 +1,5 @@
 import wolframalpha
-from assistant4discord.assistant.commands.basic import Master
+from assistant4discord.assistant.commands.master.master_class import Master
 
 
 class Wolfram(Master):
