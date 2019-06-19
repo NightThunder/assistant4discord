@@ -14,7 +14,12 @@ class Word2WordSim(Master):
 
     async def doit(self):
         sent = word2vec_input(self.message.content[22:])
-        similarity = self.sim.model.similarity(sent[-1], sent[-2])
+
+        try:
+            similarity = self.sim.model.similarity(sent[-1], sent[-2])
+        except KeyError:
+            await self.message.channel.send('not in vocabulary')
+            return
 
         await self.message.channel.send(str(similarity))
 
@@ -31,7 +36,12 @@ class MostSimilarWords(Master):
 
     async def doit(self):
         sent = word2vec_input(self.message.content[22:])
-        sims = self.sim.model.similar_by_word(sent[-1], topn=50)
+
+        try:
+            sims = self.sim.model.similar_by_word(sent[-1], topn=50)
+        except KeyError:
+            await self.message.channel.send('not in vocabulary')
+            return
 
         sim_str = ''
         for i in sims:
@@ -52,5 +62,11 @@ class WordNum(Master):
 
     async def doit(self):
         sent = word2vec_input(self.message.content[22:])
-        num = self.sim.model.vocab[sent[-1]].count
+
+        try:
+            num = self.sim.model.vocab[sent[-1]].count
+        except KeyError:
+            await self.message.channel.send('not in vocabulary')
+            return
+
         await self.message.channel.send(str(num))
