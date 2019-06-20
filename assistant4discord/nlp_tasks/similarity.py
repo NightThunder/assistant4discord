@@ -7,7 +7,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import math
 
 
-boosted = {'similar': 1000, 'similarity': 1000, 'help': 10, 'number': 10}
+boosted = {'similar': 1000, 'similarity': 1000, 'help': 10, 'number': 10, 'time': 100}
 
 
 class Similarity:
