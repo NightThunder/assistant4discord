@@ -13,7 +13,6 @@ class RemindMe(Master):
                     'Set user\'s previous message as reminder text.\n' \
                     'Use: reminder <number1> <time1> <number2> <time2> ...\n' \
                     'Valid times: second, sec, s, minute, min, m, hour, h, day, d, week, w\n' \
-                    'Example: reminder 1 day 12 hours 15 min\n' \
                     'Notes: use with ShowReminders and KillReminder```'
         self.all_reminders = []
 
@@ -29,14 +28,14 @@ class RemindMe(Master):
 
     async def coro_doit(self, reminder):
 
-        await self.message.channel.send('reminder: {}'.format(reminder.reminder_str))
+        await self.message.channel.send('reminder: {}'.format(str(reminder)))
 
         while True:
             await asyncio.sleep(reminder.time_to_message)
             await self.message.channel.send(reminder.to_remind)
 
             if reminder.every is False:
-                break
+                return
 
     async def doit(self):
         reminder = Reminder(self.client, self.message)
@@ -69,7 +68,7 @@ class ShowReminders(Master):
         n_reminders = 0
         for i, reminder in enumerate(self.commands['RemindMe'].all_reminders):
             if reminder.message.author == self.message.author and not reminder.task.done():
-                reminder_str += '**reminder {}:** {}\n'.format(i, reminder.reminder_str)
+                reminder_str += '**reminder {}:** {}\n'.format(i, str(reminder))
                 n_reminders += 1
 
         if n_reminders != 0:
@@ -109,3 +108,37 @@ class KillReminder(Master):
             await self.message.channel.send('Could not find that reminder!')
         else:
             await self.message.channel.send('Reminder {} canceled!'.format(to_kill))
+
+# Solution with TimeIt:
+# problem1: reminder list and timer list together
+# problem2: cant see reminder description in show timer
+# class RemindMe(Master):
+#
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.call = 'reminder stevilka time'
+#         self.help = '```***RemindMe help***\n' \
+#                     'Set user\'s previous message as reminder text.\n' \
+#                     'Use: reminder <number1> <time1> <number2> <time2> ...\n' \
+#                     'Valid times: second, sec, s, minute, min, m, hour, h, day, d, week, w```'
+#
+#     def get_message(self):
+#
+#         count = 0
+#         for msg in reversed(self.client.cached_messages):
+#             if msg.author == self.message.author:
+#                 count += 1
+#
+#             if count == 2:
+#                 to_remind = '<@{}> {}'.format(self.message.author.id, msg.content)
+#                 return to_remind
+#
+#         return None
+#
+#     async def doit(self):
+#         to_remind = self.get_message()
+#
+#         if to_remind:
+#             await self.message.channel.send(to_remind)
+#         else:
+#             await self.message.channel.send('something went wrong')

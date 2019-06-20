@@ -14,9 +14,8 @@ class Reminder(Master):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.to_remind = self.get_message()
-        self.time_to_message = self.time_message()
+        (self.time_to_message, self.time_str) = self.time_message()
         self.every = self.every_t()
-        self.reminder_str = '{}\nset for: {}'.format(self.to_remind[22:], datetime.datetime.fromtimestamp(int(time.time() + self.time_to_message)).strftime('%d/%m/%Y @ %H:%M:%S'))
         self.task = None
 
     def get_message(self):
@@ -45,15 +44,17 @@ class Reminder(Master):
         """
         message = word2vec_input(self.message.content[22:], replace_num=False)
 
+        time_str = ''
         time_to_message = 0
         for i, word in enumerate(message):
             if word in times:
                 try:
                     time_to_message += times[word] * int(message[i-1])
+                    time_str += '{} {}'.format(message[i-1], word)
                 except ValueError:
                     return None
 
-        return time_to_message
+        return time_to_message, time_str
 
     def every_t(self):
         message = word2vec_input(self.message.content[22:], replace_num=False)
@@ -61,3 +62,9 @@ class Reminder(Master):
             return True
         else:
             return False
+
+    def __str__(self):
+        if self.every:
+            return '{}\nset every: {}'.format(self.to_remind[22:], self.time_str)
+        else:
+            return '{}\nset for: {}'.format(self.to_remind[22:], datetime.datetime.fromtimestamp(int(time.time() + self.time_to_message)).strftime('%d/%m/%Y @ %H:%M:%S'))
