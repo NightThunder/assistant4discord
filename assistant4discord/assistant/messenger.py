@@ -7,13 +7,12 @@ import numpy as np
 
 class Commander:
 
-    def __init__(self, client, model_name, dir_path=None):
+    def __init__(self, client, model_name):
         """Commands initializer.
 
         Args:
             client: discord client from MyClient
             model_name: w2v model
-            dir_path: if commands not in assistant4discord.assistant.commands
 
             self.commands: dict of commands from commands dir, {'command': command obj, ...}
             self.calls: list of command calls from commands, ['command call', ...]
@@ -21,19 +20,19 @@ class Commander:
             self.command_vectors: pre calculate command text sentence vectors from self.calls
         """
         self.client = client
-        self.commands = self.get_commands(dir_path)
+        self.commands = self.get_commands()
         self.calls = self.get_command_calls()
 
         self.sim = Similarity(model_name)
         self.command_vectors = self.sim.get_sentence2vec(self.calls)
 
+        self.set_master_attributes()
+
     @staticmethod
-    def get_commands(dir_path) -> dict:
+    def get_commands() -> dict:
         command_dct = {}
 
-        if not dir_path:
-            dir_path = os.path.dirname(os.path.realpath(__file__)) + '/commands'
-
+        dir_path = os.path.dirname(os.path.realpath(__file__)) + '/commands'
         file_lst = os.listdir(dir_path)
 
         for file in file_lst:
@@ -57,6 +56,14 @@ class Commander:
 
         return command_calls
 
+    def set_master_attributes(self):
+        for command in self.commands.values():
+            command.client = self.client
+            command.sim = self.sim
+            command.commands = self.commands
+            command.command_vectors = self.command_vectors
+            command.calls = self.calls
+
 
 class Messenger(Commander):
     """Class for interacting with commands."""
@@ -76,11 +83,7 @@ class Messenger(Commander):
         if np.max(sim_arr) < 0.3:
             return None
 
-        for command_str, command in self.commands.items():
+        for command in self.commands.values():
             if command.call == picked_command_str:
-                command.client = self.client
                 command.message = message
-                command.sim = self.sim
-                command.commands = self.commands
-
                 return command

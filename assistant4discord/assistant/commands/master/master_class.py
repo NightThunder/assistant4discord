@@ -1,14 +1,10 @@
 class Master:
 
-    def __init__(self, client=None, message=None, similarity=None, commands=None):
-        """ Base class for commands.
-
-        Args:
-            client: discord client object
-            message: discord message object
-            similarity: Similarity object from assistant4discord.nlp_tasks.similarity
-        """
+    def __init__(self, client=None, message=None, similarity=None, commands=None, command_vectors=None, calls=None):
+        """ Base class for commands."""
         self.client = client
         self.message = message
         self.sim = similarity
         self.commands = commands
+        self.command_vectors = command_vectors
+        self.calls = calls
