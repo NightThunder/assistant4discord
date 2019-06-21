@@ -63,12 +63,17 @@ class ShowTimers(Master):
     async def doit(self):
 
         self.commands['TimeIt'].remove_dead_timers()
-        timer_str = ''
 
+        all_timers = self.commands['TimeIt'].all_timers
+        timer_str = ''
         n_timers = 0
-        for i, timer in enumerate(self.commands['TimeIt'].all_timers):
+        for i, timer in enumerate(all_timers):
             if timer.message.author == self.message.author and not timer.task.done():
                 timer_str += '**timer {}:** {} {}\n'.format(i, timer.future_command.__class__.__name__, str(timer))
+
+                if i != len(all_timers) - 1:
+                    timer_str += '--------------------\n'
+
                 n_timers += 1
 
         if n_timers != 0:

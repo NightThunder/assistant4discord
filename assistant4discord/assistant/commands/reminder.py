@@ -38,7 +38,7 @@ class RemindMe(Master):
                 return
 
     async def doit(self):
-        reminder = Reminder(self.client, self.message)
+        reminder = Reminder(client=self.client, message=self.message)
 
         if reminder.time_to_message and reminder.to_remind:
 
@@ -63,12 +63,16 @@ class ShowReminders(Master):
 
         self.commands['RemindMe'].remove_dead_reminders()
 
+        all_reminders = self.commands['RemindMe'].all_reminders
         reminder_str = ''
-
         n_reminders = 0
-        for i, reminder in enumerate(self.commands['RemindMe'].all_reminders):
+        for i, reminder in enumerate(all_reminders):
             if reminder.message.author == self.message.author and not reminder.task.done():
                 reminder_str += '**reminder {}:** {}\n'.format(i, str(reminder))
+
+                if i != len(all_reminders) - 1:
+                    reminder_str += '--------------------\n'
+
                 n_reminders += 1
 
         if n_reminders != 0:
