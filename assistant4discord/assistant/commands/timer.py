@@ -4,11 +4,6 @@ from assistant4discord.assistant.commands.master.master_class import Master
 from assistant4discord.assistant.commands.timer_helper.timer_class import Timer
 
 
-times = {'second': 1, 'seconds': 1, 'sec': 1, 's': 1, 'minute': 60, 'minutes': 60, 'min': 60, 'm': 60,
-         'hour': 3600, 'hours': 3600, 'h': 3600, 'day': 86400, 'days': 86400, 'd': 86400, 'week': 604800,
-         'weeks': 604800, 'w': 604800}
-
-
 class TimeIt(Master):
 
     def __init__(self, *args, **kwargs):
