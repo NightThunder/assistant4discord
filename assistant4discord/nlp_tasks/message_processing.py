@@ -2,8 +2,9 @@ import re
 
 
 def remove_punctuation(sent):
-    punct = r'!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~' + '’`”“'
-    text_nopunct = ''.join(char for char in sent if char not in punct)
+    # punct = r'!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~' + '’`”“'    # removes punct
+    # text_nopunct = ''.join(char for char in sent if char not in punct)
+    text_nopunct = re.sub(r'[\\!"#$%&\'()*+,-./:;<=>?@[\]^_`{|}~’”“]+', ' ', sent)    # replaces punct
     return text_nopunct
 
 
