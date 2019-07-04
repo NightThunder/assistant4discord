@@ -1,12 +1,6 @@
-from assistant4discord.nlp_tasks.message_processing import word2vec_input
 from assistant4discord.assistant.commands.master.master_class import Master
-import datetime
 import time
-
-
-times = {'second': 1, 'seconds': 1, 'sec': 1, 's': 1, 'minute': 60, 'minutes': 60, 'min': 60, 'm': 60,
-         'hour': 3600, 'hours': 3600, 'h': 3600, 'day': 86400, 'days': 86400, 'd': 86400, 'week': 604800,
-         'weeks': 604800, 'w': 604800}
+from assistant4discord.nlp_tasks.find_times import sent_time_finder, timestamp_to_utc
 
 
 class Reminder(Master):
@@ -14,8 +8,8 @@ class Reminder(Master):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.to_remind = self.get_message()
-        (self.time_to_message, self.time_str) = self.time_message()
-        self.every = self.every_t()
+        (self.time_to_message, self.every) = self.time_message()
+        self.set_for = int(self.time_to_message + time.time())
         self.task = None
 
     def get_message(self):
@@ -42,29 +36,13 @@ class Reminder(Master):
         Returns: seconds to message
 
         """
-        message = word2vec_input(self.message.content[22:], replace_num=False)
 
-        time_str = ''
-        time_to_message = 0
-        for i, word in enumerate(message):
-            if word in times:
-                try:
-                    time_to_message += times[word] * int(message[i-1])
-                    time_str += '{} {}'.format(message[i-1], word)
-                except ValueError:
-                    return None
+        time_to_command, every = sent_time_finder(self.message.content[22:])
 
-        return time_to_message, time_str
-
-    def every_t(self):
-        message = word2vec_input(self.message.content[22:], replace_num=False)
-        if 'every' in message:
-            return True
-        else:
-            return False
+        return time_to_command, every
 
     def __str__(self):
         if self.every:
-            return '{}\nset every: {}'.format(self.to_remind[22:], self.time_str)
+            return '{}\nset every: {}'.format(self.to_remind[22:], timestamp_to_utc(self.set_for))
         else:
-            return '{}\nset for: {}'.format(self.to_remind[22:], datetime.datetime.fromtimestamp(int(time.time() + self.time_to_message)).strftime('%d/%m/%Y @ %H:%M:%S'))
+            return '{}\nset for: {}'.format(self.to_remind[22:], timestamp_to_utc(self.set_for))

@@ -1,32 +1,28 @@
-from assistant4discord.nlp_tasks.message_processing import word2vec_input
 from assistant4discord.assistant.commands.master.master_class import Master
-import datetime
+from assistant4discord.nlp_tasks.find_times import sent_time_finder, timestamp_to_utc
 import time
 import numpy as np
 
 
-times = {'second': 1, 'seconds': 1, 'sec': 1, 's': 1, 'minute': 60, 'minutes': 60, 'min': 60, 'm': 60,
-         'hour': 3600, 'hours': 3600, 'h': 3600, 'day': 86400, 'days': 86400, 'd': 86400, 'week': 604800,
-         'weeks': 604800, 'w': 604800}
-
-
 class Timer(Master):
+    """ self.time_to_timer, self.every, future_command_str: asyncio.sleep time, if loop, string to compare to commands
+        self.future_command: command to run in the future
+        self.set_for: d m y format of set timer
+        self.task: coro task saver, used in timer.py
+    """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.every = self.every_t()
-        (self.time_to_timer, self.time_str, future_command_str) = self.message_filter()
+        (self.time_to_timer, self.every, future_command_str) = self.message_filter()
         self.future_command = self.message_to_command(future_command_str)
+        self.set_for = int(self.time_to_timer + time.time())
         self.task = None
 
     def message_to_command(self, message):
+        """ Same as Messenger. """
 
         sim_arr = self.sim.message_x_command_sim(' '.join(message), self.command_vectors, saved_command_vectors=True)
         picked_command_str = self.calls[int(np.argmax(sim_arr))]
-
-        # print('message:', ' '.join(message))
-        # for i in range(len(self.calls)):
-        #     print('{}: {:.2f}'.format(self.calls[i], sim_arr[i]))
 
         if np.max(sim_arr) < 0.3:
             return None
@@ -37,58 +33,27 @@ class Timer(Master):
                 return command
 
     def message_filter(self):
+        """ Use sent_time_finder to get time info. Find time in sent and remove it. Assumes that command is after or before 'time'.
 
-        message = word2vec_input(self.message.content[22:], replace_num=False)
+            Example: 'time ping 10 sec' -> 'time ping' -> 'ping'
+        """
 
-        if self.every:
-            message.remove('every')
+        time_to_command, sent_no_time, every = sent_time_finder(self.message.content[22:], filter_times=True)
 
-        future_command_str = message.copy()
-        str_time_to_command = []
+        time_i = sent_no_time.index('time')
 
-        try:
-            time_i = message.index('time')
-            future_command_str.pop(time_i)
-        except ValueError:
-            return
-
-        time_to_command = 0
-        for i, word in enumerate(message[time_i:]):
-
-            if word in times:
-                try:
-                    time_to_command += times[word] * int(message[i + time_i - 1])
-                    for _ in range(2):
-                        t_str = future_command_str.pop(i + time_i - (len(message) - len(future_command_str)))
-                        str_time_to_command.append(t_str)
-
-                    str_time_to_command[-1], str_time_to_command[-2] = str_time_to_command[-2], str_time_to_command[-1]
-
-                except ValueError:
-                    return None
-
-                try:
-                    message[i + time_i + 2]
-                except IndexError:
-                    break
-
-                if message[i + time_i + 2] not in times:
-                    break
-
-        if time_to_command == 0:
-            return None
+        if time_i == 0:
+            future_command = sent_no_time[time_i:]
         else:
-            return time_to_command, str_time_to_command, future_command_str
+            future_command = sent_no_time[:time_i]
 
-    def every_t(self):
-        message = word2vec_input(self.message.content[22:], replace_num=False)
-        if 'every' in message:
-            return True
-        else:
-            return False
+        future_command.pop(time_i)
+
+        return time_to_command, every, future_command
 
     def __str__(self):
+        """ %d.%m.%Y %H:%M:%S representation."""
         if self.every:
-            return 'set for every: {}'.format(' '.join(self.time_str))
+            return 'next run set for: {}'.format(timestamp_to_utc(self.set_for))
         else:
-            return 'set for: {}'.format(datetime.datetime.fromtimestamp(int(time.time() + self.time_to_timer)).strftime('%d/%m/%Y @ %H:%M:%S'))
+            return 'set for: {}'.format(timestamp_to_utc(self.set_for))
