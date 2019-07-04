@@ -8,7 +8,7 @@ class TimeIt(Master):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.call = 'time stevilka time'
+        self.call = 'time'
         self.help = '```***Timer help***\n' \
                     'Run a command in specified time.\n' \
                     'Example: time <time when to run> <any command>```'
@@ -81,7 +81,7 @@ class KillTimer(Master):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.call = 'kill timer stevilka'
+        self.call = 'kill timer'
         self.help = '```***KillTimer help***\n' \
                     'Cancels user\'s active timer.\n' \
                     'Example: cancel timer <timer\'s number shown in ShowTimers>```'

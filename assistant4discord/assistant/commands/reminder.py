@@ -8,7 +8,7 @@ class RemindMe(Master):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.call = 'reminder stevilka time'
+        self.call = 'reminder'
         self.help = '```***RemindMe help***\n' \
                     'Set user\'s previous message as reminder text.\n' \
                     'Use: reminder <number1> <time1> <number2> <time2> ...\n' \
@@ -41,10 +41,8 @@ class RemindMe(Master):
         reminder = Reminder(client=self.client, message=self.message)
 
         if reminder.time_to_message and reminder.to_remind:
-
             task = self.client.loop.create_task(self.coro_doit(reminder))
             reminder.task = task
-
             self.all_reminders.append(reminder)
         else:
             await self.message.channel.send('something went wrong')
@@ -85,7 +83,7 @@ class KillReminder(Master):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.call = 'kill reminder stevilka'
+        self.call = 'kill reminder'
         self.help = '```***KillReminder help***\n' \
                     'Cancels user\'s active reminder.\n' \
                     'Example: cancel reminder <reminder\'s number shown in ShowReminders>```'
