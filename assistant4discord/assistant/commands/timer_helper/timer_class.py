@@ -54,6 +54,6 @@ class Timer(Master):
     def __str__(self):
         """ %d.%m.%Y %H:%M:%S representation."""
         if self.every:
-            return 'next run set for: {}'.format(timestamp_to_utc(self.set_for))
+            return '{} next run set for {}'.format(self.future_command.__class__.__name__, timestamp_to_utc(self.set_for))
         else:
-            return 'set for: {}'.format(timestamp_to_utc(self.set_for))
+            return '{} set for {}'.format(self.future_command.__class__.__name__, timestamp_to_utc(self.set_for))

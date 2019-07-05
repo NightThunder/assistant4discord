@@ -7,16 +7,14 @@ class Reminder(Master):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.to_remind = self.get_message()
+        self.to_do = self.get_message()
         (self.time_to_message, self.every) = self.time_message()
         self.set_for = int(self.time_to_message + time.time())
-        self.task = None
 
     def get_message(self):
         """ Message to be set for reminder.
 
         Returns: @author author's last message in chat
-
         """
         c = 0
 
@@ -34,15 +32,13 @@ class Reminder(Master):
         """ Parses message for time words.
 
         Returns: seconds to message
-
         """
-
         time_to_command, every = sent_time_finder(self.message.content[22:])
 
         return time_to_command, every
 
     def __str__(self):
         if self.every:
-            return '{}\nset every: {}'.format(self.to_remind[22:], timestamp_to_utc(self.set_for))
+            return '{}\nset every: {}'.format(self.to_do[22:], timestamp_to_utc(self.set_for))
         else:
-            return '{}\nset for: {}'.format(self.to_remind[22:], timestamp_to_utc(self.set_for))
+            return '{}\nset for: {}'.format(self.to_do[22:], timestamp_to_utc(self.set_for))
