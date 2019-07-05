@@ -60,7 +60,7 @@ def sent_time_finder(sent, filter_times=False):
                     index_time.append(i - 2)
                 every = True
 
-        if w in days_dct:
+        elif w in days_dct:
             today_is = date.today().strftime('%A').lower()
 
             t = abs(days_dct[w] - days_dct[today_is]) * 86400
@@ -74,7 +74,7 @@ def sent_time_finder(sent, filter_times=False):
                 index_time.append(i - 1)
                 every = True
 
-        if w == 'at':
+        elif w == 'at':
             for j, hms in enumerate(true_sent[i + 1:]):
 
                 if vec_sent[j + i + 1] == 'stevilka':
@@ -90,7 +90,7 @@ def sent_time_finder(sent, filter_times=False):
                 else:
                     break
 
-        if w == 'on':
+        elif w == 'on':
             d = 0
             m = date.today().strftime('%m')
             y = date.today().strftime('%Y')
@@ -114,6 +114,9 @@ def sent_time_finder(sent, filter_times=False):
                     break
 
             t += int(datetime.datetime(y, m, d, 0, 0).timestamp() - time.time())
+
+        else:
+            continue
 
     if filter_times:
         return t, sent_no_time(vec_sent, index_time), every

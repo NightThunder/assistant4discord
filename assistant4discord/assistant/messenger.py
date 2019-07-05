@@ -44,7 +44,7 @@ class Commander:
                 for name, obj in inspect.getmembers(module):
                     if inspect.isclass(obj) and str(obj.__module__).count('.') == 3:
                         print('imported command: {}'.format(name))
-                        command_dct['{}'.format(name)] = obj()
+                        command_dct[name] = obj()
 
         return command_dct
 
@@ -57,12 +57,21 @@ class Commander:
         return command_calls
 
     def set_master_attributes(self):
-        for command in self.commands.values():
-            command.client = self.client
-            command.sim = self.sim
+        for command_str, command in self.commands.items():
+
+            if command_str == 'TimeIt':
+                command.command_vectors = self.command_vectors
+                command.calls = self.calls
+                command.sim = self.sim
+
+            elif command_str == 'Word2WordSim' or command_str == 'MostSimilarWords' or command_str == 'WordNum':
+                command.sim = self.sim
+
+            else:
+                pass
+
             command.commands = self.commands
-            command.command_vectors = self.command_vectors
-            command.calls = self.calls
+            command.client = self.client
 
 
 class Messenger(Commander):
