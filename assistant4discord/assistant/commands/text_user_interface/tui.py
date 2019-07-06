@@ -10,7 +10,8 @@ class AddItem(Master):
         self.send_str: send this to discord
         self.item: helper object
 
-        item helper (obj): must have __str__ if time_coro must have __str__, self.time_to_message, self.to_do, self.every
+        item_obj => helper (obj): all helpers must have __str__ and self.to_do. If time_coro must have self.time_to_message and self.every
+        helper example: reminder_class.Reminder (contains all relevant information for reminder command such as: how to get reminder and time to reminder)
     """
 
     def __init__(self, *args, **kwargs):
@@ -19,7 +20,7 @@ class AddItem(Master):
         self.time_coro = False
 
     def remove_dead_items(self):
-
+        """ Removes all done coroutines (tasks) from all_items."""
         all_active_items = []
 
         for item in self.all_items:
@@ -29,7 +30,11 @@ class AddItem(Master):
         self.all_items = all_active_items
 
     async def coro_doit(self, item_obj):
+        """  loop.create_task function.
 
+        Args:
+            item_obj: helper object
+        """
         while True:
             await asyncio.sleep(item_obj.time_to_message)
             await self.message.channel.send(item_obj.to_do)
@@ -38,6 +43,11 @@ class AddItem(Master):
                 return
 
     async def AddItem_doit(self, item_obj):
+        """ Adds item to all_items. If coroutine creates task and adds it to event loop.
+
+        Args:
+            item_obj: helper object
+        """
         Item = item_obj(client=self.client, message=self.message)
 
         send_str = str(Item)
@@ -69,13 +79,15 @@ class ShowItems(Master):
     async def ShowItems_doit(self, item_obj_str):
 
         add_items_obj = self.commands[item_obj_str]
-        add_items_obj.remove_dead_items()
         all_items = add_items_obj.all_items
+
+        if add_items_obj.time_coro:
+            add_items_obj.remove_dead_items()
 
         item_str = ''
         n_items = 0
         for i, item in enumerate(all_items):
-            if item.message.author == self.message.author and not item.task.done():
+            if item.message.author == self.message.author:
                 item_str += '**{}:** {}\n'.format(i, str(item))
 
                 if i != len(all_items) - 1:
@@ -97,8 +109,10 @@ class RemoveItem(Master):
     async def RemoveItem_doit(self, item_obj_str):
 
         add_items_obj = self.commands[item_obj_str]
-        add_items_obj.remove_dead_items()
         all_items = add_items_obj.all_items
+
+        if add_items_obj.time_coro:
+            add_items_obj.remove_dead_items()
 
         try:
             to_kill = int(word2vec_input(self.message.content[22:], replace_num=False)[-1])
@@ -108,8 +122,13 @@ class RemoveItem(Master):
 
         n_items = 0
         for i, item in enumerate(all_items):
-            if item.message.author == self.message.author and not item.task.done() and i == to_kill:
-                item.task.cancel()
+            if item.message.author == self.message.author and i == to_kill:
+
+                if add_items_obj.time_coro:
+                    item.task.cancel()
+                else:
+                    all_items.pop(i)
+
                 break
             else:
                 n_items += 1
