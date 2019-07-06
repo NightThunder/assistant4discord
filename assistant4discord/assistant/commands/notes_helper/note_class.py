@@ -1,5 +1,5 @@
 from assistant4discord.assistant.commands.master.master_class import Master
-import datetime
+from assistant4discord.nlp_tasks.find_times import timestamp_to_utc
 import time
 
 
@@ -7,11 +7,11 @@ class Note(Master):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.note = self.get_note()
-        self.note_time = datetime.datetime.fromtimestamp(time.time()).strftime('%d.%m.%Y @ %H:%M:%S')
+        self.to_do = self.get_note()
+        self.note_time = timestamp_to_utc(time.time())
 
     def get_note(self):
-
+        """ Sets user's previous message as note. """
         c = 0
         for msg in reversed(self.client.cached_messages):
             if msg.author == self.message.author:
@@ -23,4 +23,4 @@ class Note(Master):
         return None
 
     def __str__(self):
-        return '{}\n{}'.format(self.note_time, self.note)
+        return 'noted on {}\nnote: {}'.format(self.note_time, self.to_do)
