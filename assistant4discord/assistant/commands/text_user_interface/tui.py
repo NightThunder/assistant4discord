@@ -37,9 +37,16 @@ class AddItem(Master):
         """
         while True:
             await asyncio.sleep(item_obj.time_to_message)
-            await self.message.channel.send(item_obj.to_do)
 
-            if item_obj.every is False:
+            discord_send = await item_obj.to_do()        # to_do() string output
+
+            if len(discord_send) == 0:      # check if something in message
+                pass
+            else:
+                for i in range(int(len(discord_send) / 2000) + 1):        # just in case len() > 2000 (max message length for discord)
+                    await self.message.channel.send(discord_send[i * 2000:(i + 1) * 2000])
+
+            if item_obj.every is False:        # if every is false we are done else we loop
                 return
 
     async def AddItem_doit(self, item_obj):
@@ -54,21 +61,21 @@ class AddItem(Master):
 
         if self.time_coro:
 
-            if Item.time_to_message and Item.to_do:
+            if Item.time_to_message and await Item.to_do() is not None:       # <- watch Item.to_do()
                 await self.message.channel.send(send_str)
 
                 task = self.client.loop.create_task(self.coro_doit(Item))
                 setattr(Item, 'task', task)
                 self.all_items.append(Item)
             else:
-                await self.message.channel.send('something went wrong')
+                await self.message.channel.send('something went wrong in tui.py line 71')
 
         else:
-            if Item:
+            if Item.to_do() is not None:
                 self.all_items.append(Item)
                 await self.message.channel.send(send_str)
             else:
-                await self.message.channel.send('something went wrong')
+                await self.message.channel.send('something went wrong in tui.py line 78')
 
 
 class ShowItems(Master):
@@ -98,7 +105,7 @@ class ShowItems(Master):
         if n_items != 0:
             await self.message.channel.send(item_str)
         else:
-            await self.message.channel.send('something went wrong')
+            await self.message.channel.send('something went wrong in tui.py line 108')
 
 
 class RemoveItem(Master):
@@ -117,7 +124,7 @@ class RemoveItem(Master):
         try:
             to_kill = int(word2vec_input(self.message.content[22:], replace_num=False)[-1])
         except ValueError:
-            await self.message.channel.send('something went wrong')
+            await self.message.channel.send('something went wrong in tui.py line 127')
             return
 
         n_items = 0
@@ -134,6 +141,6 @@ class RemoveItem(Master):
                 n_items += 1
 
         if to_kill > n_items:
-            await self.message.channel.send('something went wrong')
+            await self.message.channel.send('something went wrong in tui.py line 144')
         else:
             await self.message.channel.send('item {} removed!'.format(to_kill))
