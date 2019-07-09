@@ -7,9 +7,17 @@ class Reminder(Master):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.to_do = self.get_message()
+        self.n = 0
+        self.to_remind = ''
         (self.time_to_message, self.every) = self.time_message()
-        self.set_for = int(self.time_to_message + time.time())
+
+    def to_do(self):
+        if self.n == 0:
+            self.to_remind = self.get_message()
+            self.n += 1
+            return self.to_remind
+        else:
+            return self.to_remind
 
     def get_message(self):
         """ Message to be set for reminder.
@@ -39,6 +47,6 @@ class Reminder(Master):
 
     def __str__(self):
         if self.every:
-            return '{}\nset every: {}'.format(self.to_do[22:], timestamp_to_utc(self.set_for))
+            return '{}\nset every: {}'.format(self.to_remind[22:], timestamp_to_utc(int(self.time_to_message + time.time())))
         else:
-            return '{}\nset for: {}'.format(self.to_do[22:], timestamp_to_utc(self.set_for))
+            return '{}\nset for: {}'.format(self.to_remind[22:], timestamp_to_utc(int(self.time_to_message + time.time())))
