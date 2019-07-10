@@ -16,7 +16,6 @@ class Timer(Master):
         (self.time_to_timer, self.every, future_command_str) = self.message_filter()
         self.future_command = self.message_to_command(future_command_str)
         self.set_for = int(self.time_to_timer + time.time())
-        self.task = None
 
     def message_to_command(self, message):
         """ Same as Messenger. """
@@ -54,6 +53,6 @@ class Timer(Master):
     def __str__(self):
         """ %d.%m.%Y %H:%M:%S representation."""
         if self.every:
-            return '{} next run set for {}'.format(self.future_command.__class__.__name__, timestamp_to_utc(self.set_for))
+            return 'command: {}\nnext run set for {}'.format(self.message.content[22:], timestamp_to_utc(self.set_for))
         else:
-            return '{} set for {}'.format(self.future_command.__class__.__name__, timestamp_to_utc(self.set_for))
+            return 'command: {}\nset for {}'.format(self.message.content[22:], timestamp_to_utc(self.set_for))
