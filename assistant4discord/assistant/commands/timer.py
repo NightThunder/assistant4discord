@@ -7,11 +7,13 @@ class TimeIt(AddItem):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.call = 'time'
         self.help = '```***Timer help***\n' \
-                    'Run a command in specified time.\n' \
+                    'Set a timer for any command.\n' \
                     'Valid times: sec, min, hour, day, week, all days of week, **on** %d.%m.%Y and **at** %H:%M:%S \n' \
+                    'Note: command is ran when timer is finished.\n' \
+                    'Warning: use with word "time" so that commands don\'t get mixed up.\n' \
                     'Example: time <time when to run> <any command>```'
+        self.call = 'time'
         self.time_coro = True
 
     async def coro_doit(self, timer):
@@ -31,7 +33,7 @@ class TimeIt(AddItem):
 
         if timer.time_to_timer and timer.future_command:
             task = self.client.loop.create_task(self.coro_doit(timer))
-            timer.task = task
+            setattr(timer, 'task', task)
             self.all_items.append(timer)
         else:
             await self.message.channel.send('something went wrong')

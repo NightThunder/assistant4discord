@@ -5,12 +5,24 @@ from assistant4discord.assistant.commands.master.master_class import Master
 
 class AddItem(Master):
     """
+        idea: each command (non basic commands) has it's own helper class that stores all the data and instructions how
+              to execute that command (every command that is ran from discord is represented by an object).
+              Saving these objects and using them later is a very common task. AddItem is meant to simplify this process.
+              AddItem initializes given object with client and message from discord and saves it to a list. If self.time_coro == True
+              (command attribute) it will run that object in a given time if self.every == False it gets removed from list after it ran.
+              If self.time_coro == False it simply saves object to a list to be accessed later. Objects can be accessed from all_items list
+              with ShowItems or RemoveItems.
+
+        Example: see reminder.py and reminder_class.py
+
+        Notes: inheritance: Command -> tui.py helper classes -> Master (is set in messenger)
+
         self.all_items: list of all items (self.item objects)
         self.time_coro: if self.item uses asyncio.sleep()
         self.send_str: send this to discord
         self.item: helper object
 
-        item_obj => helper (obj): all helpers must have __str__ and self.to_do. If time_coro must have self.time_to_message and self.every
+        item_obj => helper (obj): all helpers must have __str__ and to_do() method. If time_coro must have self.time_to_message and self.every
         helper example: reminder_class.Reminder (contains all relevant information for reminder command such as: how to get reminder and time to reminder)
     """
 
@@ -20,7 +32,7 @@ class AddItem(Master):
         self.time_coro = False
 
     def remove_dead_items(self):
-        """ Removes all done coroutines (tasks) from all_items."""
+        """ Removes all finished coroutines (tasks) from all_items."""
         all_active_items = []
 
         for item in self.all_items:
@@ -57,12 +69,10 @@ class AddItem(Master):
         """
         Item = item_obj(client=self.client, message=self.message)
 
-        send_str = str(Item)
-
         if self.time_coro:
 
             if Item.time_to_message and await Item.to_do() is not None:       # <- watch Item.to_do()
-                await self.message.channel.send(send_str)
+                await self.message.channel.send(str(Item))
 
                 task = self.client.loop.create_task(self.coro_doit(Item))
                 setattr(Item, 'task', task)
@@ -73,7 +83,7 @@ class AddItem(Master):
         else:
             if Item.to_do() is not None:
                 self.all_items.append(Item)
-                await self.message.channel.send(send_str)
+                await self.message.channel.send(str(Item))
             else:
                 await self.message.channel.send('something went wrong in tui.py line 78')
 

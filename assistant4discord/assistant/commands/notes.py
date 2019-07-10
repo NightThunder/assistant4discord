@@ -9,9 +9,9 @@ class NoteIt(AddItem):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.call = 'note'
         self.help = '```***Note help***\n' \
                     'Make a note from previous message```'
+        self.call = 'note'
 
     async def doit(self):
         await self.AddItem_doit(Note)
@@ -21,9 +21,9 @@ class ShowNotes(ShowItems):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.call = 'show notes'
         self.help = '```***ShowNotes help***\n' \
                     'Display all user\'s notes```'
+        self.call = 'show notes'
 
     async def doit(self):
         await self.ShowItems_doit('NoteIt')
@@ -33,9 +33,9 @@ class RemoveNote(RemoveItem):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.call = 'remove note stevilka'
         self.help = '```***RemoveNote help***\n' \
                     'Remove user\'s note```'
+        self.call = 'remove note stevilka'
 
     async def doit(self):
         await self.RemoveItem_doit('NoteIt')
@@ -45,9 +45,9 @@ class NotesTxt(Master):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.call = 'notes to text'
         self.help = '```***NotesTxt help***\n' \
                     'Sends user\'s notes in .txt```'
+        self.call = 'notes to text'
 
     async def doit(self):
 

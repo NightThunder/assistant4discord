@@ -13,7 +13,7 @@ class WebsiteComparison(AddItem):
                     '- line unique to sequence 1\n' \
                     '+ line unique to sequence 2\n' \
                     '? line not present in either input sequence\n' \
-                    'see: https://docs.python.org/3/library/difflib.html#difflib.Differ'
+                    'see: https://docs.python.org/3/library/difflib.html#difflib.Differ```'
         self.call = 'check stevilka'
         self.time_coro = True
 
@@ -25,7 +25,8 @@ class ShowWebsites(ShowItems):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.help = '```***ShowWebsites help***\n'
+        self.help = '```***ShowWebsites help***\n' \
+                    'Show websites queued for checking.```'
         self.call = 'show websites'
 
     async def doit(self):
@@ -36,7 +37,8 @@ class RemoveWebsite(RemoveItem):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.help = '```***RemoveWebsite help***\n'
+        self.help = '```***RemoveWebsite help***\n' \
+                    'Remove website from queue.```'
         self.call = 'remove website stevilka'
 
     async def doit(self):

@@ -39,7 +39,7 @@ def sent_time_finder(sent, filter_times=False):
     true_sent = word2vec_input(sent, replace_num=False)
     t = 0
     every = False
-    index_time = []
+    index_time = []     # TODO: make this better
 
     for i, w in enumerate(vec_sent):
 

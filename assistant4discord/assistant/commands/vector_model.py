@@ -6,11 +6,11 @@ class Word2WordSim(Master):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.call = 'similarity'
         self.help = '```***Word2wordSim help***\n' \
                     'Return cosine similarity between last two words in message.\n' \
                     'Example: similarity <word1>, <word2>\n' \
                     'Note: only works with keyword "similarity".```'
+        self.call = 'similarity'
 
     async def doit(self):
         sent = word2vec_input(self.message.content[22:])
@@ -28,11 +28,11 @@ class MostSimilarWords(Master):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.call = 'most similar'
         self.help = '```***MostSimilarWords help***\n' \
                     'Return 50 most similar words to last word in message.\n' \
                     'Example: similar <word>\n' \
                     'Note: only works with keyword "similar".```'
+        self.call = 'most similar'
 
     async def doit(self):
         sent = word2vec_input(self.message.content[22:])
@@ -54,11 +54,11 @@ class WordNum(Master):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.call = 'number'
         self.help = '```***WordNum help***\n' \
                     'How many times does a word appear in vector model.\n' \
                     'Example: number <word>\n' \
                     'Note: all words 10+ as set by model. Numbers replaced by stevilka.```'
+        self.call = 'number'
 
     async def doit(self):
         sent = word2vec_input(self.message.content[22:])

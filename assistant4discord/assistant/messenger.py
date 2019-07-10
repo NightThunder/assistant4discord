@@ -11,13 +11,14 @@ class Commander:
         """Commands initializer.
 
         Args:
-            client: discord client from MyClient
+            client: discord client from discord.py
             model_name: w2v model
 
+        Attributes:
             self.commands: dict of commands from commands dir, {'command': command obj, ...}
-            self.calls: list of command calls from commands, ['command call', ...]
+            self.calls: list of command calls from command objects, ['command call', ...]
             self.sim: w2v model class
-            self.command_vectors: pre calculate command text sentence vectors from self.calls
+            self.command_vectors: pre calculate sentence vectors from self.calls
         """
         self.client = client
         self.commands = self.get_commands()
@@ -30,6 +31,15 @@ class Commander:
 
     @staticmethod
     def get_commands() -> dict:
+        """ Load commands from assistant4discord.assistant.commands.
+            Ignore directories inside .commands.
+
+            Notes: each command is a class that inherits from Master and has help and call attributes. There should only
+                  be commands (described above) in this directory. If a command needs more then one class make a helper
+                  package inside .commands and import from there.
+
+        Returns: {'command': command obj, ...}
+        """
         command_dct = {}
 
         dir_path = os.path.dirname(os.path.realpath(__file__)) + '/commands'
@@ -57,6 +67,12 @@ class Commander:
         return command_calls
 
     def set_master_attributes(self):
+        """ Set Master class with basic attributes.
+
+            Notes: TimeIt is a special command that is a copy of Messenger and needs all Commander attributes. Word2vec
+                   commands take Similarity class as another attribute (is not needed elsewhere). If you need Similarity
+                   class in your command you can set it from here.
+        """
         for command_str, command in self.commands.items():
 
             if command_str == 'TimeIt':
@@ -75,8 +91,10 @@ class Commander:
 
 
 class Messenger(Commander):
-    """Class for interacting with commands."""
+    """ Class for interacting with commands.
 
+        Returns: chosen command if cosine similarity above 0.5 else returns None
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -86,10 +104,10 @@ class Messenger(Commander):
         picked_command_str = self.calls[int(np.argmax(sim_arr))]
 
         print('message:', message.content[22:])
-        for i in range(len(self.calls)):
+        for i in sim_arr.argsort()[-3:][::-1]:
             print('{}: {:.2f}'.format(self.calls[i], sim_arr[i]))
 
-        if np.max(sim_arr) < 0.3:
+        if np.max(sim_arr) < 0.5:
             return None
 
         for command in self.commands.values():

@@ -9,8 +9,7 @@ class RemindMe(AddItem):
         self.help = '```***RemindMe help***\n' \
                     'Set user\'s previous message as reminder text.\n' \
                     'Use: reminder <number1> <time1> <number2> <time2> ...\n' \
-                    'Valid times: sec, min, hour, day, week, all days of week, **on** %d.%m.%Y and **at** %H:%M:%S \n' \
-                    'Notes: use with ShowReminders and RemoveReminder```'
+                    'Valid times: see timer help\n```'
         self.call = 'reminder stevilka'
         self.time_coro = True
 

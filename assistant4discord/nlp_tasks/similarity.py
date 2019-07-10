@@ -8,6 +8,8 @@ import math
 
 
 boosted = {'similar': 1000, 'similarity': 1000, 'help': 10, 'number': 10, 'time': 100}
+# this is needed so that commands that use calls from different commands don't get mixed up
+# only works if word count in command > 1
 
 
 class Similarity:
@@ -27,7 +29,12 @@ class Similarity:
             raise ValueError('no model found')
 
     def sentence2vec(self, content):
-        post_vec_lst = []
+        """ Basic vector sentence representation.
+
+            Notes: uses log weight for each word
+        """
+
+        post_vec_lst = []       # TODO: use np.array
         size = self.model.vector_size
         is_message = False
 
@@ -49,7 +56,7 @@ class Similarity:
                     sum_post += self.model[word] * weight
 
                 except KeyError:
-                    sum_post += np.zeros(size)
+                    pass
 
             post_vec_lst.append(sum_post)
 
