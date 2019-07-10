@@ -9,6 +9,9 @@ from aiohttp.client_exceptions import InvalidURL
 
 
 class WebChecker(Master):
+    """ see: https://aiohttp.readthedocs.io/en/stable/client_reference.html
+             https://stackoverflow.com/questions/35879769/fetching-multiple-urls-with-aiohttp-in-python-3-5
+        for errors: https://faust.readthedocs.io/en/latest/_modules/aiohttp/client.html"""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -58,7 +61,7 @@ class WebComp(WebChecker):
         self.links = self.get_links()
         self.html_lst = None
         (self.time_to_message, self.every) = self.time_message()
-        # first run in line 64 of tui.py
+        # first run in line 62 of tui.py
 
     async def to_do(self):
 
@@ -85,6 +88,7 @@ class WebComp(WebChecker):
 
     @staticmethod
     def get_diff(s1, s2):
+        """see: https://docs.python.org/3/library/difflib.html#differ-example"""
         s1 = s1.splitlines(keepends=True)
         s2 = s2.splitlines(keepends=True)
 
