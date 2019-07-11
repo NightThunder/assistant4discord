@@ -21,5 +21,5 @@ Built with reddit comments. Comments were collected from r/askreddit, r/gaming, 
 Text user interface for building discord chat menus. Find times in sentence (not using word2vec).
 
 **How to use**  
-My model can be downloaded from [here](https://github.com/NightThunder/assistant4discord/releases/download/v1.0.0-beta/model_v1.tar.gz). Extract it and move it to assistant4discord/data/models/. Discord token can be obtained from [here](https://discordapp.com/developers/applications/). Make a token.txt file, paste token inside and put it in the same directory as \__main__. Run \__main__.
+My model can be downloaded from [here](https://github.com/NightThunder/assistant4discord/releases/download/v1.0.0-beta/model_v1.tar.gz). Extract it and move it to assistant4discord/data/models/. Discord token can be obtained from [here](https://discordapp.com/developers/applications/). Make a token.txt file, paste token inside and put it in the same directory as \_\_main_\_. Run \_\_main\_\_.
 
