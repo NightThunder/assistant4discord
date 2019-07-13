@@ -57,11 +57,12 @@ class WebComp(WebChecker):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.run_on_init = True
+        (self.time_to_message, self.every) = self.time_message()
         self.n = 0
         self.links = self.get_links()
         self.html_lst = None
-        (self.time_to_message, self.every) = self.time_message()
-        # first run in line 62 of tui.py
+        self.created_on = time.time()
 
     async def to_do(self):
 
@@ -84,6 +85,7 @@ class WebComp(WebChecker):
             self.html_lst = html_lst
             diff_str = diff_str[:-4]
 
+        print('checked websites!')
         return diff_str
 
     @staticmethod
@@ -123,6 +125,6 @@ class WebComp(WebChecker):
             msg_str += l + '\n'
 
         if self.every:
-            return '{}\ncheck set every: {}'.format(msg_str, timestamp_to_utc(int(self.time_to_message + time.time())))
+            return '{}\ncheck set every: {}'.format(msg_str, timestamp_to_utc(int(self.time_to_message + self.created_on)))
         else:
-            return '{}\nset for: {}'.format(msg_str, timestamp_to_utc(int(self.time_to_message + time.time())))
+            return '{}\nset for: {}'.format(msg_str, timestamp_to_utc(int(self.time_to_message + self.created_on)))
