@@ -9,9 +9,9 @@ class AddItem(Master):
         idea: each command (non basic commands) has it's own helper class that stores all the data and instructions how
               to execute that command (every command that is ran from discord is represented by an object).
               Saving these objects and using them later is a very common task. AddItem is meant to simplify this process.
-              AddItem initializes given object with client and message from discord and saves it to a list. If self.time_coro == True
+              AddItem initializes given object with client and message from discord and saves it to a list. If self.use_asyncio == True
               (command attribute) it will run that object in a given time if self.every == False it gets removed from list after it ran.
-              If self.time_coro == False it simply saves object to a list to be accessed later. Objects can be accessed from all_items list
+              If self.use_asyncio == False it simply saves object to a list to be accessed later. Objects can be accessed from all_items list
               with ShowItems or RemoveItems.
 
         Example: see reminder.py and reminder_class.py
@@ -19,18 +19,12 @@ class AddItem(Master):
         Notes: inheritance: Command -> tui.py helper classes -> Master (is set in messenger)
 
         self.all_items: list of all items (self.item objects)
-        self.time_coro: if self.item uses asyncio.sleep()
-        self.send_str: send this to discord
-        self.item: helper object
-
-        item_obj => helper (obj): all helpers must have __str__ and to_do() method. If time_coro must have self.time_to_message and self.every
-        helper example: reminder_class.Reminder (contains all relevant information for reminder command such as: how to get reminder and time to reminder)
+        self.use_asyncio: if self.item uses asyncio.sleep()
     """
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.all_items = []
-        self.time_coro = False
+        self.use_asyncio = False
 
     @staticmethod
     def obj_error_check(obj):
@@ -93,7 +87,7 @@ class AddItem(Master):
         if self.obj_error_check(Item):                                  # check if all helper attributes not None
             await self.message.channel.send('something went wrong')
         else:
-            if self.time_coro:                                          # check if helper uses asyncio.sleep
+            if self.use_asyncio:                                          # check if helper uses asyncio.sleep
                 await self.message.channel.send(str(Item))
 
                 task = self.client.loop.create_task(self.coro_doit(Item, is_to_do_async))     # add coro_doit to event loop
@@ -111,11 +105,13 @@ class ShowItems(Master):
 
     async def ShowItems_doit(self, item_obj_str):
 
-        all_items = self.commands[item_obj_str].all_items
+        add_item_ref = self.commands[item_obj_str]            # access global commands
+        all_items = add_item_ref.all_items
 
-        for item in all_items.copy():
-            if item.task.done():
-                all_items.remove(item)
+        if add_item_ref.use_asyncio:                          # check if command uses asyncio
+            for item in all_items.copy():
+                if item.task.done():
+                    all_items.remove(item)
 
         item_str = ''
         n_items = 0
@@ -141,11 +137,13 @@ class RemoveItem(Master):
 
     async def RemoveItem_doit(self, item_obj_str):
 
-        all_items = self.commands[item_obj_str].all_items
+        add_item_ref = self.commands[item_obj_str]
+        all_items = add_item_ref.all_items
 
-        for item in all_items.copy():
-            if item.task.done():
-                all_items.remove(item)
+        if add_item_ref.use_asyncio:
+            for item in all_items.copy():
+                if item.task.done():
+                    all_items.remove(item)
 
         try:
             to_kill = int(word2vec_input(self.message.content[22:], replace_num=False)[-1])
@@ -157,7 +155,7 @@ class RemoveItem(Master):
         for i, item in enumerate(all_items):
             if item.message.author == self.message.author and i == to_kill:
 
-                if self.commands[item_obj_str].time_coro:
+                if add_item_ref.use_asyncio:
                     item.task.cancel()
                 else:
                     all_items.pop(i)
