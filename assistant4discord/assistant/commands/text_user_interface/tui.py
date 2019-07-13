@@ -1,6 +1,7 @@
 import asyncio
 from assistant4discord.nlp_tasks.message_processing import word2vec_input
 from assistant4discord.assistant.commands.master.master_class import Master
+import inspect
 
 
 class AddItem(Master):
@@ -31,34 +32,46 @@ class AddItem(Master):
         self.all_items = []
         self.time_coro = False
 
-    def remove_dead_items(self):
-        """ Removes all finished coroutines (tasks) from all_items."""
-        all_active_items = []
+    @staticmethod
+    def obj_error_check(obj):
+        """ Check if any attribute None.
 
-        for item in self.all_items:
-            if not item.task.done():
-                all_active_items.append(item)
+        Args:
+            obj: Item
 
-        self.all_items = all_active_items
+        Returns: True if found None else False
+        """
+        master_attr = vars(Master())
 
-    async def coro_doit(self, item_obj):
+        for attr, value in vars(obj).items():
+            if attr not in master_attr and value is None:
+                return True
+
+        return False
+
+    async def coro_doit(self, item_obj, is_to_do_async):
         """  loop.create_task function.
 
         Args:
             item_obj: helper object
+            is_to_do_async: True if to_do a coroutine
         """
         while True:
+
             await asyncio.sleep(item_obj.time_to_message)
 
-            discord_send = await item_obj.to_do()        # to_do() string output
-
-            if len(discord_send) == 0:      # check if something in message
-                pass
+            if is_to_do_async:                                            # check if to_do is async def
+                discord_send = await item_obj.to_do()
             else:
-                for i in range(int(len(discord_send) / 2000) + 1):        # just in case len() > 2000 (max message length for discord)
+                discord_send = item_obj.to_do()                           # run to_do method
+
+            if len(discord_send) == 0:                                    # check if something in message
+                pass
+            else:                                                         # just in case len() > 2000 (max message length for discord)
+                for i in range(int(len(discord_send) / 2000) + 1):
                     await self.message.channel.send(discord_send[i * 2000:(i + 1) * 2000])
 
-            if item_obj.every is False:        # if every is false we are done else we loop
+            if item_obj.every is False:                                   # if every is false we are done else we loop
                 return
 
     async def AddItem_doit(self, item_obj):
@@ -67,25 +80,28 @@ class AddItem(Master):
         Args:
             item_obj: helper object
         """
-        Item = item_obj(client=self.client, message=self.message)
+        Item = item_obj(client=self.client, message=self.message)       # initialize helper object
 
-        if self.time_coro:
+        is_to_do_async = inspect.iscoroutinefunction(item_obj.to_do)    # check if helper to_do method a coroutine
 
-            if Item.time_to_message and await Item.to_do() is not None:       # <- watch Item.to_do()
-                await self.message.channel.send(str(Item))
-
-                task = self.client.loop.create_task(self.coro_doit(Item))
-                setattr(Item, 'task', task)
-                self.all_items.append(Item)
+        if getattr(Item, 'run_on_init', False):                         # run on initialization if True
+            if is_to_do_async:
+                await Item.to_do()
             else:
-                await self.message.channel.send('something went wrong in tui.py line 71')
+                Item.to_do()
 
+        if self.obj_error_check(Item):                                  # check if all helper attributes not None
+            await self.message.channel.send('something went wrong')
         else:
-            if Item.to_do() is not None:
-                self.all_items.append(Item)
+            if self.time_coro:                                          # check if helper uses asyncio.sleep
                 await self.message.channel.send(str(Item))
+
+                task = self.client.loop.create_task(self.coro_doit(Item, is_to_do_async))     # add coro_doit to event loop
+                setattr(Item, 'task', task)                             # save task as attribute of Item
+                self.all_items.append(Item)                             # save Item to list
             else:
-                await self.message.channel.send('something went wrong in tui.py line 78')
+                self.all_items.append(Item)                             # save Item to list if helper does not use asyncio
+                await self.message.channel.send(str(Item))
 
 
 class ShowItems(Master):
@@ -95,11 +111,11 @@ class ShowItems(Master):
 
     async def ShowItems_doit(self, item_obj_str):
 
-        add_items_obj = self.commands[item_obj_str]
-        all_items = add_items_obj.all_items
+        all_items = self.commands[item_obj_str].all_items
 
-        if add_items_obj.time_coro:
-            add_items_obj.remove_dead_items()
+        for item in all_items.copy():
+            if item.task.done():
+                all_items.remove(item)
 
         item_str = ''
         n_items = 0
@@ -115,7 +131,7 @@ class ShowItems(Master):
         if n_items != 0:
             await self.message.channel.send(item_str)
         else:
-            await self.message.channel.send('something went wrong in tui.py line 108')
+            await self.message.channel.send('something went wrong')
 
 
 class RemoveItem(Master):
@@ -125,23 +141,23 @@ class RemoveItem(Master):
 
     async def RemoveItem_doit(self, item_obj_str):
 
-        add_items_obj = self.commands[item_obj_str]
-        all_items = add_items_obj.all_items
+        all_items = self.commands[item_obj_str].all_items
 
-        if add_items_obj.time_coro:
-            add_items_obj.remove_dead_items()
+        for item in all_items.copy():
+            if item.task.done():
+                all_items.remove(item)
 
         try:
             to_kill = int(word2vec_input(self.message.content[22:], replace_num=False)[-1])
         except ValueError:
-            await self.message.channel.send('something went wrong in tui.py line 127')
+            await self.message.channel.send('something went wrong')
             return
 
         n_items = 0
         for i, item in enumerate(all_items):
             if item.message.author == self.message.author and i == to_kill:
 
-                if add_items_obj.time_coro:
+                if self.commands[item_obj_str].time_coro:
                     item.task.cancel()
                 else:
                     all_items.pop(i)
@@ -151,6 +167,6 @@ class RemoveItem(Master):
                 n_items += 1
 
         if to_kill > n_items:
-            await self.message.channel.send('something went wrong in tui.py line 144')
+            await self.message.channel.send('something went wrong')
         else:
             await self.message.channel.send('item {} removed!'.format(to_kill))
