@@ -14,9 +14,9 @@ class TimeIt(AddItem):
                     'Warning: use with word "time" so that commands don\'t get mixed up.\n' \
                     'Example: time <time when to run> <any command>```'
         self.call = 'time'
-        self.time_coro = True
+        self.use_asyncio = True
 
-    async def coro_doit(self, timer):
+    async def coro_doit(self, timer, is_to_do_async=None):
 
         await self.message.channel.send(str(timer))
 

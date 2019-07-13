@@ -11,7 +11,7 @@ class RemindMe(AddItem):
                     'Use: reminder <number1> <time1> <number2> <time2> ...\n' \
                     'Valid times: see timer help\n```'
         self.call = 'reminder stevilka'
-        self.time_coro = True
+        self.use_asyncio = True
 
     async def doit(self):
         await self.AddItem_doit(Reminder)

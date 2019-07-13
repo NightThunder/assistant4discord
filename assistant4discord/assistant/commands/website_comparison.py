@@ -15,7 +15,7 @@ class WebsiteComparison(AddItem):
                     '? line not present in either input sequence\n' \
                     'see: https://docs.python.org/3/library/difflib.html#difflib.Differ```'
         self.call = 'check stevilka'
-        self.time_coro = True
+        self.use_asyncio = True
 
     async def doit(self):
         await self.AddItem_doit(WebComp)
