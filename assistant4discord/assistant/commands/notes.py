@@ -58,7 +58,7 @@ class NotesTxt(Master):
             if note.message.author == self.message.author:
                 user_notes.append(str(note) + '\n--------------------\n')
 
-        user_notes[-1] = user_notes[-1][:-23]
+        user_notes[-1] = user_notes[-1][:-22]
 
         if not user_notes:
             return
