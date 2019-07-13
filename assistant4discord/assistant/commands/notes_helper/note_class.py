@@ -7,6 +7,7 @@ class Note(Master):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.run_on_init = True
         self.noted = ''
         self.note_time = timestamp_to_utc(time.time())
 
