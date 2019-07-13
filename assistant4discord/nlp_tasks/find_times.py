@@ -4,8 +4,6 @@ from datetime import date
 import time
 
 
-special_time_words = ['every', 'at', 'tomorrow', 'on']
-
 times_dct = {'second': 1, 'seconds': 1, 'sec': 1, 's': 1, 'minute': 60, 'minutes': 60, 'min': 60, 'm': 60,
              'hour': 3600, 'hours': 3600, 'h': 3600, 'day': 86400, 'days': 86400, 'd': 86400, 'week': 604800,
              'weeks': 604800, 'w': 604800, 'tomorrow': 86400}
@@ -16,7 +14,7 @@ days_dct = {'monday': 0, 'mon': 0, 'mo': 0, 'tuesday': 1, 'tue': 1, 'tu': 1, 'we
 
 
 def sent_time_finder(sent, filter_times=False):
-    """ Simple time lookup from string.
+    """ Simple time lookup from string (warning spaghetti code).
         (1) Looks for times_dct keys in sent. If found checks if int before key.
             If int not found set num = 1 else set num = int. Multiply num by key's value. Check for 'every''
         (2) Same as (1) but for days_dct.
@@ -33,53 +31,60 @@ def sent_time_finder(sent, filter_times=False):
     Returns: (int for time in string, word2vec_input list with no times, True if every in string). Returns time TO event.
 
     Not implemented: months, years
-
     """
     vec_sent = word2vec_input(sent)
     true_sent = word2vec_input(sent, replace_num=False)
+
+    no_num_sent = true_sent.copy()
     t = 0
     every = False
-    index_time = []     # TODO: make this better
 
     for i, w in enumerate(vec_sent):
 
         if w in times_dct:
             try:
                 num = int(true_sent[i - 1])
-                index_time.append(i - 1)
+                no_num_sent[i - 1] = None
             except ValueError:
                 num = 1
 
             t += times_dct[w] * num
-            index_time.append(i)
+            no_num_sent[i - 1] = None
 
             if vec_sent[i - 1] == 'every' or vec_sent[i - 2] == 'every':
                 if vec_sent[i - 1] == 'every':
-                    index_time.append(i - 1)
+                    no_num_sent[i - 1] = None
                 else:
-                    index_time.append(i - 2)
+                    no_num_sent[i - 2] = None
                 every = True
 
         elif w in days_dct:
+            now = datetime.datetime.now()
             today_is = date.today().strftime('%A').lower()
 
-            t = abs(days_dct[w] - days_dct[today_is]) * 86400
+            t = abs(days_dct[w] - days_dct[today_is]) * 86400 - (now.hour * 3600 + now.minute * 60 + now.second)
 
             if t == 0:
-                t = 7 * 86400
+                t = 7 * 86400 - (now.hour * 3600 + now.minute * 60 + now.second)
 
-            index_time.append(i)
+            no_num_sent[i] = None
 
             if vec_sent[i - 1] == 'every':
-                index_time.append(i - 1)
+                no_num_sent[i - 1] = None
                 every = True
 
         elif w == 'at':
+
+            now = datetime.datetime.now()
+            if at_helper(true_sent):
+                to_midnight = 86400 - (now.hour * 3600 + now.minute * 60 + now.second)
+                t += to_midnight
+
+            no_num_sent[i] = None
+
             for j, hms in enumerate(true_sent[i + 1:]):
 
                 if vec_sent[j + i + 1] == 'stevilka':
-
-                    index_time.append(j + i + 1)
 
                     if j == 0:
                         t += int(hms) * 3600
@@ -87,19 +92,22 @@ def sent_time_finder(sent, filter_times=False):
                         t += int(hms) * 60
                     else:
                         t += int(hms)
+
+                    no_num_sent[j + i + 1] = None
                 else:
                     break
 
         elif w == 'on':
             d = 0
-            m = date.today().strftime('%m')
-            y = date.today().strftime('%Y')
+            now = datetime.datetime.now()
+            m = now.month
+            y = now.year
+
+            no_num_sent[i] = None
 
             for j, dmy in enumerate(true_sent[i + 1:]):
 
                 if vec_sent[j + i + 1] == 'stevilka':
-
-                    index_time.append(j + i + 1)
 
                     if j == 0:
                         d = int(dmy)
@@ -110,38 +118,31 @@ def sent_time_finder(sent, filter_times=False):
                             y = int(dmy) + 2000
                         else:
                             y = int(dmy)
+
+                    no_num_sent[j + i + 1] = None
                 else:
                     break
 
-            t += int(datetime.datetime(y, m, d, 0, 0).timestamp() - time.time())
+            t += int(datetime.datetime(y, m, d, 0, 0).timestamp() - time.time()) + 1
 
         else:
             continue
 
     if filter_times:
-        return t, sent_no_time(vec_sent, index_time), every
+        return t, [w for w in no_num_sent if w is not None], every
     else:
         return t, every
 
 
-def sent_no_time(vec_sent, ind):
-    """ Cleans time words and time numbers from sentence.
+def at_helper(true_sent):
 
-    Args:
-        vec_sent: word2vec_input of sentence
-        ind: index values of time words and corresponding numbers
+    if 'on' not in true_sent:
+        for w in true_sent:
+            for k in days_dct:
+                if w in k:
+                    return True
 
-    Returns: word2vec_input list of sentence with no time words and no time numbers
-
-    """
-
-    no_time_vec_sent = []
-
-    for i, w in enumerate(vec_sent):
-        if i not in ind:
-            no_time_vec_sent.append(w)
-
-    return no_time_vec_sent
+    return False
 
 
 def timestamp_to_utc(timestamp):
