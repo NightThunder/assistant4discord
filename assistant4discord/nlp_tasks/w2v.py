@@ -9,13 +9,13 @@ import math
 
 boosted = {'similar': 1000, 'similarity': 1000, 'help': 10, 'number': 10, 'time': 100}
 # this is needed so that commands that use calls from different commands don't get mixed up
-# only works if word count in command > 1
 
 
-class Similarity:
+class w2vSimilarity:
 
-    def __init__(self, model_name):
+    def __init__(self, model_name, test_set):
         self.model = self.load_model(model_name)
+        self.w2v_matrix = self.get_sentence2vec(test_set)
 
     @staticmethod
     def load_model(file_name):
@@ -33,18 +33,20 @@ class Similarity:
 
             Notes: uses log weight for each word
         """
+        m = len(content)
+        n = self.model.vector_size
+        is_message = False          # check for boosted
 
-        post_vec_lst = []       # TODO: use np.array
-        size = self.model.vector_size
-        is_message = False
-
-        if any(isinstance(el, list) for el in content) is False:
+        if any(isinstance(el, list) for el in content) is False:        # check if not list of lists
             is_message = True
+            m = len(content)
             content = [content]
 
-        for sent in content:
+        sent_mat = np.zeros((m, n))
 
-            sum_post = np.zeros(size)
+        for i, sent in enumerate(content):
+
+            sum_post = np.zeros(n)
 
             for word in sent:
                 try:
@@ -58,11 +60,9 @@ class Similarity:
                 except KeyError:
                     pass
 
-            post_vec_lst.append(sum_post)
+            sent_mat[i] = sum_post
 
-        post_mat = np.array(post_vec_lst)
-
-        return post_mat
+        return sent_mat
 
     def get_sentence2vec(self, content):
         """Calls sentence2vec. Different for string or list of strings."""
@@ -78,17 +78,12 @@ class Similarity:
         """Return cosine similarity of vector and matrix rows."""
         return cosine_similarity(sentence, compare_to_sentences).ravel()
 
-    def message_x_command_sim(self, message: str, commands: list, saved_command_vectors=False):
-        """ Compares message to list of commands or to sentence vectors.
+    def message_x_command_sim(self, message: str):
+        """ Compares message to sentence vectors.
 
         Args:
             message: string
-            commands: list of text commands or command sentence vectors if saved_command_vectors=True
-            saved_command_vectors: set True if already calculated vector commands (at start or in .pickle)
 
         Returns: np.array of cosine similarities
         """
-        if saved_command_vectors:
-            return self.sentence_sim(self.get_sentence2vec(message), commands)
-        else:
-            return self.sentence_sim(self.get_sentence2vec(message), self.get_sentence2vec(commands))
+        return self.sentence_sim(self.get_sentence2vec(message), self.w2v_matrix)
