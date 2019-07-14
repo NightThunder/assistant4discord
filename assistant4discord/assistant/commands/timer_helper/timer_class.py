@@ -20,7 +20,7 @@ class Timer(Master):
     def message_to_command(self, message):
         """ Same as Messenger. """
 
-        sim_arr = self.sim.message_x_command_sim(' '.join(message), self.command_vectors, saved_command_vectors=True)
+        sim_arr = self.sim.message_x_command_sim(' '.join(message))
         picked_command_str = self.calls[int(np.argmax(sim_arr))]
 
         if np.max(sim_arr) < 0.3:
@@ -37,7 +37,7 @@ class Timer(Master):
             Example: 'time ping 10 sec' -> 'time ping' -> 'ping'
         """
 
-        time_to_command, sent_no_time, every = sent_time_finder(self.message.content[22:], filter_times=True)
+        time_to_command, sent_no_time, every = sent_time_finder(self.message.content, filter_times=True)
 
         time_i = sent_no_time.index('time')
 
@@ -53,6 +53,6 @@ class Timer(Master):
     def __str__(self):
         """ %d.%m.%Y %H:%M:%S representation."""
         if self.every:
-            return 'command: {}\nnext run set for {}'.format(self.message.content[22:], timestamp_to_utc(self.time_to_timer + self.created_on))
+            return 'command: {}\nnext run set for {}'.format(self.message.content, timestamp_to_utc(self.time_to_timer + self.created_on))
         else:
-            return 'command: {}\nset for {}'.format(self.message.content[22:], timestamp_to_utc(self.time_to_timer + self.created_on))
+            return 'command: {}\nset for {}'.format(self.message.content, timestamp_to_utc(self.time_to_timer + self.created_on))

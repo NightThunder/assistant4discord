@@ -146,7 +146,7 @@ class RemoveItem(Master):
                     all_items.remove(item)
 
         try:
-            to_kill = int(word2vec_input(self.message.content[22:], replace_num=False)[-1])
+            to_kill = int(word2vec_input(self.message.content, replace_num=False)[-1])
         except ValueError:
             await self.message.channel.send('something went wrong')
             return

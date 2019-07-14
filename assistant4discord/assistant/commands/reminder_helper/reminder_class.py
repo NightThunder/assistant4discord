@@ -43,7 +43,7 @@ class Reminder(Master):
 
         Returns: seconds to message
         """
-        time_to_command, every = sent_time_finder(self.message.content[22:])
+        time_to_command, every = sent_time_finder(self.message.content)
 
         return time_to_command, every
 

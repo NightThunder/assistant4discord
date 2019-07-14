@@ -10,7 +10,7 @@ class Help(Master):
 
     async def doit(self):
 
-        message = self.message.content[22:]
+        message = self.message.content
 
         if len(word2vec_input(message)) > 1:
             for i, (command_str, command) in enumerate(self.commands.items()):

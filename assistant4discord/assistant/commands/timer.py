@@ -13,7 +13,7 @@ class TimeIt(AddItem):
                     'Note: command is ran when timer is finished.\n' \
                     'Warning: use with word "time" so that commands don\'t get mixed up.\n' \
                     'Example: time <time when to run> <any command>```'
-        self.call = 'time'
+        self.call = 'time stevilka'
         self.use_asyncio = True
 
     async def coro_doit(self, timer, is_to_do_async=None):
@@ -29,7 +29,7 @@ class TimeIt(AddItem):
 
     async def AddItem_doit(self, item_obj=None):
 
-        timer = Timer(message=self.message, similarity=self.sim, commands=self.commands, command_vectors=self.command_vectors, calls=self.calls)
+        timer = Timer(message=self.message, similarity=self.sim, commands=self.commands, calls=self.calls)
 
         if timer.time_to_timer and timer.future_command:
             task = self.client.loop.create_task(self.coro_doit(timer))
@@ -48,7 +48,7 @@ class ShowTimers(ShowItems):
         super().__init__(*args, **kwargs)
         self.help = '```***ShowTimers help***\n' \
                     'Display user\'s active timers.\n```'
-        self.call = 'show timer'
+        self.call = 'show timers'
 
     async def doit(self):
         await self.ShowItems_doit('TimeIt')
@@ -61,7 +61,7 @@ class RemoveTimer(RemoveItem):
         self.help = '```***RemoveTimer help***\n' \
                     'Cancels user\'s active timer.\n' \
                     'Example: cancel timer <timer\'s number shown in ShowTimers>```'
-        self.call = 'remove timer'
+        self.call = 'remove timer stevilka'
 
     async def doit(self):
         await self.RemoveItem_doit('TimeIt')
