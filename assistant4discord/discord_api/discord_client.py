@@ -28,14 +28,16 @@ class MyClient(discord.Client):
             return
 
         if message.content.startswith('<@{}>'.format(self.user.id)):
+            message.content = message.content[22:]
             messenger = self.messenger.message_to_command(message)
+
             if messenger:
                 await messenger.doit()
             else:
                 await message.channel.send('Error: not implemented')
 
 
-def run(model_name, my_token, log_chat):
+def run(method, model_name, my_token, log_chat):
 
     client = MyClient()
 
@@ -43,5 +45,5 @@ def run(model_name, my_token, log_chat):
         client.log_chat = log_chat
         client.chat_logger = setup_logger(log_name='chat.log')
 
-    client.messenger = Messenger(client=client, model_name=model_name)
+    client.messenger = Messenger(method=method, client=client, model_name=model_name)
     client.run(my_token)
