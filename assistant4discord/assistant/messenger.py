@@ -1,4 +1,5 @@
-from assistant4discord.nlp_tasks.similarity import Similarity
+from assistant4discord.nlp_tasks.w2v import w2vSimilarity
+from assistant4discord.nlp_tasks.tf import tfSimilarity
 from importlib import import_module
 import os
 import inspect
@@ -7,10 +8,11 @@ import numpy as np
 
 class Commander:
 
-    def __init__(self, client, model_name):
+    def __init__(self, method, client, model_name=None):
         """Commands initializer.
 
         Args:
+            method: w2v or tf
             client: discord client from discord.py
             model_name: w2v model
 
@@ -20,17 +22,21 @@ class Commander:
             self.sim: w2v model class
             self.command_vectors: pre calculate sentence vectors from self.calls
         """
+        self.method = method
         self.client = client
         self.commands = self.get_commands()
         self.calls = self.get_command_calls()
 
-        self.sim = Similarity(model_name)
-        self.command_vectors = self.sim.get_sentence2vec(self.calls)
+        if self.method == 'w2v':
+            self.sim = w2vSimilarity(model_name, self.calls)
+        elif self.method == 'tf':
+            self.sim = tfSimilarity(self.calls)
+        else:
+            raise ValueError
 
         self.set_master_attributes()
 
-    @staticmethod
-    def get_commands() -> dict:
+    def get_commands(self) -> dict:
         """ Load commands from assistant4discord.assistant.commands.
             Ignore directories inside .commands.
 
@@ -53,8 +59,19 @@ class Commander:
 
                 for name, obj in inspect.getmembers(module):
                     if inspect.isclass(obj) and str(obj.__module__).count('.') == 3:
+
+                        obj = obj()
+
+                        has_special = getattr(obj, 'special', False)        # check if command uses method
+                        if has_special:
+                            if has_special == self.method:                  # if special is the same as method used
+                                command_dct[name] = obj
+                            else:
+                                pass
+                        else:
+                            command_dct[name] = obj
+
                         print('imported command: {}'.format(name))
-                        command_dct[name] = obj()
 
         return command_dct
 
@@ -76,11 +93,10 @@ class Commander:
         for command_str, command in self.commands.items():
 
             if command_str == 'TimeIt':
-                command.command_vectors = self.command_vectors
                 command.calls = self.calls
                 command.sim = self.sim
 
-            elif command_str == 'Word2WordSim' or command_str == 'MostSimilarWords' or command_str == 'WordNum':
+            elif getattr(command, 'special', False) == 'w2v':
                 command.sim = self.sim
 
             else:
@@ -100,12 +116,12 @@ class Messenger(Commander):
 
     def message_to_command(self, message: str) -> object:
 
-        sim_arr = self.sim.message_x_command_sim(message.content[22:], self.command_vectors, saved_command_vectors=True)
+        sim_arr = self.sim.message_x_command_sim(message.content)
         picked_command_str = self.calls[int(np.argmax(sim_arr))]
 
-        print('message:', message.content[22:])
+        print('message:', message.content)
         for i in sim_arr.argsort()[-3:][::-1]:
-            print('{}: {:.2f}'.format(self.calls[i], sim_arr[i]))
+            print('{}: {:.3f}'.format(self.calls[i], sim_arr[i]))
 
         if np.max(sim_arr) < 0.5:
             return None
