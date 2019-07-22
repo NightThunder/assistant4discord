@@ -78,7 +78,7 @@ class AddItem(Master):
 
         is_to_do_async = inspect.iscoroutinefunction(item_obj.to_do)    # check if helper to_do method a coroutine
 
-        if getattr(Item, 'run_on_init', False):                         # run on initialization if True
+        if Item.run_on_init:                                            # run on initialization if True
             if is_to_do_async:
                 await Item.to_do()
             else:
@@ -103,7 +103,7 @@ class ShowItems(Master):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    async def ShowItems_doit(self, item_obj_str):
+    async def ShowItems_doit(self, item_obj_str, public=False):
 
         add_item_ref = self.commands[item_obj_str]            # access global commands
         all_items = add_item_ref.all_items
@@ -115,14 +115,24 @@ class ShowItems(Master):
 
         item_str = ''
         n_items = 0
-        for i, item in enumerate(all_items):
-            if item.message.author == self.message.author:
-                item_str += '**{}:** {}\n'.format(i, str(item))
+
+        if public:
+            for i, item in enumerate(all_items):
+                item_str += '**{}** - {}\n'.format(i, str(item))
 
                 if i != len(all_items) - 1:
                     item_str += '--------------------\n'
 
                 n_items += 1
+        else:
+            for i, item in enumerate(all_items):
+                if item.message.author == self.message.author:
+                    item_str += '**{}** - {}\n'.format(i, str(item))
+
+                    if i != len(all_items) - 1:
+                        item_str += '--------------------\n'
+
+                    n_items += 1
 
         if n_items != 0:
             await self.message.channel.send(item_str)
