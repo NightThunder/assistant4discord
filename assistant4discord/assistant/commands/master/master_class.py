@@ -17,7 +17,6 @@ class Master:
             return True
 
         elif self.special.get('permission') == 'mod' and self.message.author in mod_lst:
-            print('heeeeree')
             return True
 
         else:
