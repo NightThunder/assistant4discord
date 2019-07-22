@@ -17,6 +17,11 @@ class MyClient(discord.Client):
         self.chat_logger = None
 
     async def on_ready(self):
+        initialized = self.messenger.initializer()
+
+        for command in initialized:
+            await command.initialize()
+
         print('Logged in as: {}, {}'.format(self.user.name, self.user.id))
 
     async def on_message(self, message):
@@ -26,6 +31,15 @@ class MyClient(discord.Client):
 
         if message.author == self.user:
             return
+
+        # if private message no @ needed but it runs message_to_command every time
+        if isinstance(message.channel, discord.DMChannel):
+            messenger = self.messenger.message_to_command(message)
+
+            if messenger:
+                await messenger.doit()
+            else:
+                pass                # do nothing if command not found
 
         if message.content.startswith('<@{}>'.format(self.user.id)):
             message.content = message.content[22:]

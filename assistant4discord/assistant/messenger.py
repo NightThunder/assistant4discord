@@ -19,14 +19,14 @@ class Commander:
         Attributes:
             self.commands: dict of commands from commands dir, {'command': command obj, ...}
             self.calls: list of command calls from command objects, ['command call', ...]
-            self.sim: w2v model class
-            self.command_vectors: pre calculate sentence vectors from self.calls
+            self.sim: model
         """
         self.method = method
         self.client = client
         self.commands = self.get_commands()
         self.calls = self.get_command_calls()
 
+        # command recognition method initialization
         if self.method == 'w2v':
             self.sim = w2vSimilarity(model_name, self.calls)
         elif self.method == 'tf':
@@ -37,8 +37,7 @@ class Commander:
         self.set_master_attributes()
 
     def get_commands(self) -> dict:
-        """ Load commands from assistant4discord.assistant.commands.
-            Ignore directories inside .commands.
+        """ Load commands from assistant4discord.assistant.commands. Ignore directories inside .commands.
 
             Notes: each command is a class that inherits from Master and has help and call attributes. There should only
                   be commands (described above) in this directory. If a command needs more then one class make a helper
@@ -60,19 +59,23 @@ class Commander:
                 for name, obj in inspect.getmembers(module):
                     if inspect.isclass(obj) and str(obj.__module__).count('.') == 3:
 
-                        obj = obj()
+                        obj = obj()                                         # initialize command
 
-                        has_special = getattr(obj, 'special', False)        # check if command uses method
-                        if has_special:
-                            if has_special == self.method:                  # if special is the same as method used
-                                command_dct[name] = obj
+                        if getattr(obj, 'special', False):                             # check if command uses method
+                            if obj.special.get('method'):
+                                if self.method == obj.special.get('method'):
+                                    command_dct[name] = obj
+                                    print('imported command: {}'.format(name))
+                                else:
+                                    print('NOT imported command: {}'.format(name))
                             else:
-                                pass
+                                command_dct[name] = obj
+                                print('imported command: {}'.format(name))
                         else:
                             command_dct[name] = obj
+                            print('imported command: {}'.format(name))
 
-                        print('imported command: {}'.format(name))
-
+        print('-------------------------------\nimported {} commands\n'.format(len(command_dct)))
         return command_dct
 
     def get_command_calls(self):
@@ -93,11 +96,12 @@ class Commander:
         for command_str, command in self.commands.items():
 
             if command_str == 'TimeIt':
+                command.sim = self.sim
                 command.calls = self.calls
-                command.sim = self.sim
 
-            elif getattr(command, 'special', False) == 'w2v':
-                command.sim = self.sim
+            elif getattr(command, 'special', False):
+                if 'w2v' == command.special.get('method'):
+                    command.sim = self.sim
 
             else:
                 pass
@@ -113,6 +117,16 @@ class Messenger(Commander):
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    def initializer(self):
+        """ Runs once on ready and initializes some commands."""
+        initialized = []
+
+        for command_str, command in self.commands.items():
+            if getattr(command, 'initialize', False):
+                initialized.append(command)
+
+        return initialized
 
     def message_to_command(self, message: str) -> object:
 
