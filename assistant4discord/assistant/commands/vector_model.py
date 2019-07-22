@@ -11,7 +11,7 @@ class Word2WordSim(Master):
                     'Example: similarity <word1>, <word2>\n' \
                     'Note: only works with keyword "similarity".```'
         self.call = 'similarity'
-        self.special = 'w2v'
+        self.special = {'method': 'w2v'}
 
     async def doit(self):
         sent = word2vec_input(self.message.content)
@@ -34,7 +34,7 @@ class MostSimilarWords(Master):
                     'Example: similar <word>\n' \
                     'Note: only works with keyword "similar".```'
         self.call = 'most similar'
-        self.special = 'w2v'
+        self.special = {'method': 'w2v'}
 
     async def doit(self):
         sent = word2vec_input(self.message.content)
@@ -61,7 +61,7 @@ class WordNum(Master):
                     'Example: number <word>\n' \
                     'Note: all words 10+ as set by model. Numbers replaced by stevilka.```'
         self.call = 'number'
-        self.special = 'w2v'
+        self.special = {'method': 'w2v'}
 
     async def doit(self):
         sent = word2vec_input(self.message.content)

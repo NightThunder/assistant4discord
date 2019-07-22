@@ -23,12 +23,14 @@ class Help(Master):
 
         else:
             command_str = '```My commands: '
-            for i, command_str_ in enumerate(self.commands.keys()):
-                if i < len(self.commands) - 1:
-                    command_str += command_str_ + ', '
-                else:
-                    command_str += command_str_
+            for i, (command_str_, command) in enumerate(self.commands.items()):
+                if command.special:
+                    if command.special.get('hidden'):
+                        continue
 
+                command_str += command_str_ + ', '
+
+            command_str = command_str[:-2]
             command_str += '\nType help <command> for more info!```'
 
             await self.message.channel.send(command_str)
