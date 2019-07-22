@@ -16,8 +16,8 @@ class tfSimilarity:
 
         tf_matrix = self.vectorizer.fit_transform(test_set).toarray()
 
-        print(self.vectorizer.vocabulary_)
-        print(tf_matrix)
+        # print(self.vectorizer.vocabulary_)
+        # print(tf_matrix)
 
         return self.normalize_to_1(tf_matrix)
 
@@ -25,7 +25,7 @@ class tfSimilarity:
         """ Make term frequency vector from message."""
         train_vec = self.vectorizer.transform(train_set).toarray()
 
-        print(train_vec)
+        # print(train_vec)
 
         return self.normalize_to_1(train_vec)
 
