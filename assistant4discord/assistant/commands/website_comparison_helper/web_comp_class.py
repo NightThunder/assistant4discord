@@ -9,12 +9,21 @@ from aiohttp.client_exceptions import InvalidURL
 
 
 class WebChecker(Master):
-    """ see: https://aiohttp.readthedocs.io/en/stable/client_reference.html
-             https://stackoverflow.com/questions/35879769/fetching-multiple-urls-with-aiohttp-in-python-3-5
-        for errors: https://faust.readthedocs.io/en/latest/_modules/aiohttp/client.html"""
+    """ Get content of a website.
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    Note
+    ----
+    Works with list of websites. Websites in message must be split with any whitespace.
+
+    References
+    ----------
+    https://aiohttp.readthedocs.io/en/stable/client_reference.html
+    https://stackoverflow.com/questions/35879769/fetching-multiple-urls-with-aiohttp-in-python-3-5
+    https://faust.readthedocs.io/en/latest/_modules/aiohttp/client.html
+    """
+
+    def __init__(self):
+        super().__init__()
 
     @staticmethod
     async def fetch(session, url):
@@ -30,7 +39,9 @@ class WebChecker(Master):
             return None
 
     async def fetch_all(self, session, urls):
-        results = await asyncio.gather(*[self.client.loop.create_task(self.fetch(session, url)) for url in urls])
+        results = await asyncio.gather(
+            *[self.client.loop.create_task(self.fetch(session, url)) for url in urls]
+        )
         return results
 
     async def get_content(self, urls):
@@ -55,8 +66,23 @@ class WebChecker(Master):
 
 class WebComp(WebChecker):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self):
+        """
+        Other Parameters
+        ----------------
+        run_on_init: bool
+            If True runs once on initialization.
+        time_to_message: int
+        every: bool
+        n: int
+            0 if never ran, 1 if ran once or more.
+        links: list of str
+            List of links provided by user.
+        created_on: int
+            When was this initialized.
+
+        """
+        super().__init__()
         self.run_on_init = True
         (self.time_to_message, self.every) = self.time_message()
         self.n = 0
@@ -71,7 +97,7 @@ class WebComp(WebChecker):
         if None in html_lst:
             return None
 
-        diff_str = ''
+        diff_str = ""
 
         if self.n == 0:
             self.html_lst = html_lst
@@ -80,17 +106,33 @@ class WebComp(WebChecker):
             for new_html, saved_html, link in zip(html_lst, self.html_lst, self.links):
                 diff = self.get_diff(html2text(new_html), html2text(saved_html))
                 if len(diff) != 0:
-                    diff_str = '{}\n{}\n\n'.format(link, diff)
+                    diff_str = "{}\n{}\n\n".format(link, diff)
 
             self.html_lst = html_lst
             diff_str = diff_str[:-4]
 
-        print('checked websites!')
+        print("checked websites!")
         return diff_str
 
     @staticmethod
     def get_diff(s1, s2):
-        """see: https://docs.python.org/3/library/difflib.html#differ-example"""
+        """ Get difference from two strings.
+
+        Parameters
+        ----------
+        s1: str
+        s2: str
+
+        Returns
+        -------
+        str
+            Diff string.
+
+        References
+        ----------
+        https://docs.python.org/3/library/difflib.html#differ-example
+        """
+
         s1 = s1.splitlines(keepends=True)
         s2 = s2.splitlines(keepends=True)
 
@@ -98,12 +140,12 @@ class WebComp(WebChecker):
 
         result = list(d.compare(s1, s2))
 
-        lines = ''
+        lines = ""
         for l in result:
-            if l.startswith('  '):
+            if l.startswith("  "):
                 continue
-            elif not l.endswith('\n'):
-                lines += l + '\n'
+            elif not l.endswith("\n"):
+                lines += l + "\n"
             else:
                 lines += l
 
@@ -112,19 +154,26 @@ class WebComp(WebChecker):
     def time_message(self):
         """ Parses message for time words.
 
-        Returns: seconds to message
+        Returns
+        -------
+        int
+            seconds to message
         """
-        time_to_command, every = sent_time_finder(self.message.content[22:])
+        time_to_command, every = sent_time_finder(self.message.content)
 
         return time_to_command, every
 
     def __str__(self):
 
-        msg_str = ''
+        msg_str = ""
         for l in self.links:
-            msg_str += l + '\n'
+            msg_str += l + "\n"
 
         if self.every:
-            return '{}\ncheck set every: {}'.format(msg_str, timestamp_to_utc(int(self.time_to_message + self.created_on)))
+            return "{}\ncheck set every: {}".format(
+                msg_str, timestamp_to_utc(int(self.time_to_message + self.created_on))
+            )
         else:
-            return '{}\nset for: {}'.format(msg_str, timestamp_to_utc(int(self.time_to_message + self.created_on)))
+            return "{}\nset for: {}".format(
+                msg_str, timestamp_to_utc(int(self.time_to_message + self.created_on))
+            )

@@ -3,12 +3,21 @@ from assistant4discord.assistant.commands.master.master_class import Master
 
 class Mod(Master):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.run_on_init = True
         self.to_mod = None
 
     def to_do(self):
+        """ Set a moderator.
+
+        Checks all users that bot can see for a match.
+
+        Returns
+        -------
+        str
+            Name of new mod or None user not found.
+        """
         to_mod = self.get_message()
 
         for user in self.client.users:

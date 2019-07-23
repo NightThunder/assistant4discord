@@ -5,10 +5,10 @@ import time
 
 class Note(Master):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.run_on_init = True
-        self.noted = ''
+        self.noted = ""
         self.note_time = timestamp_to_utc(time.time())
 
     def to_do(self):
@@ -25,4 +25,4 @@ class Note(Master):
         return None
 
     def __str__(self):
-        return 'noted on {}\nnote: {}'.format(self.note_time, self.noted)
+        return "noted on {}\nnote: {}".format(self.note_time, self.noted)

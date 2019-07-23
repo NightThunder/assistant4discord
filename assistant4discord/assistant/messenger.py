@@ -7,135 +7,151 @@ import numpy as np
 
 
 class Commander:
+    """ Initialize message -> command method. Import commands. Set command attributes. """
 
-    def __init__(self, method, client, model_name=None):
-        """Commands initializer.
+    def __init__(self, method, client, model_name):
+        """
+        Parameters
+        ----------
+        method: str
+            What method to use for message to commend conversion.
+            w2v (word to vector) or tf (term frequency)
+        client: obj
+            Discord client.
+        model_name: str, optional
+            If w2v model name which is passed to gensim.
 
-        Args:
-            method: w2v or tf
-            client: discord client from discord.py
-            model_name: w2v model
+        Other Parameters
+        ----------------
+        commands: dict
+            Dictionary of command objects. {'command str': command obj, ...}.
+        calls: list of str
+            List of command calls. Calls are set in command objects.
+        sim: obj
+            This object represents a word model. w2v or tf model.
 
-        Attributes:
-            self.commands: dict of commands from commands dir, {'command': command obj, ...}
-            self.calls: list of command calls from command objects, ['command call', ...]
-            self.sim: model
+        Raises
+        ------
+        ValueError
+            If no or wrong method name in __main__ .
         """
         self.method = method
         self.client = client
         self.commands = self.get_commands()
         self.calls = self.get_command_calls()
 
-        # command recognition method initialization
-        if self.method == 'w2v':
+        if self.method == "w2v":
             self.sim = w2vSimilarity(model_name, self.calls)
-        elif self.method == 'tf':
+        elif self.method == "tf":
             self.sim = tfSimilarity(self.calls)
         else:
             raise ValueError
 
+        # set commands dict, client and sim
         self.set_master_attributes()
 
-    def get_commands(self) -> dict:
-        """ Load commands from assistant4discord.assistant.commands. Ignore directories inside .commands.
+    def get_commands(self):
+        """ Load commands from assistant4discord/assistant/commands/. Ignore directories inside /commands
 
-            Notes: each command is a class that inherits from Master and has help and call attributes. There should only
-                  be commands (described above) in this directory. If a command needs more then one class make a helper
-                  package inside .commands and import from there.
+        Note
+        ----
+        Each command is a class that inherits from Master and must have: help attribute, call attribute and doit method.
+        There should only be commands (described above) in this directory. If a command needs more then one class make a helper
+        package inside /commands and import from there.
 
-        Returns: {'command': command obj, ...}
+        Returns
+        -------
+        dict
+            Dictionary of command objects. {'command str': command obj, ...}.
         """
         command_dct = {}
 
-        dir_path = os.path.dirname(os.path.realpath(__file__)) + '/commands'
+        dir_path = os.path.dirname(os.path.realpath(__file__)) + "/commands"
         file_lst = os.listdir(dir_path)
 
         for file in file_lst:
-            if file.endswith('.py') and '__init__' not in file:
+            if file.endswith(".py") and "__init__" not in file:
 
-                module_name = 'assistant4discord.assistant.commands.{}'.format(file[:-3])
+                module_name = "assistant4discord.assistant.commands.{}".format(file[:-3])
                 module = import_module(module_name)
 
                 for name, obj in inspect.getmembers(module):
-                    if inspect.isclass(obj) and str(obj.__module__).count('.') == 3:
+                    if inspect.isclass(obj) and str(obj.__module__).count(".") == 3:
 
-                        obj = obj()                                         # initialize command
+                        # initialize command
+                        obj = obj()
 
-                        if getattr(obj, 'special', False):                             # check if command uses method
-                            if obj.special.get('method'):
-                                if self.method == obj.special.get('method'):
-                                    command_dct[name] = obj
-                                    print('imported command: {}'.format(name))
-                                else:
-                                    print('NOT imported command: {}'.format(name))
-                            else:
+                        # look for method special
+                        if obj.special.get("method"):
+                            if self.method == obj.special.get("method"):
                                 command_dct[name] = obj
-                                print('imported command: {}'.format(name))
+                                print("imported command: {}".format(name))
+                            else:
+                                print("NOT imported command: {}".format(name))
                         else:
                             command_dct[name] = obj
-                            print('imported command: {}'.format(name))
+                            print("imported command: {}".format(name))
 
-        print('-------------------------------\nimported {} commands\n'.format(len(command_dct)))
+        print("-------------------------------\nimported {} commands\n".format(len(command_dct)))
         return command_dct
 
     def get_command_calls(self):
         command_calls = []
 
-        for command_str, command in self.commands.items():
+        for command in self.commands.values():
             command_calls.append(command.call)
 
         return command_calls
 
     def set_master_attributes(self):
-        """ Set Master class with basic attributes.
+        """ Set basic attributes in every command."""
 
-            Notes: TimeIt is a special command that is a copy of Messenger and needs all Commander attributes. Word2vec
-                   commands take Similarity class as another attribute (is not needed elsewhere). If you need Similarity
-                   class in your command you can set it from here.
-        """
         for command_str, command in self.commands.items():
 
-            if command_str == 'TimeIt':
-                command.sim = self.sim
-                command.calls = self.calls
-
-            elif getattr(command, 'special', False):
-                if 'w2v' == command.special.get('method'):
-                    command.sim = self.sim
-
-            else:
-                pass
-
-            command.commands = self.commands
             command.client = self.client
+            command.commands = self.commands
+            command.sim = self.sim
 
 
 class Messenger(Commander):
-    """ Class for interacting with commands.
+    """ Class for message -> command mapping. """
 
-        Returns: chosen command if cosine similarity above 0.5 else returns None
-    """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     def initializer(self):
-        """ Runs once on ready and initializes some commands."""
+        """ Runs once on ready and initializes command that have initialize method.
+
+        Returns
+        -------
+        List of commands to be initialized (ran once on bot start).
+        """
         initialized = []
 
         for command_str, command in self.commands.items():
-            if getattr(command, 'initialize', False):
+            if getattr(command, "initialize", False):
                 initialized.append(command)
 
         return initialized
 
-    def message_to_command(self, message: str) -> object:
+    def message_to_command(self, message):
+        """ Uses message_x_command_sim from assistant4discord/nlp_tasks/ to get the command that matches the most with user input.
 
+        Parameters
+        ----------
+        message: obj
+            https://discordpy.readthedocs.io/en/latest/api.html#message
+
+        Returns
+        -------
+        Chosen command or None if cosine similarity on all command calls below some value.
+        """
         sim_arr = self.sim.message_x_command_sim(message.content)
         picked_command_str = self.calls[int(np.argmax(sim_arr))]
 
-        print('message:', message.content)
+        print("message:", message.content)
         for i in sim_arr.argsort()[-3:][::-1]:
-            print('{}: {:.3f}'.format(self.calls[i], sim_arr[i]))
+            print("{}: {:.3f}".format(self.calls[i], sim_arr[i]))
 
         if np.max(sim_arr) < 0.5:
             return None

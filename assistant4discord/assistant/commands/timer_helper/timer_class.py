@@ -5,14 +5,21 @@ import numpy as np
 
 
 class Timer(Master):
-    """ self.time_to_timer, self.every, future_command_str: asyncio.sleep time, if loop, string to compare to commands
-        self.future_command: command to run in the future
-        self.set_for: d m y format of set timer
-        self.task: coro task saver, used in timer.py
-    """
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, **kwargs):
+        """
+        Other Parameters
+        ----------------
+        calls: list of str
+            Get command calls from all commands.
+        time_to_timer: int
+        every: bool
+        future_command_str: str
+            User message with command and time in it.
+        created_on: int
+            When was this initialized
+        """
+        super().__init__(**kwargs)
+        self.calls = self.get_command_calls()
         (self.time_to_timer, self.every, future_command_str) = self.message_filter()
         self.future_command = self.message_to_command(future_command_str)
         self.created_on = time.time()
@@ -20,10 +27,10 @@ class Timer(Master):
     def message_to_command(self, message):
         """ Same as Messenger. """
 
-        sim_arr = self.sim.message_x_command_sim(' '.join(message))
+        sim_arr = self.sim.message_x_command_sim(" ".join(message))
         picked_command_str = self.calls[int(np.argmax(sim_arr))]
 
-        if np.max(sim_arr) < 0.3:
+        if np.max(sim_arr) < 0.5:
             return None
 
         for command in self.commands.values():
@@ -31,15 +38,27 @@ class Timer(Master):
                 command.message = self.message
                 return command
 
-    def message_filter(self):
-        """ Use sent_time_finder to get time info. Find time in sent and remove it. Assumes that command is after or before 'time'.
+    def get_command_calls(self):
+        command_calls = []
 
-            Example: 'time ping 10 sec' -> 'time ping' -> 'ping'
+        for command_str, command in self.commands.items():
+            command_calls.append(command.call)
+
+        return command_calls
+
+    def message_filter(self):
+        """ Get time and command from messsage.
+
+        Use sent_time_finder to get time info. Find time in sent and remove it. Assumes that command is after or before 'time'.
+
+        Examples
+        --------
+        'time ping 10 sec' -> 'time ping' -> 'ping'
         """
 
         time_to_command, sent_no_time, every = sent_time_finder(self.message.content, filter_times=True)
 
-        time_i = sent_no_time.index('time')
+        time_i = sent_no_time.index("time")
 
         if time_i == 0:
             future_command = sent_no_time[time_i:]
@@ -53,6 +72,12 @@ class Timer(Master):
     def __str__(self):
         """ %d.%m.%Y %H:%M:%S representation."""
         if self.every:
-            return 'command: {}\nnext run set for {}'.format(self.message.content, timestamp_to_utc(self.time_to_timer + self.created_on))
+            return "command: {}\nnext run set for {}".format(
+                self.message.content,
+                timestamp_to_utc(self.time_to_timer + self.created_on),
+            )
         else:
-            return 'command: {}\nset for {}'.format(self.message.content, timestamp_to_utc(self.time_to_timer + self.created_on))
+            return "command: {}\nset for {}".format(
+                self.message.content,
+                timestamp_to_utc(self.time_to_timer + self.created_on),
+            )

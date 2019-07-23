@@ -5,8 +5,10 @@ from assistant4discord.nlp_tasks.find_times import sent_time_finder, timestamp_t
 
 class Reminder(Master):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, **kwargs):
+        """ See in tui.py"""
+
+        super().__init__(**kwargs)
         self.run_on_init = True
         (self.time_to_message, self.every) = self.time_message()
         self.n = 0
@@ -24,7 +26,13 @@ class Reminder(Master):
     def get_message(self):
         """ Message to be set for reminder.
 
-        Returns: @author author's last message in chat
+        Loop over all messages (newest to oldest) and find author's second message (first is this command).
+        Set this message as reminder.
+
+        Returns
+        -------
+        str
+            @author <author's last message in chat>
         """
         c = 0
 
@@ -41,7 +49,9 @@ class Reminder(Master):
     def time_message(self):
         """ Parses message for time words.
 
-        Returns: seconds to message
+        Return
+        ------
+        (int, bool)
         """
         time_to_command, every = sent_time_finder(self.message.content)
 

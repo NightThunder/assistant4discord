@@ -2,9 +2,16 @@ import logging
 from pathlib import Path
 
 
-def setup_logger(name=__name__, log_name='new.log', level=logging.DEBUG, format='%(asctime)s: %(levelname)s: %(message)s'):
+def setup_logger(name=__name__, log_name="new.log", level=logging.DEBUG, format="%(asctime)s: %(levelname)s: %(message)s",):
+    """ Basic logger.
 
-    log_file = str(Path(__file__).parents[1]) + '/data/' + log_name
+    References
+    ----------
+    https://www.youtube.com/watch?v=-ARI4Cz-awo
+    https://www.youtube.com/watch?v=jxmzY9soFXg
+    """
+
+    log_file = str(Path(__file__).parents[1]) + "/data/" + log_name
 
     logger = logging.getLogger(name)
     logger.setLevel(level)

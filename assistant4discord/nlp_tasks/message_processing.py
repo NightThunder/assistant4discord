@@ -2,40 +2,45 @@ import re
 
 
 def remove_punctuation(sent):
-    text_nopunct = re.sub(r'[\\!"#$%&\'()*+,-./:;<=>?@[\]^_`{|}~’”“]+', ' ', sent)    # replaces punct
+    text_nopunct = re.sub(r'[\\!"#$%&\'()*+,-./:;<=>?@[\]^_`{|}~’”“]+', " ", sent)
     return text_nopunct
 
 
 def replace_numbers(sent):
-    text_nonum = re.sub(r'[0-9]+', 'stevilka', sent)    # all ints and floats in vector model were replaced by string 'stevilka'
+    # Note: all ints and floats in vector model were replaced by string 'stevilka'
+    text_nonum = re.sub(r"[0-9]+", "stevilka", sent)
     return text_nonum
 
 
 def word_by_word(sent):
-    tokens = re.split(r'\W+', sent[0])
-    tokens_noempty = [word.lower() for word in tokens if word != '']
+    tokens = re.split(r"\W+", sent[0])
+    tokens_noempty = [word.lower() for word in tokens if word != ""]
     return tokens_noempty
 
 
 def word2vec_input(message, replace_num=True):
-    """ Prepares message for word2vec.
+    """ Prepares message for word2vec. Sentence -> list of words in sentence.
 
-    Notes:
-        sent_tokenize():  splits into sentences,
-        a: replaces numbers with stevilka, removes punctuation, replaces /n,
-        b: lowers,
-        c: splits sentence into words
+    sent_tokenize():  splits into sentences (not used here)
+    a: replaces numbers with "stevilka", removes punctuation, replaces /n,
+    b: lowers,
+    c: splits sentence into words
 
-    Args:
-        message: message string
-        replace_num: True if you don't want to replace numbers
+    a = [replace_numbers(remove_punctuation(message)).replace('\n', ' ')]
+    b = [i.lower() for i in a]
+    c = word_by_word(b)
 
-    Returns: sentences word by word in list [[w1, w2, ...], [w1, w2, ...], ...]
-                                              sent1          sent2
+    Parameters
+    ----------
+    message: str
+        Discord message.
+    replace_num: bool, optional
+        If True replaces all ints and floats to string "stevilka".
 
-    How it works: a = [replace_numbers(remove_punctuation(message)).replace('\n', ' ')]
-                  b = [i.lower() for i in a]
-                  c = word_by_word(b)
+    Returns
+    -------
+    list of strings
+        [word_1, word_2, ..., word_n]
     """
     if replace_num:
         text_in_sent = (word_by_word([i.lower() for i in [replace_numbers(remove_punctuation(message)).replace('\n', ' ')]]))
