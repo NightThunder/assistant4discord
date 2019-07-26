@@ -89,7 +89,7 @@ class AddItem(Master):
             Default value.
         """
         super().__init__()
-        self.all_items = []
+        self.name = None
         self.use_asyncio = False
 
     @staticmethod
@@ -114,6 +114,17 @@ class AddItem(Master):
 
         return False
 
+    async def delete_finished(self, collection_name, _id):
+        await self.db[collection_name].delete_one({'_id': _id})
+
+    async def verify_doc(self, collection_name, _id):
+        found = await self.db[collection_name].find_one({'_id': _id})
+
+        if found:
+            return True
+        else:
+            return False
+
     async def coro_doit(self, item_obj, is_to_do_async):
         """ loop.create_task function.
 
@@ -124,27 +135,39 @@ class AddItem(Master):
         is_to_do_async: bool
             True if to_do a coroutine.
         """
+        make_db_entry = True
+
         while True:
 
-            await asyncio.sleep(item_obj.time_to_message)
+            if make_db_entry:
+                res = await Obj2Dict(item_obj).make_document(self.db)
+                doc_id = res.inserted_id
+                make_db_entry = False
 
-            # check if to_do is async def
-            if is_to_do_async:
-                discord_send = await item_obj.to_do()
-            else:
-                discord_send = item_obj.to_do()
-
-            # check if something in message
-            # just in case len() > 2000 (max message length for discord)
-            if len(discord_send) == 0:
-                pass
-            else:
-                for i in range(int(len(discord_send) / 2000) + 1):
-                    await self.message.channel.send(discord_send[i * 2000: (i + 1) * 2000])
-
-            # if every is false we are done else we loop
-            if item_obj.every is False:
+            elif not await self.verify_doc(self.name, doc_id):
                 return
+
+            else:
+                await asyncio.sleep(item_obj.time_to_message)
+
+                # check if to_do is async def
+                if is_to_do_async:
+                    discord_send = await item_obj.to_do()
+                else:
+                    discord_send = item_obj.to_do()
+
+                # check if something in message
+                # just in case len() > 2000 (max message length for discord)
+                if len(discord_send) == 0:
+                    pass
+                else:
+                    for i in range(int(len(discord_send) / 2000) + 1):
+                        await self.message.channel.send(discord_send[i * 2000: (i + 1) * 2000])
+
+                # if every is false we are done else we loop
+                if item_obj.every is False:
+                    await self.delete_finished(self.name, doc_id)
+                    return
 
     async def AddItem_doit(self, item_obj):
         """ Adds item to all_items. If use_asyncio create task and add it to event loop.
@@ -157,6 +180,8 @@ class AddItem(Master):
 
         # initialize helper object
         Item = item_obj(client=self.client, message=self.message)
+
+        self.name = Item.name
 
         # check if helper to_do method a coroutine
         is_to_do_async = inspect.iscoroutinefunction(item_obj.to_do)
@@ -174,12 +199,10 @@ class AddItem(Master):
         else:
             if self.use_asyncio:                                                             # check if helper uses asyncio
                 await self.message.channel.send(str(Item))
+                self.client.loop.create_task(self.coro_doit(Item, is_to_do_async))    # add coro_doit to event loop
 
-                task = self.client.loop.create_task(self.coro_doit(Item, is_to_do_async))    # add coro_doit to event loop
-                setattr(Item, "task", task)    # save task as attribute of Item
-                self.all_items.append(Item)    # save Item to list
             else:
-                self.all_items.append(Item)    # save Item to list if helper doesn't use asyncio
+                await Obj2Dict(Item).make_document(self.db)
                 await self.message.channel.send(str(Item))
 
 
@@ -191,6 +214,14 @@ class ShowItems(Master):
 
     def __init__(self):
         super().__init__()
+
+    async def get_all_docs(self, collection_name):
+        cursor = self.db[collection_name].find({})
+        return await cursor.to_list(length=None)
+
+    async def get_user_docs(self, collection_name, author):
+        cursor = self.db[collection_name].find({'username': author})
+        return await cursor.to_list(length=None)
 
     async def ShowItems_doit(self, item_obj_str, public=False):
         """
@@ -207,36 +238,33 @@ class ShowItems(Master):
         Uses self.commands to get to command object and get its all_items.
         """
 
-        # access global commands
-        add_item_ref = self.commands[item_obj_str]
-        all_items = add_item_ref.all_items
+        item_name = self.commands[item_obj_str].name
 
-        # check if command uses asyncio
-        if add_item_ref.use_asyncio:
-            for item in all_items.copy():
-                if item.task.done():
-                    all_items.remove(item)
+        if not item_name:
+            await self.message.channel.send("something went wrong")
+            return
 
         item_str = ""
         n_items = 0
 
         if public:
+            all_items = await self.get_all_docs(item_name)
+
             for i, item in enumerate(all_items):
-                item_str += "**{}** - {}\n".format(i, str(item))
-
-                if i != len(all_items) - 1:
-                    item_str += "--------------------\n"
-
+                item_str += "**{}** - {} by {}".format(i, item['text'], item['username'])
+                item_str += "\n-----------------------------------\n"
                 n_items += 1
+
         else:
-            for i, item in enumerate(all_items):
-                if item.message.author == self.message.author:
-                    item_str += "**{}** - {}\n".format(i, str(item))
+            user_items = await self.get_user_docs(item_name, str(self.message.author))
 
-                    if i != len(all_items) - 1:
-                        item_str += "--------------------\n"
-
+            for i, item in enumerate(user_items):
+                if str(self.message.author) == item['username']:
+                    item_str += "**{}** - {}".format(i, item['text'])
+                    item_str += "\n-----------------------------------\n"
                     n_items += 1
+
+        item_str = item_str[:-37]
 
         if n_items != 0:
             await self.message.channel.send(item_str)
@@ -256,15 +284,20 @@ class RemoveItem(Master):
         """
         super().__init__()
 
+    async def get_user_docs(self, collection_name, author):
+        cursor = self.db[collection_name].find({'username': author})
+        return await cursor.to_list(length=None)
+
+    async def delete_doc(self, collection_name, _id):
+        await self.db[collection_name].delete_one({'_id': _id})
+
     async def RemoveItem_doit(self, item_obj_str):
 
-        add_item_ref = self.commands[item_obj_str]
-        all_items = add_item_ref.all_items
+        item_name = self.commands[item_obj_str].name
 
-        if add_item_ref.use_asyncio:
-            for item in all_items.copy():
-                if item.task.done():
-                    all_items.remove(item)
+        if not item_name:
+            await self.message.channel.send("something went wrong")
+            return
 
         try:
             to_kill = int(word2vec_input(self.message.content, replace_num=False)[-1])
@@ -272,20 +305,43 @@ class RemoveItem(Master):
             await self.message.channel.send("something went wrong")
             return
 
-        n_items = 0
-        for i, item in enumerate(all_items):
-            if item.message.author == self.message.author and i == to_kill:
+        all_items = await self.get_user_docs(item_name, str(self.message.author))
 
-                if add_item_ref.use_asyncio:
-                    item.task.cancel()
-                else:
-                    all_items.pop(i)
-
-                break
-            else:
-                n_items += 1
-
-        if to_kill > n_items:
+        if to_kill > len(all_items) - 1:
             await self.message.channel.send("something went wrong")
         else:
+            id_to_delete = all_items[to_kill]['_id']
+            await self.delete_doc(item_name, id_to_delete)
             await self.message.channel.send("item {} removed!".format(to_kill))
+
+
+class Obj2Dict:
+
+    def __init__(self, obj):
+        dct = {}
+
+        master_attr = vars(Master())
+
+        for attr, value in vars(obj).items():
+            if attr in master_attr:
+                if attr == 'message':
+                    dct.update({'username': str(value.author),
+                                'channel id': int(value.channel.id),
+                                'message': str(value.content),
+                                'created at': str(value.created_at)})
+                else:
+                    pass
+            else:
+                if attr == 'name':
+                    dct.update({'name': value.lower()})
+                else:
+                    dct.update({attr: value})
+
+        dct.update({'text': str(obj)})
+
+        self.dct = dct
+
+    async def make_document(self, db):
+        collection_name = self.dct['name']
+        db[collection_name]
+        return await db[collection_name].insert_one(self.dct)
