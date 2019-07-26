@@ -22,8 +22,8 @@ class WebChecker(Master):
     https://faust.readthedocs.io/en/latest/_modules/aiohttp/client.html
     """
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     @staticmethod
     async def fetch(session, url):
@@ -66,7 +66,7 @@ class WebChecker(Master):
 
 class WebComp(WebChecker):
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         """
         Other Parameters
         ----------------
@@ -82,7 +82,8 @@ class WebComp(WebChecker):
             When was this initialized.
 
         """
-        super().__init__()
+        super().__init__(**kwargs)
+        self.name = 'website comparison'
         self.run_on_init = True
         (self.time_to_message, self.every) = self.time_message()
         self.n = 0
