@@ -179,7 +179,10 @@ class AddItem(Master):
         """
 
         # initialize helper object
-        Item = item_obj(client=self.client, message=self.message)
+        if '__module__' in vars(item_obj):
+            Item = item_obj(client=self.client, message=self.message)
+        else:
+            Item = item_obj
 
         self.name = Item.name
 
@@ -187,7 +190,7 @@ class AddItem(Master):
         is_to_do_async = inspect.iscoroutinefunction(item_obj.to_do)
 
         # run on initialization if True
-        if Item.run_on_init:
+        if getattr(Item, 'run_on_init', False):
             if is_to_do_async:
                 await Item.to_do()
             else:
@@ -195,12 +198,16 @@ class AddItem(Master):
 
         # check if all helper attributes not None
         if self.obj_error_check(Item):
-            await self.message.channel.send("something went wrong")
+            try:
+                await self.message.channel.send("something went wrong")
+            except AttributeError:
+                pass
         else:
             if self.use_asyncio:                                                             # check if helper uses asyncio
                 await self.message.channel.send(str(Item))
-                self.client.loop.create_task(self.coro_doit(Item, is_to_do_async))    # add coro_doit to event loop
-
+                task = self.client.loop.create_task(self.coro_doit(Item, is_to_do_async))    # add coro_doit to event loop
+                if not task:
+                    await self.message.channel.send("something went wrong")
             else:
                 await Obj2Dict(Item).make_document(self.db)
                 await self.message.channel.send(str(Item))
@@ -251,7 +258,11 @@ class ShowItems(Master):
             all_items = await self.get_all_docs(item_name)
 
             for i, item in enumerate(all_items):
-                item_str += "**{}** - {} by {}".format(i, item['text'], item['username'])
+                try:
+                    item_str += "**{}** - {} by {}".format(i, item['text'], item['username'])
+                except KeyError:
+                    item_str += "**{}** - {}".format(i, item['text'])
+
                 item_str += "\n-----------------------------------\n"
                 n_items += 1
 
@@ -343,5 +354,5 @@ class Obj2Dict:
 
     async def make_document(self, db):
         collection_name = self.dct['name']
-        db[collection_name]
-        return await db[collection_name].insert_one(self.dct)
+        collection = db[collection_name]
+        return await collection.insert_one(self.dct)
