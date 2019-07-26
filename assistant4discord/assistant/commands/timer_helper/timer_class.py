@@ -11,7 +11,7 @@ class Timer(Master):
         ----------------
         calls: list of str
             Get command calls from all commands.
-        time_to_timer: int
+        time_to_message: int
         every: bool
         future_command_str: str
             User message with command and time in it.
@@ -19,10 +19,15 @@ class Timer(Master):
             When was this initialized
         """
         super().__init__(**kwargs)
+        self.name = 'timers'
         self.calls = self.get_command_calls()
-        (self.time_to_timer, self.every, future_command_str) = self.message_filter()
-        self.future_command = self.message_to_command(future_command_str)
-        self.created_on = time.time()
+        (self.time_to_message, self.every, future_command_str) = self.message_filter()
+        # self.future_command = self.message_to_command(future_command_str)
+        self.future_command_call = self.message_to_command(future_command_str)
+        self.created_on = int(time.time())
+
+    def to_do(self):
+        pass
 
     def message_to_command(self, message):
         """ Same as Messenger. """
@@ -33,10 +38,12 @@ class Timer(Master):
         if np.max(sim_arr) < 0.5:
             return None
 
-        for command in self.commands.values():
-            if command.call == picked_command_str:
-                command.message = self.message
-                return command
+        return picked_command_str
+
+        # for command in self.commands.values():
+        #     if command.call == picked_command_str:
+        #         command.message = self.message
+        #         return command
 
     def get_command_calls(self):
         command_calls = []
@@ -74,10 +81,10 @@ class Timer(Master):
         if self.every:
             return "command: {}\nnext run set for {}".format(
                 self.message.content,
-                timestamp_to_utc(self.time_to_timer + self.created_on),
+                timestamp_to_utc(self.time_to_message + self.created_on),
             )
         else:
             return "command: {}\nset for {}".format(
                 self.message.content,
-                timestamp_to_utc(self.time_to_timer + self.created_on),
+                timestamp_to_utc(self.time_to_message + self.created_on),
             )

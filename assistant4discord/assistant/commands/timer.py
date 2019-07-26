@@ -1,6 +1,6 @@
 import asyncio
 from assistant4discord.assistant.commands.timer_helper.timer_class import Timer
-from assistant4discord.assistant.commands.text_user_interface.tui import AddItem, ShowItems, RemoveItem
+from assistant4discord.assistant.commands.text_user_interface.tui import AddItem, ShowItems, RemoveItem, Obj2Dict
 
 
 class TimeIt(AddItem):
@@ -20,30 +20,46 @@ class TimeIt(AddItem):
         # bool, optional: set to True if helper object needs asyncio.sleep() .
         self.use_asyncio = True
 
-    async def coro_doit(self, timer, is_to_do_async=None):
+    async def coro_doit(self, item_obj, is_to_do_async):
+        """ loop.create_task function.
 
-        await self.message.channel.send(str(timer))
+        Parameters
+        ----------
+        item_obj: obj
+            Command object
+        is_to_do_async: bool
+            True if to_do a coroutine.
+        """
+        make_db_entry = True
 
         while True:
-            await asyncio.sleep(timer.time_to_timer)
-            await timer.future_command.doit()
 
-            if timer.every is False:
+            if not item_obj.future_command_call:
+                return None
+
+            if make_db_entry:
+                res = await Obj2Dict(item_obj).make_document(self.db)
+                doc_id = res.inserted_id
+                make_db_entry = False
+
+            elif not await self.verify_doc(self.name, doc_id):
                 return
 
-    async def AddItem_doit(self, item_obj=None):
+            else:
+                for command_obj in self.commands.values():
+                    if command_obj.call == item_obj.future_command_call:
+                        command_obj.message = self.message
+                        command = command_obj
 
-        timer = Timer(message=self.message, similarity=self.sim, commands=self.commands)
+                await asyncio.sleep(item_obj.time_to_message)
+                await command.doit()
 
-        if timer.time_to_timer and timer.future_command:
-            task = self.client.loop.create_task(self.coro_doit(timer))
-            setattr(timer, "task", task)
-            self.all_items.append(timer)
-        else:
-            await self.message.channel.send("something went wrong")
+                if item_obj.every is False:
+                    await self.delete_finished(self.name, doc_id)
+                    return
 
     async def doit(self):
-        await self.AddItem_doit()
+        await self.AddItem_doit(Timer(message=self.message, similarity=self.sim, commands=self.commands))
 
 
 class ShowTimers(ShowItems):
