@@ -7,9 +7,10 @@ class Note(Master):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.name = 'notes'
         self.run_on_init = True
         self.noted = ""
-        self.note_time = timestamp_to_utc(time.time())
+        self.created_on = int(time.time())
 
     def to_do(self):
         """ Sets user's previous message as note. """
@@ -25,4 +26,4 @@ class Note(Master):
         return None
 
     def __str__(self):
-        return "noted on {}\nnote: {}".format(self.note_time, self.noted)
+        return "noted on {}\nnote: {}".format(timestamp_to_utc(self.created_on), self.noted)

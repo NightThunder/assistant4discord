@@ -9,7 +9,7 @@ import numpy as np
 class Commander:
     """ Initialize message -> command method. Import commands. Set command attributes. """
 
-    def __init__(self, method, client, model_name):
+    def __init__(self, method, db, client, model_name):
         """
         Parameters
         ----------
@@ -36,6 +36,7 @@ class Commander:
             If no or wrong method name in __main__ .
         """
         self.method = method
+        self.db = db
         self.client = client
         self.commands = self.get_commands()
         self.calls = self.get_command_calls()
@@ -108,6 +109,7 @@ class Commander:
 
         for command_str, command in self.commands.items():
 
+            command.db = self.db
             command.client = self.client
             command.commands = self.commands
             command.sim = self.sim

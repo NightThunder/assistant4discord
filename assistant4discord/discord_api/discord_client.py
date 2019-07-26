@@ -2,6 +2,7 @@ import discord
 import logging
 from assistant4discord.data.logger import setup_logger
 from assistant4discord.assistant.messenger import Messenger
+import motor.motor_asyncio
 
 
 logging.basicConfig(level=logging.INFO)
@@ -86,11 +87,14 @@ class MyClient(discord.Client):
 
 def run(method, my_token, log_chat, model_name=None):
 
+    mongodb_client = motor.motor_asyncio.AsyncIOMotorClient('localhost', 27017)
+    db = mongodb_client.assistant_database
+
     client = MyClient()
 
     if log_chat:
         client.log_chat = log_chat
         client.chat_logger = setup_logger(log_name="chat.log")
 
-    client.messenger = Messenger(method=method, client=client, model_name=model_name)
+    client.messenger = Messenger(method=method, db=db, client=client, model_name=model_name)
     client.run(my_token)
