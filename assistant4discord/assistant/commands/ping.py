@@ -1,4 +1,4 @@
-from assistant4discord.assistant.commands.master.master_class import Master
+from .master.master_class import Master
 
 
 class Ping(Master):

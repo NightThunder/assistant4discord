@@ -1,6 +1,7 @@
 import asyncio
-from assistant4discord.assistant.commands.timer_helper.timer_class import Timer
-from assistant4discord.assistant.commands.text_user_interface.tui import AddItem, ShowItems, RemoveItem, Obj2Dict
+from .extensions.timer_class import Timer
+from .extensions.mongodb_helpers.tui import ShowItems, RemoveItem
+from .extensions.mongodb_helpers.mongodb_adder import AddItem, Obj2Dict
 
 
 class TimeIt(AddItem):

@@ -1,5 +1,6 @@
-from assistant4discord.assistant.commands.website_comparison_helper.web_comp_class import WebComp
-from assistant4discord.assistant.commands.text_user_interface.tui import AddItem, ShowItems, RemoveItem
+from .extensions.web_comp_class import WebComp
+from .extensions.mongodb_helpers.tui import ShowItems, RemoveItem
+from .extensions.mongodb_helpers.mongodb_adder import AddItem
 
 
 class WebsiteComparison(AddItem):

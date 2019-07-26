@@ -1,8 +1,9 @@
-from assistant4discord.assistant.commands.master.master_class import Master
-from assistant4discord.assistant.commands.notes_helper.note_class import Note
 import os
 import discord
-from assistant4discord.assistant.commands.text_user_interface.tui import AddItem, ShowItems, RemoveItem
+from .master.master_class import Master
+from .extensions.note_class import Note
+from .extensions.mongodb_helpers.tui import ShowItems, RemoveItem
+from .extensions.mongodb_helpers.mongodb_adder import AddItem
 
 
 class NoteIt(AddItem):

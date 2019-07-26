@@ -1,11 +1,11 @@
-from assistant4discord.assistant.commands.master.master_class import Master
-from assistant4discord.nlp_tasks.find_times import sent_time_finder, timestamp_to_utc
 import aiohttp
 import asyncio
 import time
 from html2text import html2text
 from difflib import Differ
 from aiohttp.client_exceptions import InvalidURL
+from assistant4discord.assistant.commands.master.master_class import Master
+from assistant4discord.nlp_tasks.find_times import sent_time_finder, timestamp_to_utc
 
 
 class WebChecker(Master):

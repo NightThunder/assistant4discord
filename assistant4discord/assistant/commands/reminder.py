@@ -1,5 +1,6 @@
-from assistant4discord.assistant.commands.reminder_helper.reminder_class import Reminder
-from assistant4discord.assistant.commands.text_user_interface.tui import AddItem, ShowItems, RemoveItem
+from .extensions.reminder_class import Reminder
+from .extensions.mongodb_helpers.tui import ShowItems, RemoveItem
+from .extensions.mongodb_helpers.mongodb_adder import AddItem
 
 
 class RemindMe(AddItem):
