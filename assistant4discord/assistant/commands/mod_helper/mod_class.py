@@ -5,10 +5,12 @@ class Mod(Master):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.name = 'mods'
         self.run_on_init = True
-        self.to_mod = None
+        self.mod = None
+        self.n = 0
 
-    def to_do(self):
+    async def to_do(self):
         """ Set a moderator.
 
         Checks all users that bot can see for a match.
@@ -18,12 +20,26 @@ class Mod(Master):
         str
             Name of new mod or None user not found.
         """
-        to_mod = self.get_message()
+        if self.n == 0:
+            app_info = await self.commands["AppInfo"].get_app_info()
 
-        for user in self.client.users:
-            if str(user) == to_mod:
-                self.to_mod = to_mod
-                return self.to_mod
+            collection = self.db[self.name]
+            owner_in_db = await collection.find_one({'mod': str(app_info.owner)})
+
+            if owner_in_db:
+                pass
+            else:
+                self.mod = str(app_info.owner)
+
+            self.n += 1
+
+        else:
+            to_mod = self.get_message()
+
+            for user in self.client.users:
+                if str(user) == to_mod:
+                    self.mod = to_mod
+                    return self.mod
 
     def get_message(self):
         c = 0
@@ -39,4 +55,4 @@ class Mod(Master):
         return None
 
     def __str__(self):
-        return 'bot mod: {}'.format(self.to_mod)
+        return 'bot mod: {}'.format(self.mod)

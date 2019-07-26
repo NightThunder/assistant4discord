@@ -12,17 +12,13 @@ class Mods(AddItem):
 
     async def initialize(self):
         """ Initializes owner on start."""
-
-        app_info = await self.commands["AppInfo"].get_app_info()
-        self.all_items.append(app_info.owner)
+        await self.AddItem_doit(Mod(commands=self.commands, db=self.db))
 
     async def doit(self):
         if self.check_rights():
             await self.AddItem_doit(Mod)
         else:
-            await self.message.channel.send(
-                "need to be {}".format(self.special["permission"])
-            )
+            await self.message.channel.send("need to be {}".format(self.special["permission"]))
 
 
 class ShowMods(ShowItems):
@@ -48,6 +44,4 @@ class RemoveMod(RemoveItem):
         if self.check_rights():
             await self.RemoveItem_doit("Mods")
         else:
-            await self.message.channel.send(
-                "need to be {}".format(self.special["permission"])
-            )
+            await self.message.channel.send("need to be {}".format(self.special["permission"]))
