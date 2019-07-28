@@ -2,6 +2,7 @@ import discord
 import logging
 from assistant4discord.data.logger import setup_logger
 from assistant4discord.assistant.messenger import Messenger
+from assistant4discord.assistant.mongodb_reinitialize import Reinitializer
 import motor.motor_asyncio
 
 
@@ -9,7 +10,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 class MyClient(discord.Client):
-    def __init__(self, messenger=None, log_chat=False, chat_logger=None, *args, **kwargs):
+    def __init__(self, reinitializer=None, messenger=None, log_chat=False, chat_logger=None, *args, **kwargs):
         """
         Parameters
         ----------
@@ -29,11 +30,14 @@ class MyClient(discord.Client):
         """
         super().__init__(*args, **kwargs)
         self.log_chat = log_chat
+        self.reinitializer = reinitializer
         self.messenger = messenger
         self.chat_logger = chat_logger
 
     async def on_ready(self):
         """ Initializes some commands. Displays bot name and id on login."""
+
+        await self.reinitializer.reinitialize()
 
         # list of obj: commands that have initialize method
         initialized = self.messenger.initializer()
@@ -96,5 +100,6 @@ def run(method, my_token, log_chat, model_name=None):
         client.log_chat = log_chat
         client.chat_logger = setup_logger(log_name="chat.log")
 
+    client.reinitializer = Reinitializer(db=db, client=client)
     client.messenger = Messenger(method=method, db=db, client=client, model_name=model_name)
     client.run(my_token)
