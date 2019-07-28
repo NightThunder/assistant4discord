@@ -1,7 +1,8 @@
 import asyncio
+import time
 from .extensions.timer_class import Timer
-from .extensions.mongodb_helpers.tui import ShowItems, RemoveItem
-from .extensions.mongodb_helpers.mongodb_adder import AddItem, Obj2Dict
+from .extensions.helpers.tui import ShowItems, RemoveItem
+from .extensions.helpers.mongodb_adder import AddItem, Obj2Dict
 
 
 class TimeIt(AddItem):
@@ -18,18 +19,13 @@ class TimeIt(AddItem):
         )
         self.call = "time stevilka"
 
-        # bool, optional: set to True if helper object needs asyncio.sleep() .
-        self.use_asyncio = True
-
-    async def coro_doit(self, item_obj, is_to_do_async):
+    async def coro_doit(self, item_obj):
         """ loop.create_task function.
 
         Parameters
         ----------
         item_obj: obj
             Command object
-        is_to_do_async: bool
-            True if to_do a coroutine.
         """
         make_db_entry = True
 
@@ -39,7 +35,7 @@ class TimeIt(AddItem):
                 return None
 
             if make_db_entry:
-                res = await Obj2Dict(item_obj).make_document(self.db)
+                res = await Obj2Dict(item_obj).make_doc(self.db)
                 doc_id = res.inserted_id
                 make_db_entry = False
 
@@ -58,6 +54,9 @@ class TimeIt(AddItem):
                 if item_obj.every is False:
                     await self.delete_finished(self.name, doc_id)
                     return
+                else:
+                    item_obj.created_on = int(time.time())
+                    await Obj2Dict(item_obj).update_doc(self.db, doc_id)
 
     async def doit(self):
         await self.AddItem_doit(Timer(message=self.message, similarity=self.sim, commands=self.commands))

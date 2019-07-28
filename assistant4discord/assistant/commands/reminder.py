@@ -1,6 +1,6 @@
 from .extensions.reminder_class import Reminder
-from .extensions.mongodb_helpers.tui import ShowItems, RemoveItem
-from .extensions.mongodb_helpers.mongodb_adder import AddItem
+from .extensions.helpers.tui import ShowItems, RemoveItem
+from .extensions.helpers.mongodb_adder import AddItem
 
 
 class RemindMe(AddItem):
@@ -14,9 +14,6 @@ class RemindMe(AddItem):
             "Valid times: see timer help\n```"
         )
         self.call = "reminder stevilka"
-
-        # bool, optional: set to True if helper object needs asyncio.sleep() .
-        self.use_asyncio = True
 
     async def doit(self):
         await self.AddItem_doit(Reminder)

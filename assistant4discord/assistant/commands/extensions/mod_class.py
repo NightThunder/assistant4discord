@@ -10,7 +10,7 @@ class Mod(Master):
         self.mod = None
         self.n = 0
 
-    async def to_do(self):
+    async def todo(self):
         """ Set a moderator.
 
         Checks all users that bot can see for a match.

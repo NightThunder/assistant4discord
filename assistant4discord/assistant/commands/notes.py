@@ -2,8 +2,8 @@ import os
 import discord
 from .master.master_class import Master
 from .extensions.note_class import Note
-from .extensions.mongodb_helpers.tui import ShowItems, RemoveItem
-from .extensions.mongodb_helpers.mongodb_adder import AddItem
+from .extensions.helpers.tui import ShowItems, RemoveItem
+from .extensions.helpers.mongodb_adder import AddItem
 
 
 class NoteIt(AddItem):
@@ -46,23 +46,27 @@ class NotesTxt(Master):
         self.help = "```***NotesTxt help***\n" "Sends user's notes in .txt```"
         self.call = "notes to text"
 
+    async def get_user_docs(self, author):
+        cursor = self.db['notes'].find({'username': author})
+        return await cursor.to_list(length=None)
+
     async def doit(self):
 
-        all_notes = self.commands["NoteIt"].all_items
-        user_notes = []
+        user_notes = await self.get_user_docs(str(self.message.author))
 
-        for note in all_notes:
-            if note.message.author == self.message.author:
-                user_notes.append(str(note) + "\n--------------------\n")
+        notes_file = ''
+        for note in user_notes:
+            notes_file += note['text'] + "\n-----------------------------------\n"
 
-        user_notes[-1] = user_notes[-1][:-22]
+        notes_file = notes_file[:-37]
 
-        if not user_notes:
+        if not notes_file:
+            await self.message.channel.send("no notes")
             return
 
         file_name = "{}_notes.txt".format(str(self.message.author)[:-4])
         with open(file_name, "w") as file:
-            file.write("".join(user_notes))
+            file.write(notes_file)
 
         await self.message.channel.send(file=discord.File(file_name))
 

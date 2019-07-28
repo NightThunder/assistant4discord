@@ -7,12 +7,12 @@ class Note(Master):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.name = 'notes'
+        self.name = "notes"
         self.run_on_init = True
         self.noted = ""
         self.created_on = int(time.time())
 
-    def to_do(self):
+    def todo(self):
         """ Sets user's previous message as note. """
         c = 0
         for msg in reversed(self.client.cached_messages):

@@ -1,6 +1,6 @@
 from .extensions.web_comp_class import WebComp
-from .extensions.mongodb_helpers.tui import ShowItems, RemoveItem
-from .extensions.mongodb_helpers.mongodb_adder import AddItem
+from .extensions.helpers.tui import ShowItems, RemoveItem
+from .extensions.helpers.mongodb_adder import AddItem
 
 
 class WebsiteComparison(AddItem):
@@ -20,11 +20,8 @@ class WebsiteComparison(AddItem):
         )
         self.call = "check stevilka"
 
-        # bool, optional: set to True if helper object needs asyncio.sleep() .
-        self.use_asyncio = True
-
     async def doit(self):
-        await self.AddItem_doit(WebComp)
+        await self.AddItem_doit(WebComp(client=self.client, message=self.message, db=self.db))
 
 
 class ShowWebsites(ShowItems):

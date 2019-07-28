@@ -1,6 +1,6 @@
 from .extensions.mod_class import Mod
-from .extensions.mongodb_helpers.tui import ShowItems, RemoveItem
-from .extensions.mongodb_helpers.mongodb_adder import AddItem
+from .extensions.helpers.tui import ShowItems, RemoveItem
+from .extensions.helpers.mongodb_adder import AddItem
 
 
 class Mods(AddItem):

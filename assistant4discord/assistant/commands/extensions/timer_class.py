@@ -20,14 +20,18 @@ class Timer(Master):
         """
         super().__init__(**kwargs)
         self.name = 'timers'
-        self.calls = self.get_command_calls()
-        (self.time_to_message, self.every, future_command_str) = self.message_filter()
-        # self.future_command = self.message_to_command(future_command_str)
-        self.future_command_call = self.message_to_command(future_command_str)
+        self.run_on_init = True
+        self.use_asyncio = True
+        self.calls = None
+        self.time_to_message = None
+        self.every = None
+        self.future_command_call = None
         self.created_on = int(time.time())
 
-    def to_do(self):
-        pass
+    def todo(self):
+        self.calls = self.get_command_calls()
+        (self.time_to_message, self.every, future_command_str) = self.message_filter()
+        self.future_command_call = self.message_to_command(future_command_str)
 
     def message_to_command(self, message):
         """ Same as Messenger. """

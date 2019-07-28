@@ -11,17 +11,22 @@ class Reminder(Master):
         super().__init__(**kwargs)
         self.name = 'reminders'
         self.run_on_init = True
-        (self.time_to_message, self.every) = self.time_message()
+        self.use_asyncio = True
+        self.time_to_message = None
+        self.every = None
         self.n = 0
         self.to_remind = ''
         self.created_on = int(time.time())
 
-    def to_do(self):
+    def todo(self):
         if self.n == 0:
+            (self.time_to_message, self.every) = self.time_message()
+
             self.to_remind = self.get_message()
             self.n += 1
             return self.to_remind
         else:
+            self.created_on = int(time.time())
             return self.to_remind
 
     def get_message(self):
