@@ -167,7 +167,10 @@ class AddItem(Master):
                         await self.message.channel.send("something went wrong")
                 else:
                     await Obj2Dict(Item).make_doc(self.db)
-                    await self.message.channel.send(str(Item))
+                    try:
+                        await self.message.channel.send(str(Item))
+                    except AttributeError:
+                        pass
 
 
 class Obj2Dict:
@@ -179,7 +182,8 @@ class Obj2Dict:
 
         for attr, value in obj.__dict__.items():
             if attr in master_attr:
-                if not getattr(obj, '_id', False):
+                # if not getattr(obj, '_id', False):
+                if obj.message:
                     if attr == 'message':
                         dct.update({'username': str(value.author),
                                     'channel id': int(value.channel.id),

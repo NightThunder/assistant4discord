@@ -44,11 +44,6 @@ class Timer(Master):
 
         return picked_command_str
 
-        # for command in self.commands.values():
-        #     if command.call == picked_command_str:
-        #         command.message = self.message
-        #         return command
-
     def get_command_calls(self):
         command_calls = []
 
