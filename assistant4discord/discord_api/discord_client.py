@@ -89,10 +89,10 @@ class MyClient(discord.Client):
                 await message.channel.send("Error: not implemented")
 
 
-def run(method, my_token, log_chat, model_name=None):
+def run(method, discord_token, mongodb_token, log_chat, model_name=None):
 
-    mongodb_client = motor.motor_asyncio.AsyncIOMotorClient('localhost', 27017)
-    db = mongodb_client.assistant_database
+    mongodb_client = motor.motor_asyncio.AsyncIOMotorClient(mongodb_token)
+    db = mongodb_client['assistant4discord']
 
     client = MyClient()
 
@@ -102,4 +102,4 @@ def run(method, my_token, log_chat, model_name=None):
 
     client.reinitializer = Reinitializer(db=db, client=client)
     client.messenger = Messenger(method=method, db=db, client=client, model_name=model_name)
-    client.run(my_token)
+    client.run(discord_token)
