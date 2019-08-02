@@ -9,6 +9,7 @@ class Word2WordSim(Master):
         self.help = (
             "```***Word2wordSim help***\n"
             "Return cosine similarity between last two words in message.\n"
+            "Call: similarity\n"
             "Example: similarity <word1>, <word2>\n"
             'Note: only works with keyword "similarity".```'
         )
@@ -34,6 +35,7 @@ class MostSimilarWords(Master):
         self.help = (
             "```***MostSimilarWords help***\n"
             "Return 50 most similar words to last word in message.\n"
+            "Call: most similar\n"
             "Example: similar <word>\n"
             'Note: only works with keyword "similar".```'
         )
@@ -63,6 +65,7 @@ class WordNum(Master):
         self.help = (
             "```***WordNum help***\n"
             "How many times does a word appear in vector model.\n"
+            "Call: number"
             "Example: number <word>\n"
             "Note: all words 10+ as set by model. Numbers replaced by stevilka.```"
         )

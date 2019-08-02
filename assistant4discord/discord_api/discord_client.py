@@ -14,6 +14,8 @@ class MyClient(discord.Client):
         """
         Parameters
         ----------
+        reinitializer: obj
+            Loads commands from mongodb.
         messenger: obj
             Imports commands when initialized. Used for message -> command mapping.
         log_chat: bool, optional
@@ -35,11 +37,10 @@ class MyClient(discord.Client):
         self.chat_logger = chat_logger
 
     async def on_ready(self):
-        """ Initializes some commands. Displays bot name and id on login."""
+        """ Reinitializes commands from mongodb. Initializes commands with initialize method. Displays bot name and id on login."""
 
         await self.reinitializer.reinitialize()
 
-        # list of obj: commands that have initialize method
         initialized = self.messenger.initializer()
 
         for command in initialized:
@@ -71,14 +72,6 @@ class MyClient(discord.Client):
         if message.author == self.user:
             return
 
-        if isinstance(message.channel, discord.DMChannel):
-            messenger = self.messenger.message_to_command(message)
-
-            if messenger:
-                await messenger.doit()
-            else:
-                pass
-
         if message.content.startswith("<@{}>".format(self.user.id)):
             message.content = message.content[22:]
             messenger = self.messenger.message_to_command(message)
@@ -88,11 +81,24 @@ class MyClient(discord.Client):
             else:
                 await message.channel.send("Error: not implemented")
 
+        elif isinstance(message.channel, discord.DMChannel):
+            messenger = self.messenger.message_to_command(message)
+
+            if messenger:
+                await messenger.doit()
+            else:
+                # do nothing if command not detected
+                pass
+
+        else:
+            # is not private message and does not start with @assistant
+            pass
+
 
 def run(method, discord_token, mongodb_token, log_chat, model_name=None):
 
     mongodb_client = motor.motor_asyncio.AsyncIOMotorClient(mongodb_token)
-    db = mongodb_client['assistant4discord']
+    db = mongodb_client["assistant4discord"]
 
     client = MyClient()
 

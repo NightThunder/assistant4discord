@@ -10,8 +10,10 @@ class RemindMe(AddItem):
         self.help = (
             "```***RemindMe help***\n"
             "Set user's previous message as reminder text.\n"
-            "Use: reminder <number1> <time1> <number2> <time2> ...\n"
-            "Valid times: see timer help\n```"
+            "Call: reminder\n"
+            "Example: reminder <number> <time word>\n"
+            "Valid times: second, minute, hour, day, week, name of days, time in format at h:m:s dates in format on d/m/y.\n"
+            "Warning: at and on MUST be used with times and dates.\n```"
         )
         self.call = "reminder stevilka"
 
@@ -26,7 +28,7 @@ class ShowReminders(ShowItems):
         self.help = (
             "```***ShowReminders help***\n"
             "Display user's active reminders.\n"
-            "Example: see reminder | show reminder | get reminder etc.```"
+            "Call: show reminders\n```"
         )
         self.call = "show reminders"
 
@@ -41,6 +43,7 @@ class RemoveReminder(RemoveItem):
         self.help = (
             "```***RemoveReminder help***\n"
             "Cancels user's active reminder.\n"
+            "Call: remove reminder <number>\n"
             "Example: cancel reminder <reminder's number shown in ShowReminders>```"
         )
         self.call = "remove reminder stevilka"

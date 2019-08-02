@@ -18,7 +18,6 @@ class Help(Master):
         Command not found!
             If command of that name was noit found
         """
-
         message = self.message.content
 
         if len(word2vec_input(message)) > 1:

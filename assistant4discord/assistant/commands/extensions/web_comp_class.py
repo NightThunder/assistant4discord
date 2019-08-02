@@ -50,7 +50,7 @@ class WebComp(WebChecker):
             (self.time_to_message, self.every) = self.time_message()
 
             ######### blocking #########
-            if self.every and self.time_to_message > 180 and await self.num_of_entries(str(self.message.author)) < 10:
+            if self.every and self.time_to_message > 1 and await self.num_of_entries(str(self.message.author)) < 10:
                 pass
             else:
                 return None

@@ -155,7 +155,7 @@ class Messenger(Commander):
         for i in sim_arr.argsort()[-3:][::-1]:
             print("{}: {:.3f}".format(self.calls[i], sim_arr[i]))
 
-        if np.max(sim_arr) < 0.5:
+        if np.max(sim_arr) < 0.25:
             return None
 
         for command in self.commands.values():

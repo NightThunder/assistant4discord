@@ -2,11 +2,12 @@ from .master.master_class import Master
 
 
 class AppInfo(Master):
-
     def __init__(self):
         super().__init__()
         self.help = (
-            "```***Info help***\n" "Display basic information about this bot.```"
+            "```***Info help***\n" 
+            "Display basic information about this bot.\n"
+            "Call: info```"
         )
         self.call = "info"
 
@@ -18,7 +19,8 @@ class AppInfo(Master):
         app_info = await self.get_app_info()
 
         info_str = (
-            "name: <@{}>\nowner: {}\ndescription: {}\npublic bot: {}\n-------------------------------\ntype "
-            "help for command info".format(app_info.id, app_info.owner, app_info.description, app_info.bot_public))
+            "name: <@{}>\nowner: {}\ndescription: {}\npublic bot: {}\ngithub: https://github.com/NightThunder/assistant4discord"
+            "\n-------------------------------\n"
+            "type help for commands info".format(app_info.id, app_info.owner, app_info.description, app_info.bot_public))
 
         await self.message.channel.send("{}".format(info_str))

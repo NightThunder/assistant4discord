@@ -4,26 +4,29 @@ from assistant4discord.assistant.commands.master.master_class import Master
 
 
 class AddItem(Master):
-    """ Command memory.
+    """ Persistent storage.
 
-    Inherit this class in your command if you need to save an object that represents a command.
+    Inherit this class in your command if you need to save an object that represents a command to a database.
 
     Types of commands:
         (i) normal command (static)
-            Doesn't use any asyncio. AddItem saves it to a list. Remains in list until owner removes it.
+            Doesn't use any asyncio. AddItem saves it to mongodb. Remains in database until owner removes it.
         (ii) async command
             use_asyncio = True
-            Uses asyncio, aiohttp, ... . AddItem saves it to a list and initializes a timer. Removed when timer is up.
-            Can also be removed by user.
+            Uses asyncio, aiohttp, ...
+            AddItem saves it to mongodb and initializes a timer. Removed when timer is up. Can also be removed by user.
     """
+
     def __init__(self):
         """
         Other Parameters
         ----------------
-        all_items: list of obj
-            List of command objects.
-        use_asyncio: bool
-            Default value.
+        name: str
+            Name of command object.
+        is_todo_async: bool or None
+            True if method async.
+        is_re_obj: bool or None
+            True if object initialized form database.
         """
         super().__init__()
         self.name = None
@@ -31,22 +34,22 @@ class AddItem(Master):
         self.is_re_obj = None
 
     @staticmethod
-    def obj_error_check(obj):
+    def obj_error_check(item_obj):
         """ Check if any attribute None.
 
         Parameters
         ----------
-        obj: obj
+        item_obj: obj
             Command object.
 
         Returns
         -------
         bool
-            True if found None else False
+            True if found None in object attributes else False.
         """
         master_attr = Master().__dict__
 
-        for attr, value in obj.__dict__.items():
+        for attr, value in item_obj.__dict__.items():
             if attr not in master_attr and value is None:
                 return True
 
@@ -69,10 +72,9 @@ class AddItem(Master):
         Parameters
         ----------
         item_obj: obj
-            Command object
-        self.is_todo_async: bool
-            True if to_do a coroutine.
+            Command object.
         """
+
         if self.is_re_obj:
             make_db_entry = False
             doc_id = item_obj._id
@@ -87,7 +89,7 @@ class AddItem(Master):
                 make_db_entry = False
 
             else:
-                # noinspection PyUnboundLocalVariable
+                # looks in database for a specific document
                 found = await self.find_doc(doc_id)
 
                 if found:
@@ -95,7 +97,12 @@ class AddItem(Master):
                 else:
                     return
 
+                # works with reinitializer (dynamic time change) object has static time_to_message
                 await asyncio.sleep(found['time_to_message'])
+
+                # if not found it was deleted by user
+                if not await self.find_doc(doc_id):
+                    return
 
                 # check if to_do is async def
                 if self.is_todo_async:
@@ -103,15 +110,14 @@ class AddItem(Master):
                 else:
                     discord_send = item_obj.todo()
 
-                # check if something in message
-                # just in case len() > 2000 (max message length for discord)
+                # check if something in message if len > 2000 split message
                 if len(discord_send) == 0:
                     pass
                 else:
                     for i in range(int(len(discord_send) / 2000) + 1):
                         await channel.send(discord_send[i * 2000: (i + 1) * 2000])
 
-                # if every is false we are done else we loop
+                # if every is false we are done else we update doc and loop
                 if item_obj.every is False:
                     await self.delete_doc(doc_id)
                     return
@@ -119,15 +125,24 @@ class AddItem(Master):
                     await Obj2Dict(item_obj).update_doc(self.db, doc_id)
 
     async def AddItem_doit(self, item_obj):
-        """ Adds item to all_items. If use_asyncio create task and add it to event loop.
+        """ Core method.
 
         Parameters
-        ----------
         item_obj: obj
-            Command object
+            Command object passed from commands directory.
+
+        If __module__ in dict of item_obj that means that no Master attributes were given in that case assume only client
+        and message are needed.
+        Set self.is_re_obj if _id in attributes (only if called from mongodb_reinitialize). Set self.name. Set self.is_todo_async
+        if item_obj has async def todo().
+        If is_re_obj skip all initialization steps.
+        Initialization is done for 2 cases. If async add it to event loop else write it to mongodb.
+
+        Note
+        ----
+        AttributeErrors are for when self.message == None. Happens if command has initialize method.
         """
 
-        # initialize helper object
         if '__module__' in item_obj.__dict__:
             Item = item_obj(client=self.client, message=self.message)
         else:
@@ -174,6 +189,7 @@ class AddItem(Master):
 
 
 class Obj2Dict:
+    """ Transform command object __dict__ to mongodb readable dict."""
 
     def __init__(self, obj):
         dct = {}
@@ -182,13 +198,12 @@ class Obj2Dict:
 
         for attr, value in obj.__dict__.items():
             if attr in master_attr:
-                # if not getattr(obj, '_id', False):
                 if obj.message:
                     if attr == 'message':
                         dct.update({'username': str(value.author),
                                     'channel id': int(value.channel.id),
                                     'message': str(value.content),
-                                    'created at': str(value.created_at)})
+                                    'message created at': str(value.created_at)})
                     else:
                         pass
                 else:

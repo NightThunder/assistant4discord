@@ -3,10 +3,7 @@ from assistant4discord.assistant.commands.master.master_class import Master
 
 
 class ShowItems(Master):
-    """ Display all_items.
-
-    Makes a nice text menu in discord
-    """
+    """ Makes a nice text menu in discord."""
 
     def __init__(self):
         super().__init__()
@@ -20,7 +17,8 @@ class ShowItems(Master):
         return await cursor.to_list(length=None)
 
     async def ShowItems_doit(self, item_obj_str, public=False):
-        """
+        """ Shows documents of a collection for a user or all if public.
+
         Parameters
         ----------
         item_obj_str: str
@@ -33,7 +31,6 @@ class ShowItems(Master):
         ----
         Uses self.commands to get to command object and get its all_items.
         """
-
         item_name = self.commands[item_obj_str].name
 
         if not item_name:
@@ -73,7 +70,7 @@ class ShowItems(Master):
 
 
 class RemoveItem(Master):
-    """ Remove from all_items."""
+    """ Removes document from database."""
 
     def __init__(self):
         """ Same as ShowItems.

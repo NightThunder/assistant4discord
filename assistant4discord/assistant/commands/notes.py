@@ -7,10 +7,11 @@ from .extensions.helpers.mongodb_adder import AddItem
 
 
 class NoteIt(AddItem):
-
     def __init__(self):
         super().__init__()
-        self.help = "```***Note help***\n" "Make a note from previous message```"
+        self.help = (
+            "```***Note help***\n" "Make a note from previous message\n" "Call: note```"
+        )
         self.call = "note"
 
     async def doit(self):
@@ -18,10 +19,13 @@ class NoteIt(AddItem):
 
 
 class ShowNotes(ShowItems):
-
     def __init__(self):
         super().__init__()
-        self.help = "```***ShowNotes help***\n" "Display all user's notes```"
+        self.help = (
+            "```***ShowNotes help***\n"
+            "Display all user's notes\n"
+            "Call: show notes```"
+        )
         self.call = "show notes"
 
     async def doit(self):
@@ -29,10 +33,13 @@ class ShowNotes(ShowItems):
 
 
 class RemoveNote(RemoveItem):
-
     def __init__(self):
         super().__init__()
-        self.help = "```***RemoveNote help***\n" "Remove user's note```"
+        self.help = (
+            "```***RemoveNote help***\n"
+            "Remove user's note\n"
+            "Call remove note <number>```"
+        )
         self.call = "remove note stevilka"
 
     async def doit(self):
@@ -40,23 +47,26 @@ class RemoveNote(RemoveItem):
 
 
 class NotesTxt(Master):
-
     def __init__(self):
         super().__init__()
-        self.help = "```***NotesTxt help***\n" "Sends user's notes in .txt```"
+        self.help = (
+            "```***NotesTxt help***\n"
+            "Sends user's notes in .txt"
+            "Call: notes to text```"
+        )
         self.call = "notes to text"
 
     async def get_user_docs(self, author):
-        cursor = self.db['notes'].find({'username': author})
+        cursor = self.db["notes"].find({"username": author})
         return await cursor.to_list(length=None)
 
     async def doit(self):
 
         user_notes = await self.get_user_docs(str(self.message.author))
 
-        notes_file = ''
+        notes_file = ""
         for note in user_notes:
-            notes_file += note['text'] + "\n-----------------------------------\n"
+            notes_file += note["text"] + "\n-----------------------------------\n"
 
         notes_file = notes_file[:-37]
 

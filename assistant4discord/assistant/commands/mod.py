@@ -4,10 +4,12 @@ from .extensions.helpers.mongodb_adder import AddItem
 
 
 class Mods(AddItem):
-
     def __init__(self):
         super().__init__()
-        self.help = "```***Mods help***\n" "Add a moderator. Owner only.```"
+        self.help = ("```***Mods help***\n" 
+                     "Add a moderator. Owner only.\n" 
+                     "Call: mod```"
+        )
         self.call = "mod"
         self.special = {"permission": "owner", "hidden": True}
 
@@ -23,10 +25,13 @@ class Mods(AddItem):
 
 
 class ShowMods(ShowItems):
-
     def __init__(self):
         super().__init__()
-        self.help = "```***ShowMods help***\n" "Display all moderators.```"
+        self.help = (
+            "```***ShowMods help***\n" 
+            "Display all moderators.\n" 
+            "Call: show mods```"
+        )
         self.call = "show mods"
 
     async def doit(self):
@@ -34,10 +39,13 @@ class ShowMods(ShowItems):
 
 
 class RemoveMod(RemoveItem):
-
     def __init__(self):
         super().__init__()
-        self.help = "```***RemoveMod help***\n" "Removes moderator. Owner only.```"
+        self.help = (
+            "```***RemoveMod help***\n"
+            "Removes moderator. Owner only.\n"
+            "Call: remove mod <number>```"
+        )
         self.call = "remove mod stevilka"
         self.special = {"permission": "owner", "hidden": True}
 

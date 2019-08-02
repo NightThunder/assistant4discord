@@ -13,12 +13,14 @@ class Mod(Master):
     async def todo(self):
         """ Set a moderator.
 
-        Checks all users that bot can see for a match.
+        If n == 0 get owner name from info command (await client.application_info()). Look in database if owner already
+        present, if owner not found set owner as mod.
+        If n!= 0 check all users that bot can see for a match. If match found set new mod.
 
         Returns
         -------
         str
-            Name of new mod or None user not found.
+            Name of a new mod or None if user not found.
         """
         if self.n == 0:
             app_info = await self.commands["AppInfo"].get_app_info()
@@ -40,6 +42,8 @@ class Mod(Master):
                 if str(user) == to_mod:
                     self.mod = to_mod
                     return self.mod
+
+            return None
 
     def get_message(self):
         c = 0

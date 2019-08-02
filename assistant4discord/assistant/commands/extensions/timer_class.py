@@ -39,7 +39,7 @@ class Timer(Master):
         sim_arr = self.sim.message_x_command_sim(" ".join(message))
         picked_command_str = self.calls[int(np.argmax(sim_arr))]
 
-        if np.max(sim_arr) < 0.5:
+        if np.max(sim_arr) < 0.25:
             return None
 
         return picked_command_str

@@ -7,7 +7,8 @@ class Ping(Master):
         super().__init__()
         self.help = (
             "```***Ping help***\n"
-            "Ping discord server and return response time in ms.```"
+            "Ping discord server and return response time in ms.\n"
+            "Call: ping```"
         )
         self.call = "ping"
 

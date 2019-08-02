@@ -12,11 +12,12 @@ class TimeIt(AddItem):
         self.help = (
             "```***Timer help***\n"
             "Set a timer for any command.\n"
-            "Valid times: sec, min, hour, day, week, all days of week, **on** %d.%m.%Y and **at** %H:%M:%S \n"
+            "Call: time ...\n"
             "Note: command is ran when timer is finished.\n"
-            'Warning: use with word "time" so that commands don\'t get mixed up.\n'
-            "Example: time <time when to run> <any command>"
-            "RESETS ON SERVER RESTART!```"
+            "Example: time <time when to run> <any command>\n"
+            "Valid times: second, minute, hour, day, week, name of days, time in format at h:m:s dates in format on d/m/y.\n"
+            "Warning: at and on MUST be used with times and dates.\n"
+            "Warning: RESETS ON SERVER RESTART!```"
         )
         self.call = "time stevilka"
 
@@ -40,7 +41,7 @@ class TimeIt(AddItem):
                 doc_id = res.inserted_id
                 make_db_entry = False
 
-            elif not await self.find_doc(self.name, doc_id):
+            elif not await self.find_doc(doc_id):
                 return
 
             else:
@@ -53,7 +54,7 @@ class TimeIt(AddItem):
                 await command.doit()
 
                 if item_obj.every is False:
-                    await self.delete_doc(self.name, doc_id)
+                    await self.delete_doc(doc_id)
                     return
                 else:
                     item_obj.created_on = int(time.time())
