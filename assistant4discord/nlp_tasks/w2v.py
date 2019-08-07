@@ -91,8 +91,10 @@ class w2vSimilarity:
             for word in sent:
                 try:
                     if word in boosted and is_message:
+                        # weight = boosted[word] / (1 + self.model.vocab[word].count)
                         weight = boosted[word] / (1 + math.log(self.model.vocab[word].count))
                     else:
+                        # weight = 1000 / (1 + self.model.vocab[word].count)
                         weight = 1 / (1 + math.log(self.model.vocab[word].count))
 
                     sum_post += self.model[word] * weight
