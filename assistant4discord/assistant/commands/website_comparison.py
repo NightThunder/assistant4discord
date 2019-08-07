@@ -4,6 +4,7 @@ from .extensions.helpers.mongodb_adder import AddItem
 
 
 class WebsiteComparison(AddItem):
+
     def __init__(self):
         super().__init__()
         self.help = (
@@ -22,12 +23,11 @@ class WebsiteComparison(AddItem):
         self.call = "check stevilka"
 
     async def doit(self):
-        await self.AddItem_doit(
-            WebComp(client=self.client, message=self.message, db=self.db)
-        )
+        await self.AddItem_doit(WebComp(client=self.client, message=self.message, db=self.db))
 
 
 class ShowWebsites(ShowItems):
+
     def __init__(self):
         super().__init__()
         self.help = (
@@ -38,10 +38,11 @@ class ShowWebsites(ShowItems):
         self.call = "show websites"
 
     async def doit(self):
-        await self.ShowItems_doit("WebsiteComparison")
+        await self.ShowItems_doit(WebComp)
 
 
 class RemoveWebsite(RemoveItem):
+
     def __init__(self):
         super().__init__()
         self.help = (
@@ -52,4 +53,4 @@ class RemoveWebsite(RemoveItem):
         self.call = "remove website stevilka"
 
     async def doit(self):
-        await self.RemoveItem_doit("WebsiteComparison")
+        await self.RemoveItem_doit(WebComp)
