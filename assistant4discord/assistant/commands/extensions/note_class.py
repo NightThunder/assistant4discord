@@ -6,14 +6,35 @@ import time
 class Note(Master):
 
     def __init__(self, **kwargs):
+        """
+        Other Parameters
+        ----------------
+        name: str
+            Used for identification.
+        run_on_init: bool
+            If True runs once on initialization.
+        noted: str
+            User's message used as note string.
+        created_on: int
+            When did todo() ran.
+
+        """
         super().__init__(**kwargs)
-        self.name = "notes"
+        self.name = "note_it"
         self.run_on_init = True
         self.noted = ""
         self.created_on = int(time.time())
 
     def todo(self):
-        """ Sets user's previous message as note. """
+        """ Sets user's previous message as note.
+
+        Loop over all messages (newest to oldest) and find author's second message (first is this command).
+
+        Returns
+        -------
+        str
+            Content of message. Set this as note.
+        """
         c = 0
         for msg in reversed(self.client.cached_messages):
             if msg.author == self.message.author:
@@ -26,4 +47,4 @@ class Note(Master):
         return None
 
     def __str__(self):
-        return "noted on {}\nnote: {}".format(timestamp_to_utc(self.created_on), self.noted)
+        return "noted on {} utc\nnote: {}".format(timestamp_to_utc(self.created_on), self.noted)
