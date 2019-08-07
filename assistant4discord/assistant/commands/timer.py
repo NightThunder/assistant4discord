@@ -1,8 +1,6 @@
-import asyncio
-import time
 from .extensions.timer_class import Timer
 from .extensions.helpers.tui import ShowItems, RemoveItem
-from .extensions.helpers.mongodb_adder import AddItem, Obj2Dict
+from .extensions.helpers.mongodb_adder import AddItem
 
 
 class TimeIt(AddItem):
@@ -21,45 +19,6 @@ class TimeIt(AddItem):
         )
         self.call = "time stevilka"
 
-    async def coro_doit(self, item_obj):
-        """ loop.create_task function.
-
-        Parameters
-        ----------
-        item_obj: obj
-            Command object
-        """
-        make_db_entry = True
-
-        while True:
-
-            if not item_obj.future_command_call:
-                return None
-
-            if make_db_entry:
-                res = await Obj2Dict(item_obj).make_doc(self.db)
-                doc_id = res.inserted_id
-                make_db_entry = False
-
-            elif not await self.find_doc(doc_id):
-                return
-
-            else:
-                for command_obj in self.commands.values():
-                    if command_obj.call == item_obj.future_command_call:
-                        command_obj.message = self.message
-                        command = command_obj
-
-                await asyncio.sleep(item_obj.time_to_message)
-                await command.doit()
-
-                if item_obj.every is False:
-                    await self.delete_doc(doc_id)
-                    return
-                else:
-                    item_obj.created_on = int(time.time())
-                    await Obj2Dict(item_obj).update_doc(self.db, doc_id)
-
     async def doit(self):
         await self.AddItem_doit(Timer(message=self.message, similarity=self.sim, commands=self.commands))
 
@@ -72,7 +31,7 @@ class ShowTimers(ShowItems):
         self.call = "show timers"
 
     async def doit(self):
-        await self.ShowItems_doit("TimeIt")
+        await self.ShowItems_doit(Timer)
 
 
 class RemoveTimer(RemoveItem):
@@ -87,4 +46,4 @@ class RemoveTimer(RemoveItem):
         self.call = "remove timer stevilka"
 
     async def doit(self):
-        await self.RemoveItem_doit("TimeIt")
+        await self.RemoveItem_doit(Timer)
