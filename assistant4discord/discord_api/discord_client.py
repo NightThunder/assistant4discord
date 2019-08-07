@@ -106,6 +106,6 @@ def run(method, discord_token, mongodb_token, log_chat, model_name=None):
         client.log_chat = log_chat
         client.chat_logger = setup_logger(log_name="chat.log")
 
-    client.reinitializer = Reinitializer(db=db, client=client)
     client.messenger = Messenger(method=method, db=db, client=client, model_name=model_name)
+    client.reinitializer = Reinitializer(db=db, client=client, messenger=client.messenger)
     client.run(discord_token)
