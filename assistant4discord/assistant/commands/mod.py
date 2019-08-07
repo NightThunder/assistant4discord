@@ -4,27 +4,32 @@ from .extensions.helpers.mongodb_adder import AddItem
 
 
 class Mods(AddItem):
+
     def __init__(self):
         super().__init__()
-        self.help = ("```***Mods help***\n" 
-                     "Add a moderator. Owner only.\n" 
-                     "Call: mod```"
+        self.help = (
+            "```***Mods help***\n" 
+            "Add a moderator. Owner only.\n" 
+            "Call: mod```"
         )
         self.call = "mod"
         self.special = {"permission": "owner", "hidden": True}
 
     async def initialize(self):
         """ Initializes owner on start."""
-        await self.AddItem_doit(Mod(commands=self.commands, db=self.db))
+        await self.AddItem_doit(
+            Mod(initialize=True, commands=self.commands, db=self.db)
+        )
 
     async def doit(self):
-        if self.check_rights():
+        if await self.check_rights():
             await self.AddItem_doit(Mod)
         else:
-            await self.message.channel.send("need to be {}".format(self.special["permission"]))
+            await self.send("need to be {}".format(self.special["permission"]))
 
 
 class ShowMods(ShowItems):
+
     def __init__(self):
         super().__init__()
         self.help = (
@@ -35,10 +40,11 @@ class ShowMods(ShowItems):
         self.call = "show mods"
 
     async def doit(self):
-        await self.ShowItems_doit("Mods", public=True)
+        await self.ShowItems_doit(Mod, public=True)
 
 
 class RemoveMod(RemoveItem):
+
     def __init__(self):
         super().__init__()
         self.help = (
@@ -50,7 +56,7 @@ class RemoveMod(RemoveItem):
         self.special = {"permission": "owner", "hidden": True}
 
     async def doit(self):
-        if self.check_rights():
-            await self.RemoveItem_doit("Mods")
+        if await self.check_rights():
+            await self.RemoveItem_doit(Mod)
         else:
-            await self.message.channel.send("need to be {}".format(self.special["permission"]))
+            await self.send("need to be {}".format(self.special["permission"]))
