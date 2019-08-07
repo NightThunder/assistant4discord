@@ -33,7 +33,7 @@ class ShowReminders(ShowItems):
         self.call = "show reminders"
 
     async def doit(self):
-        await self.ShowItems_doit("RemindMe")
+        await self.ShowItems_doit(Reminder)
 
 
 class RemoveReminder(RemoveItem):
@@ -49,4 +49,4 @@ class RemoveReminder(RemoveItem):
         self.call = "remove reminder stevilka"
 
     async def doit(self):
-        await self.RemoveItem_doit("RemindMe")
+        await self.RemoveItem_doit(Reminder)

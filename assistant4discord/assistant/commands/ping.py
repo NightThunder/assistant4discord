@@ -13,4 +13,4 @@ class Ping(Master):
         self.call = "ping"
 
     async def doit(self):
-        await self.message.channel.send("{} ms".format(round(self.client.latency * 1000)))
+        await self.send("{} ms".format(round(self.client.latency * 1000)))
