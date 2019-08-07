@@ -93,7 +93,7 @@ class AddItem(Master):
                 found = await self.find_doc(doc_id)
 
                 if found:
-                    channel = self.client.get_channel(found['channel id'])
+                    channel = self.client.get_channel(found['channel_id'])
                 else:
                     return
 
@@ -111,11 +111,15 @@ class AddItem(Master):
                     discord_send = item_obj.todo()
 
                 # check if something in message if len > 2000 split message
-                if len(discord_send) == 0:
+                # if TypeError this is timer with function and not string
+                try:
+                    if len(discord_send) == 0:
+                        pass
+                    else:
+                        for i in range(int(len(discord_send) / 2000) + 1):
+                            await channel.send(discord_send[i * 2000: (i + 1) * 2000])
+                except TypeError:
                     pass
-                else:
-                    for i in range(int(len(discord_send) / 2000) + 1):
-                        await channel.send(discord_send[i * 2000: (i + 1) * 2000])
 
                 # if every is false we are done else we update doc and loop
                 if item_obj.every is False:
@@ -170,7 +174,7 @@ class AddItem(Master):
             # check if all helper attributes not None
             if self.obj_error_check(Item):
                 try:
-                    await self.message.channel.send("something went wrong")
+                    await self.message.channel.send("something went wrong 177")
                     return
                 except AttributeError:
                     pass
@@ -179,7 +183,7 @@ class AddItem(Master):
                     await self.message.channel.send(str(Item))
                     task = self.client.loop.create_task(self.coro_doit(Item))    # add coro_doit to event loop
                     if not task:
-                        await self.message.channel.send("something went wrong")
+                        await self.message.channel.send("something went wrong 186")
                 else:
                     await Obj2Dict(Item).make_doc(self.db)
                     try:
@@ -198,19 +202,19 @@ class Obj2Dict:
 
         for attr, value in obj.__dict__.items():
             if attr in master_attr:
-                if obj.message:
+                if type(obj.message) != str and obj.message is not None:
                     if attr == 'message':
                         dct.update({'username': str(value.author),
-                                    'channel id': int(value.channel.id),
+                                    'channel_id': int(value.channel.id),
                                     'message': str(value.content),
-                                    'message created at': str(value.created_at)})
+                                    'message_created_at': str(value.created_at)})
                     else:
                         pass
                 else:
                     pass
             else:
                 if attr == 'name':
-                    dct.update({'name': value.lower()})
+                    dct.update({'name': value})
                 else:
                     dct.update({attr: value})
 
