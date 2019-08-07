@@ -34,9 +34,7 @@ class WebChecker(Master):
             return None
 
     async def fetch_all(self, session, urls):
-        results = await asyncio.gather(
-            *[self.client.loop.create_task(self.fetch(session, url)) for url in urls]
-        )
+        results = await asyncio.gather(*[self.client.loop.create_task(self.fetch(session, url)) for url in urls])
         return results
 
     async def get_content(self, urls):
