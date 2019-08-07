@@ -16,12 +16,12 @@ class ShowItems(Master):
         cursor = self.db[collection_name].find({'username': author})
         return await cursor.to_list(length=None)
 
-    async def ShowItems_doit(self, item_obj_str, public=False):
+    async def ShowItems_doit(self, item_obj, public=False):
         """ Shows documents of a collection for a user or all if public.
 
         Parameters
         ----------
-        item_obj_str: str
+        item_obj: obj
             Command name which inherits from AddItem.
 
         public: bool
@@ -31,10 +31,10 @@ class ShowItems(Master):
         ----
         Uses self.commands to get to command object and get its all_items.
         """
-        item_name = self.commands[item_obj_str].name
+        item_name = item_obj().name
 
         if not item_name:
-            await self.message.channel.send("something went wrong")
+            await self.message.channel.send("something went wrong 37")
             return
 
         item_str = ""
@@ -44,10 +44,7 @@ class ShowItems(Master):
             all_items = await self.get_all_docs(item_name)
 
             for i, item in enumerate(all_items):
-                try:
-                    item_str += "**{}** - {} by {}".format(i, item['text'], item['username'])
-                except KeyError:
-                    item_str += "**{}** - {}".format(i, item['text'])
+                item_str += "**{}** - {}".format(i, item['text'])
 
                 item_str += "\n-----------------------------------\n"
                 n_items += 1
@@ -66,7 +63,7 @@ class ShowItems(Master):
         if n_items != 0:
             await self.message.channel.send(item_str)
         else:
-            await self.message.channel.send("something went wrong")
+            await self.message.channel.send("something went wrong 66")
 
 
 class RemoveItem(Master):
@@ -88,24 +85,27 @@ class RemoveItem(Master):
     async def delete_doc(self, collection_name, _id):
         await self.db[collection_name].delete_one({'_id': _id})
 
-    async def RemoveItem_doit(self, item_obj_str):
+    async def RemoveItem_doit(self, item_obj):
 
-        item_name = self.commands[item_obj_str].name
+        item_name = item_obj().name
 
         if not item_name:
-            await self.message.channel.send("something went wrong")
+            await self.message.channel.send("something went wrong 93")
             return
 
         try:
             to_kill = int(word2vec_input(self.message.content, replace_num=False)[-1])
         except ValueError:
-            await self.message.channel.send("something went wrong")
+            await self.message.channel.send("something went wrong 99")
             return
 
         all_items = await self.get_user_docs(item_name, str(self.message.author))
 
+        if item_name == 'mods':
+            to_kill -= 1
+
         if to_kill > len(all_items) - 1:
-            await self.message.channel.send("something went wrong")
+            await self.message.channel.send("something went wrong 108")
         else:
             id_to_delete = all_items[to_kill]['_id']
             await self.delete_doc(item_name, id_to_delete)
