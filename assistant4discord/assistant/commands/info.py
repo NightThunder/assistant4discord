@@ -23,4 +23,4 @@ class AppInfo(Master):
             "\n-------------------------------\n"
             "type help for commands info".format(app_info.id, app_info.owner, app_info.description, app_info.bot_public))
 
-        await self.message.channel.send("{}".format(info_str))
+        await self.send("{}".format(info_str))

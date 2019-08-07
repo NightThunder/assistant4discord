@@ -23,11 +23,11 @@ class Help(Master):
         if len(word2vec_input(message)) > 1:
             for i, (command_str, command) in enumerate(self.commands.items()):
                 if command_str.lower() in message.lower() and command_str != "Help":
-                    await self.message.channel.send(command.help)
+                    await self.send(command.help)
                     break
 
                 if i == len(self.commands) - 1:
-                    await self.message.channel.send("Command not found!")
+                    await self.send("Command not found!")
 
         else:
             command_str = "```My commands: "
@@ -41,4 +41,4 @@ class Help(Master):
             command_str = command_str[:-2]
             command_str += "\nType help <command> for more info!```"
 
-            await self.message.channel.send(command_str)
+            await self.send(command_str)
