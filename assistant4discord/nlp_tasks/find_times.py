@@ -210,3 +210,42 @@ def timestamp_to_utc(timestamp):
         %d.%m.%Y @ %H:%M:%S
     """
     return datetime.datetime.fromtimestamp(int(timestamp)).strftime("%d.%m.%Y @ %H:%M:%S")
+
+
+def convert_sec(seconds):
+    """ Converts seconds to w d h m s.
+
+    Parameters
+    ----------
+    seconds: int
+
+    Returns
+    -------
+    x weeks, x days, x h, x min, x sec
+
+    References
+    ----------
+    https://stackoverflow.com/questions/4048651/python-function-to-convert-seconds-into-minutes-hours-and-days
+    """
+    intervals = (
+        ('weeks', 604800),
+        ('days', 86400),
+        ('h', 3600),
+        ('min', 60),
+        ('sec', 1),
+        )
+
+    result = []
+
+    for name, count in intervals:
+        value = seconds // count
+
+        if value:
+            seconds -= value * count
+
+            if value == 1:
+                name = name.rstrip('s')
+
+            result.append("{} {}".format(value, name))
+
+    return ', '.join(result)
