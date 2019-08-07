@@ -29,7 +29,7 @@ class ShowNotes(ShowItems):
         self.call = "show notes"
 
     async def doit(self):
-        await self.ShowItems_doit("NoteIt")
+        await self.ShowItems_doit(Note)
 
 
 class RemoveNote(RemoveItem):
@@ -43,7 +43,7 @@ class RemoveNote(RemoveItem):
         self.call = "remove note stevilka"
 
     async def doit(self):
-        await self.RemoveItem_doit("NoteIt")
+        await self.RemoveItem_doit(Note)
 
 
 class NotesTxt(Master):
@@ -57,7 +57,7 @@ class NotesTxt(Master):
         self.call = "notes to text"
 
     async def get_user_docs(self, author):
-        cursor = self.db["notes"].find({"username": author})
+        cursor = self.db["note_it"].find({"username": author})
         return await cursor.to_list(length=None)
 
     async def doit(self):
@@ -71,13 +71,13 @@ class NotesTxt(Master):
         notes_file = notes_file[:-37]
 
         if not notes_file:
-            await self.message.channel.send("no notes")
+            await self.send("no notes")
             return
 
         file_name = "{}_notes.txt".format(str(self.message.author)[:-4])
         with open(file_name, "w") as file:
             file.write(notes_file)
 
-        await self.message.channel.send(file=discord.File(file_name))
+        await self.send(discord.File(file_name), is_file=True)
 
         os.remove(file_name)
