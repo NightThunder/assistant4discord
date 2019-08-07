@@ -28,9 +28,10 @@ class Reinitializer:
     https://motor.readthedocs.io/en/stable/tutorial-asyncio.html
     https://www.youtube.com/watch?v=BPvg9bndP1U
     """
-    def __init__(self, db, client):
+    def __init__(self, db, client, messenger):
         self.db = db
         self.client = client
+        self.messenger = messenger
 
     async def get_all_docs(self, collection_name):
         """ Get all documents of a collection.
@@ -63,7 +64,7 @@ class Reinitializer:
 
         Note
         ----
-        Also adds _id to object.
+        Also adds _id to object. Saved channel is used mainly for timed functions (TimeIt).
 
         A field required in every MongoDB document. The _id field must have a unique value. You can think of the _id
         field as the document’s primary key. If you create a new document without an _id field, MongoDB automatically
@@ -75,14 +76,23 @@ class Reinitializer:
         Initialized object that was created from mongodb JSON with __dict__ .
         """
         command_doc = await self.get_all_docs(obj().name)
-        re_obj = None
 
         for command in command_doc:
             re_obj = obj()
             re_obj.__dict__.update(command)
             re_obj.client = self.client
 
-        return re_obj
+            try:
+                re_obj.saved_channel = command['channel_id']
+            except KeyError:
+                pass
+
+            if re_obj.name == 'time_it':
+                re_obj.commands = self.messenger.commands
+                re_obj.sim = self.messenger.sim
+
+            await self.timer_check(re_obj)
+            await self.add_item(re_obj)
 
     async def timer_check(self, re_obj):
         """ Corrections for asyncio.sleep()."""
@@ -94,12 +104,10 @@ class Reinitializer:
             new_time_to_message = time_to_message - (int(time.time()) - created_on)
             replace_lst = [{'time_to_message': time_to_message}, {'$set': {'time_to_message': new_time_to_message}}]
 
-            if new_time_to_message < 0:
-                await self.update_doc(re_obj.name, replace_lst)
-            else:
-                await self.update_doc(re_obj.name, replace_lst)
+            await self.update_doc(re_obj.name, replace_lst)
+
         else:
-            return None
+            return
 
     async def add_item(self, re_obj):
         """ Adds initialized object (command) to event loop."""
@@ -125,10 +133,4 @@ class Reinitializer:
                 for name, obj in inspect.getmembers(module):
                     if inspect.isclass(obj) and str(obj.__module__).count(".") == 4:
                         if name != 'Master':
-                            re_obj = await self.load_from_db(obj)
-                            if re_obj:
-                                await self.timer_check(re_obj)
-                                await self.add_item(re_obj)
-
-
-# TODO: fix timer so it works with this
+                            await self.load_from_db(obj)
