@@ -96,7 +96,6 @@ def sent_time_finder(sent, filter_times=False):
         if w in times_dct:
             try:
                 num = int(true_sent[i - 1])
-                no_num_sent[i - 1] = None
             except ValueError:
                 num = 1
 
@@ -128,13 +127,20 @@ def sent_time_finder(sent, filter_times=False):
 
         elif w == "at":
 
-            if at_helper(true_sent):
+            if "on" not in true_sent:
+                if day_helper(true_sent):
+                    t = 0
+
                 to_midnight = 86400 - (now.hour * 3600 + now.minute * 60 + now.second)
+
+                if 'tomorrow' in no_num_sent:
+                    t = 0
+
                 t += to_midnight
 
             no_num_sent[i] = None
 
-            for j, hms in enumerate(true_sent[i + 1 :]):
+            for j, hms in enumerate(true_sent[i + 1:]):
 
                 if vec_sent[j + i + 1] == "stevilka":
 
@@ -150,31 +156,36 @@ def sent_time_finder(sent, filter_times=False):
                     break
 
         elif w == "on":
-            d = 0
-            m = now.month
-            y = now.year
 
-            no_num_sent[i] = None
+            # check if on before day word (if True this is not it and pass)
+            if not day_helper(true_sent):
+                d = 0
+                m = now.month
+                y = now.year
 
-            for j, dmy in enumerate(true_sent[i + 1:]):
+                no_num_sent[i] = None
 
-                if vec_sent[j + i + 1] == "stevilka":
+                for j, dmy in enumerate(true_sent[i + 1:]):
 
-                    if j == 0:
-                        d = int(dmy)
-                    elif j == 1:
-                        m = int(dmy)
-                    else:
-                        if len(dmy) == 2:
-                            y = int(dmy) + 2000
+                    if vec_sent[j + i + 1] == "stevilka":
+
+                        if j == 0:
+                            d = int(dmy)
+                        elif j == 1:
+                            m = int(dmy)
                         else:
-                            y = int(dmy)
+                            if len(dmy) == 2:
+                                y = int(dmy) + 2000
+                            else:
+                                y = int(dmy)
 
-                    no_num_sent[j + i + 1] = None
-                else:
-                    break
+                        no_num_sent[j + i + 1] = None
+                    else:
+                        break
 
-            t += int(datetime.datetime(y, m, d, 0, 0).timestamp() - time.time()) + 1
+                t += int(datetime.datetime(y, m, d, 0, 0).timestamp() - time.time()) + 1
+            else:
+                pass
 
         else:
             continue
@@ -185,19 +196,19 @@ def sent_time_finder(sent, filter_times=False):
         return t, every
 
 
-def at_helper(true_sent):
+def day_helper(true_sent):
+    """ True if day word in sent -> reset to midnight done already."""
 
-    if "on" not in true_sent:
-        for w in true_sent:
-            for k in days_dct:
-                if w in k:
-                    return True
+    for word_ in true_sent:
+        for day_ in days_dct:
+            if word_ == day_:
+                return True
 
     return False
 
 
-def timestamp_to_utc(timestamp):
-    """ timestamp -> utc time
+def timestamp_to_local(timestamp):
+    """ timestamp -> local time
 
     Parameters
     ----------
