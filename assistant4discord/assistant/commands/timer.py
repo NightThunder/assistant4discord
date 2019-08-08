@@ -14,8 +14,7 @@ class TimeIt(AddItem):
             "Note: command is ran when timer is finished.\n"
             "Example: time <time when to run> <any command>\n"
             "Valid times: second, minute, hour, day, week, name of days, time in format at h:m:s dates in format on d/m/y.\n"
-            "Warning: at and on MUST be used with times and dates.\n"
-            "Warning: RESETS ON SERVER RESTART!```"
+            "Warning: at and on MUST be used with times and dates.\n```"
         )
         self.call = "time stevilka"
 

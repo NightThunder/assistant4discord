@@ -18,7 +18,8 @@ class WebsiteComparison(AddItem):
             "? line not present in either input sequence\n"
             "see: https://docs.python.org/3/library/difflib.html#difflib.Differ\n"
             "Valid times: second, minute, hour, day, week, name of days, time in format at h:m:s dates in format on d/m/y.\n"
-            "Warning: at and on MUST be used with times and dates.```"
+            "Warning: at and on MUST be used with times and dates.\n"
+            "Warning: max 10 links per message, max 100 total websites, min time check is 120 sec```"
         )
         self.call = "check stevilka"
 
