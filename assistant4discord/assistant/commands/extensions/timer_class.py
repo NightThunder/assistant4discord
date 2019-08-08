@@ -2,6 +2,7 @@ from assistant4discord.assistant.commands.master.master_class import Master
 from assistant4discord.nlp_tasks.find_times import sent_time_finder, timestamp_to_local, convert_sec
 import time
 import numpy as np
+from assistant4discord.nlp_tasks.message_processing import word2vec_input
 
 
 class Timer(Master):
@@ -93,22 +94,14 @@ class Timer(Master):
     def message_filter(self):
         """ Get time and command from messsage.
 
-        Use sent_time_finder to get time info. Find time in sent and remove it. Assumes that command is after or before 'time'.
+        Use sent_time_finder to get time info. Find time in sent and remove it.
 
-        Examples
-        --------
-        'time ping 10 sec' -> 'time ping' -> 'ping'
         """
+        time_to_command, every = sent_time_finder(self.message.content)
 
-        time_to_command, sent_no_time, every = sent_time_finder(self.message.content, filter_times=True)
+        future_command = word2vec_input(self.message.content)
 
-        time_i = sent_no_time.index("time")
-
-        if time_i == 0:
-            future_command = sent_no_time[time_i:]
-        else:
-            future_command = sent_no_time[:time_i]
-
+        time_i = future_command.index("time")
         future_command.pop(time_i)
 
         return time_to_command, every, future_command
