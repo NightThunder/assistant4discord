@@ -1,5 +1,5 @@
 from assistant4discord.assistant.commands.master.master_class import Master
-from assistant4discord.nlp_tasks.find_times import timestamp_to_utc
+from assistant4discord.nlp_tasks.find_times import timestamp_to_local
 import time
 
 
@@ -47,4 +47,4 @@ class Note(Master):
         return None
 
     def __str__(self):
-        return "noted on {} utc\nnote: {}".format(timestamp_to_utc(self.created_on), self.noted)
+        return "noted on {} utc\nnote: {}".format(timestamp_to_local(self.created_on), self.noted)

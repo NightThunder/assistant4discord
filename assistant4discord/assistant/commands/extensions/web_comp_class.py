@@ -1,7 +1,7 @@
 import time
 from html2text import html2text
 from difflib import Differ
-from assistant4discord.nlp_tasks.find_times import sent_time_finder, timestamp_to_utc, convert_sec
+from assistant4discord.nlp_tasks.find_times import sent_time_finder, timestamp_to_local, convert_sec
 from .helpers.web_checker import WebChecker
 
 
@@ -61,7 +61,7 @@ class WebComp(WebChecker):
             (self.time_to_message, self.every) = self.time_message()
 
             # block
-            if self.every and self.time_to_message >= 60 and await self.num_of_entries(str(self.message.author)) < 10:
+            if self.every and self.time_to_message >= 120 and await self.num_of_entries(str(self.message.author)) < 10:
                 pass
             else:
                 return None
@@ -168,12 +168,12 @@ class WebComp(WebChecker):
             msg_str += l + "\n"
 
         if self.every:
-            return "{}\ncheck set every {}\nnext check on {} utc".format(
+            return "{}\ncheck set every {}\nnext check on {}".format(
                 msg_str,
                 convert_sec(self.time_to_message),
-                timestamp_to_utc(self.time_to_message + self.created_on),
+                timestamp_to_local(self.time_to_message + self.created_on),
             )
         else:
-            return "{}\ncheck set for: {} utc".format(
-                msg_str, timestamp_to_utc(self.time_to_message + self.created_on)
+            return "{}\ncheck set for: {}".format(
+                msg_str, timestamp_to_local(self.time_to_message + self.created_on)
             )

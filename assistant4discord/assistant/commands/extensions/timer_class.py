@@ -1,5 +1,5 @@
 from assistant4discord.assistant.commands.master.master_class import Master
-from assistant4discord.nlp_tasks.find_times import sent_time_finder, timestamp_to_utc, convert_sec
+from assistant4discord.nlp_tasks.find_times import sent_time_finder, timestamp_to_local, convert_sec
 import time
 import numpy as np
 
@@ -115,13 +115,13 @@ class Timer(Master):
 
     def __str__(self):
         if self.every:
-            return "command: {}\nset every {}\nnext run on: {} utc".format(
+            return "command: {}\nset every {}\nnext run on: {}".format(
                 self.future_command,
                 convert_sec(self.time_to_message),
-                timestamp_to_utc(self.time_to_message + self.created_on),
+                timestamp_to_local(self.time_to_message + self.created_on),
             )
         else:
-            return "command: {}\nset for {} utc".format(
+            return "command: {}\nset for {}".format(
                 self.future_command,
-                timestamp_to_utc(self.time_to_message + self.created_on),
+                timestamp_to_local(self.time_to_message + self.created_on),
             )

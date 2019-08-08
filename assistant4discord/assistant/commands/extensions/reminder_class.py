@@ -1,6 +1,6 @@
 from assistant4discord.assistant.commands.master.master_class import Master
 import time
-from assistant4discord.nlp_tasks.find_times import sent_time_finder, timestamp_to_utc, convert_sec
+from assistant4discord.nlp_tasks.find_times import sent_time_finder, timestamp_to_local, convert_sec
 
 
 class Reminder(Master):
@@ -74,19 +74,21 @@ class Reminder(Master):
         return None
 
     def time_message(self):
+
         time_to_command, every = sent_time_finder(self.message.content)
 
+        print(time_to_command, every)
         return time_to_command, every
 
     def __str__(self):
         if self.every:
-            return "reminder: {}\nset every {}\nnext reminder on: {} utc".format(
+            return "reminder: {}\nset every {}\nnext reminder on: {}".format(
                 self.to_remind[22:],
                 convert_sec(self.time_to_message),
-                timestamp_to_utc(self.time_to_message + self.created_on),
+                timestamp_to_local(self.time_to_message + self.created_on),
             )
         else:
-            return "reminder: {}\nset for: {} utc".format(
+            return "reminder: {}\nset for: {}".format(
                 self.to_remind[22:],
-                timestamp_to_utc(self.time_to_message + self.created_on),
+                timestamp_to_local(self.time_to_message + self.created_on),
             )
