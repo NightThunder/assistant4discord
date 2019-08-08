@@ -81,19 +81,6 @@ class MyClient(discord.Client):
             else:
                 await message.channel.send("Error: not implemented")
 
-        elif isinstance(message.channel, discord.DMChannel):
-            messenger = self.messenger.message_to_command(message)
-
-            if messenger:
-                await messenger.doit()
-            else:
-                # do nothing if command not detected
-                pass
-
-        else:
-            # is not private message and does not start with @assistant
-            pass
-
 
 def run(method, discord_token, mongodb_token, log_chat, model_name=None):
 
