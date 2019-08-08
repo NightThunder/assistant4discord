@@ -76,12 +76,15 @@ def sent_time_finder(sent, filter_times=False):
 
     Note
     ----
-    Naive implementation.
+    Naive implementation. replace_num is not needed (it doesn't work anyway).
 
     Examples
     --------
     sent = 'remind me on 17.8.19 at 17:00' -> (3796550, False)
     sent = 'remind me every day' -> (86400, True)
+
+    TODO: fix filter_times
+
     """
     vec_sent = word2vec_input(sent)
     true_sent = word2vec_input(sent, replace_num=False)
