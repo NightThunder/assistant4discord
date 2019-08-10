@@ -50,7 +50,7 @@ days_dct = {
 }
 
 
-def sent_time_finder(sent, filter_times=False):
+def sent_time_finder(sent):
     """ Simple time lookup from string.
 
     (1) Looks for times_dct keys in sent. If found checks if int before key.
@@ -63,8 +63,6 @@ def sent_time_finder(sent, filter_times=False):
     ----------
     sent: str
         Discord message.
-    filter_times: bool, optional
-        If True also return message without times.
 
     Returns
     -------
@@ -76,23 +74,26 @@ def sent_time_finder(sent, filter_times=False):
 
     Note
     ----
-    Naive implementation. replace_num is not needed (it doesn't work anyway).
+    Naive (bad) implementation. Timezones not supported, works with local only.
 
     Examples
     --------
     sent = 'remind me on 17.8.19 at 17:00' -> (3796550, False)
     sent = 'remind me every day' -> (86400, True)
 
-    TODO: fix filter_times
-
     """
     vec_sent = word2vec_input(sent)
     true_sent = word2vec_input(sent, replace_num=False)
 
-    no_num_sent = true_sent.copy()
     t = 0
-    every = False
     now = datetime.datetime.now()
+
+    in_sent = whats_in_sent(true_sent)
+
+    if 'every' in true_sent:
+        every = True
+    else:
+        every = False
 
     for i, w in enumerate(vec_sent):
 
@@ -103,45 +104,32 @@ def sent_time_finder(sent, filter_times=False):
                 num = 1
 
             t += times_dct[w] * num
-            no_num_sent[i - 1] = None
 
-            if vec_sent[i - 1] == "every" or vec_sent[i - 2] == "every":
-                if vec_sent[i - 1] == "every":
-                    no_num_sent[i - 1] = None
-                else:
-                    no_num_sent[i - 2] = None
-                every = True
+            if w == 'tomorrow':
+                t -= now.hour * 3600 + now.minute * 60 + now.second
 
         elif w in days_dct:
             today_is = date.today().strftime("%A").lower()
 
-            t = abs(days_dct[w] - days_dct[today_is]) * 86400 - (
-                now.hour * 3600 + now.minute * 60 + now.second
-            )
+            day_diff = days_dct[w] - days_dct[today_is]
 
-            if t == 0:
+            if day_diff < 0:
+                day_diff = 7 - abs(day_diff)
+
+            t = day_diff * 86400 - (now.hour * 3600 + now.minute * 60 + now.second)
+
+            if t < 0:
                 t = 7 * 86400 - (now.hour * 3600 + now.minute * 60 + now.second)
-
-            no_num_sent[i] = None
-
-            if vec_sent[i - 1] == "every":
-                no_num_sent[i - 1] = None
-                every = True
 
         elif w == "at":
 
-            if "on" not in true_sent:
-                if day_helper(true_sent):
-                    t = 0
-
+            if "on" not in true_sent and 'day' not in in_sent:
                 to_midnight = 86400 - (now.hour * 3600 + now.minute * 60 + now.second)
 
-                if 'tomorrow' in no_num_sent:
+                if 'tomorrow' in true_sent:
                     t = 0
 
                 t += to_midnight
-
-            no_num_sent[i] = None
 
             for j, hms in enumerate(true_sent[i + 1:]):
 
@@ -154,19 +142,16 @@ def sent_time_finder(sent, filter_times=False):
                     else:
                         t += int(hms)
 
-                    no_num_sent[j + i + 1] = None
                 else:
                     break
 
         elif w == "on":
 
             # check if on before day word (if True this is not it and pass)
-            if not day_helper(true_sent):
+            if 'day' not in in_sent:
                 d = 0
                 m = now.month
                 y = now.year
-
-                no_num_sent[i] = None
 
                 for j, dmy in enumerate(true_sent[i + 1:]):
 
@@ -182,7 +167,6 @@ def sent_time_finder(sent, filter_times=False):
                             else:
                                 y = int(dmy)
 
-                        no_num_sent[j + i + 1] = None
                     else:
                         break
 
@@ -193,21 +177,30 @@ def sent_time_finder(sent, filter_times=False):
         else:
             continue
 
-    if filter_times:
-        return t, [w for w in no_num_sent if w is not None], every
-    else:
-        return t, every
+    return t, every
 
 
-def day_helper(true_sent):
-    """ True if day word in sent -> reset to midnight done already."""
+def whats_in_sent(true_sent):
+
+    in_sent = []
 
     for word_ in true_sent:
+        for time_ in times_dct:
+            if word_ == time_:
+                in_sent.append('time')
+
         for day_ in days_dct:
             if word_ == day_:
-                return True
+                in_sent.append('day')
 
-    return False
+        if word_ == 'on':
+            in_sent.append('on')
+        elif word_ == 'at':
+            in_sent.append('at')
+        else:
+            pass
+
+    return in_sent
 
 
 def timestamp_to_local(timestamp):
@@ -263,3 +256,11 @@ def convert_sec(seconds):
             result.append("{} {}".format(value, name))
 
     return ', '.join(result)
+
+
+# ex1 = ['tomorrow', 'tomorrow at 12', '1 day', '2 days at 22:00', 'fri', 'mon', 'sat at 9', '10 sec', '1 week']
+# for e in ex1:
+#     print(e)
+#     _ = sent_time_finder(e)[0]
+#     print(timestamp_to_local(_ + time.time()))
+#     print('-----------------------------')
