@@ -3,7 +3,7 @@ import time
 import os
 import inspect
 from pathlib import Path
-from assistant4discord.assistant.commands.extensions.helpers.mongodb_adder import AddItem
+from assistant4discord.assistant.commands.helpers.mongodb_adder import AddItem
 
 
 class Reinitializer:
@@ -28,6 +28,7 @@ class Reinitializer:
     https://motor.readthedocs.io/en/stable/tutorial-asyncio.html
     https://www.youtube.com/watch?v=BPvg9bndP1U
     """
+
     def __init__(self, db, client, messenger):
         self.db = db
         self.client = client
@@ -117,8 +118,35 @@ class Reinitializer:
         ext.db = self.db
         await ext.AddItem_doit(re_obj)
 
+    @staticmethod
+    def get_helpers():
+        """ Adds all helper class names to a list.
+
+        Helper objects can be inherited in extensions. Importing inherited objects results in an error.
+        """
+        helpers = []
+
+        dir_path = str(Path(__file__).parents[1]) + "/assistant/commands/helpers"
+        file_lst = os.listdir(dir_path)
+
+        for file in file_lst:
+            if file.endswith(".py") and "__init__" not in file:
+
+                module_name = "assistant4discord.assistant.commands.helpers.{}".format(file[:-3])
+
+                module = import_module(module_name)
+
+                for name, obj in inspect.getmembers(module):
+                    if inspect.isclass(obj) and str(obj.__module__).count(".") == 4:
+                        if name not in helpers:
+                            helpers.append(name)
+
+        return helpers
+
     async def reinitialize(self):
         """ Creates (reinitializes) commands from extension classes using mongodb."""
+
+        helpers = self.get_helpers()
 
         dir_path = str(Path(__file__).parents[1]) + "/assistant/commands/extensions"
         file_lst = os.listdir(dir_path)
@@ -132,5 +160,5 @@ class Reinitializer:
 
                 for name, obj in inspect.getmembers(module):
                     if inspect.isclass(obj) and str(obj.__module__).count(".") == 4:
-                        if name != 'Master':
+                        if name not in helpers:
                             await self.load_from_db(obj)
