@@ -1,6 +1,6 @@
 from .extensions.timer_class import Timer
-from .extensions.helpers.tui import ShowItems, RemoveItem
-from .extensions.helpers.mongodb_adder import AddItem
+from .helpers.tui import ShowItems, RemoveItem
+from .helpers.mongodb_adder import AddItem
 
 
 class TimeIt(AddItem):
