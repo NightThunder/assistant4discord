@@ -26,11 +26,11 @@ class Timer(Master):
         future_command: obj
             Class name of command to be executed.
         created_on: int
-            When did todo() ran.
+            When did doit() ran.
 
         Note
         ----
-        All None attributes in __init__ are initialized in todo() method.
+        All None attributes in __init__ are initialized in doit() method.
 
         """
         super().__init__(**kwargs)
@@ -43,7 +43,7 @@ class Timer(Master):
         self.future_command = None
         self.created_on = int(time.time())
 
-    async def todo(self):
+    async def doit(self):
 
         if self.switch == 0:
             (self.time_to_message, self.every, future_command_str) = self.message_filter()
@@ -108,9 +108,9 @@ class Timer(Master):
 
     def __str__(self):
         if self.every:
-            return "command: {}\nset every {}\nnext run on: {}".format(
+            return "command: {}\nset every {}\nnext run on {}".format(
                 self.future_command,
-                convert_sec(self.time_to_message),
+                convert_sec(self.every),
                 timestamp_to_local(self.time_to_message + self.created_on),
             )
         else:

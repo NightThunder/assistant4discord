@@ -2,7 +2,7 @@ import time
 from html2text import html2text
 from difflib import Differ
 from assistant4discord.nlp_tasks.find_times import sent_time_finder, timestamp_to_local, convert_sec
-from .helpers.web_checker import WebChecker
+from assistant4discord.assistant.commands.helpers.web_checker import WebChecker
 
 
 class WebComp(WebChecker):
@@ -27,12 +27,11 @@ class WebComp(WebChecker):
         html_lst: list of str
             Html of website.
         created_on: int
-            When did todo() ran.
+            When did doit() ran.
 
         Note
         ----
-        All None attributes in __init__ are initialized in todo() method.
-
+        All None attributes in __init__ are initialized in doit() method.
         """
         super().__init__(**kwargs)
         self.name = "website_comparison"
@@ -53,7 +52,7 @@ class WebComp(WebChecker):
         else:
             return 0
 
-    async def todo(self):
+    async def doit(self):
 
         diff_str = ""
 
@@ -170,7 +169,7 @@ class WebComp(WebChecker):
         if self.every:
             return "{}\ncheck set every {}\nnext check on {}".format(
                 msg_str,
-                convert_sec(self.time_to_message),
+                convert_sec(self.every),
                 timestamp_to_local(self.time_to_message + self.created_on),
             )
         else:

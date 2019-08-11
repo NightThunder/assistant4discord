@@ -4,6 +4,7 @@ from assistant4discord.nlp_tasks.find_times import sent_time_finder, timestamp_t
 
 
 class Reminder(Master):
+
     def __init__(self, **kwargs):
         """
         Other Parameters
@@ -23,11 +24,11 @@ class Reminder(Master):
         to_remind: str
             User's message used as reminder string.
         created_on: int
-            When did todo() ran.
+            When did doit() ran.
 
         Note
         ----
-        All None attributes in __init__ are initialized in todo() method.
+        All None attributes in __init__ are initialized in doit() method.
 
         """
         super().__init__(**kwargs)
@@ -40,7 +41,7 @@ class Reminder(Master):
         self.to_remind = ""
         self.created_on = int(time.time())
 
-    def todo(self):
+    def doit(self):
         if self.switch == 0:
             (self.time_to_message, self.every) = self.time_message()
 
@@ -60,6 +61,7 @@ class Reminder(Master):
         -------
         str
             @author <author's last message in chat>
+
         """
         c = 0
 
@@ -74,17 +76,14 @@ class Reminder(Master):
         return None
 
     def time_message(self):
-
         time_to_command, every = sent_time_finder(self.message.content)
-
-        print(time_to_command, every)
         return time_to_command, every
 
     def __str__(self):
         if self.every:
-            return "reminder: {}\nset every {}\nnext reminder on: {}".format(
+            return "reminder: {}\nset every {}\nnext reminder on {}".format(
                 self.to_remind[22:],
-                convert_sec(self.time_to_message),
+                convert_sec(self.every),
                 timestamp_to_local(self.time_to_message + self.created_on),
             )
         else:
