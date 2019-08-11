@@ -16,8 +16,7 @@ class Note(Master):
         noted: str
             User's message used as note string.
         created_on: int
-            When did todo() ran.
-
+            When did doit() ran.
         """
         super().__init__(**kwargs)
         self.name = "note_it"
@@ -25,7 +24,7 @@ class Note(Master):
         self.noted = ""
         self.created_on = int(time.time())
 
-    def todo(self):
+    def doit(self):
         """ Sets user's previous message as note.
 
         Loop over all messages (newest to oldest) and find author's second message (first is this command).

@@ -21,7 +21,7 @@ class Mod(Master):
         self.run_on_init = True
         self.mod = None
 
-    async def todo(self):
+    async def doit(self):
         """ Set a moderator.
 
         If initialize get owner name from info command (await client.application_info()). Look in database if owner already
