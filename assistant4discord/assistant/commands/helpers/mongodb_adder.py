@@ -106,9 +106,9 @@ class AddItem(Master):
 
                 # check if to_do is async def
                 if self.is_todo_async:
-                    discord_send = await item_obj.todo()
+                    discord_send = await item_obj.doit()
                 else:
-                    discord_send = item_obj.todo()
+                    discord_send = item_obj.doit()
 
                 # check if something in message if len > 2000 split message
                 # if TypeError this is timer with function and not string
@@ -126,6 +126,8 @@ class AddItem(Master):
                     await self.delete_doc(doc_id)
                     return
                 else:
+                    # correction if 'at' keyword in message
+                    item_obj.time_to_message = item_obj.every
                     await Obj2Dict(item_obj).update_doc(self.db, doc_id)
 
     async def AddItem_doit(self, item_obj):
@@ -138,15 +140,15 @@ class AddItem(Master):
         If __module__ in dict of item_obj that means that no Master attributes were given in that case assume only client
         and message are needed.
         Set self.is_re_obj if _id in attributes (only if called from mongodb_reinitialize). Set self.name. Set self.is_todo_async
-        if item_obj has async def todo().
+        if item_obj has async def doit().
         If is_re_obj skip all initialization steps.
         Initialization is done for 2 cases. If async add it to event loop else write it to mongodb.
 
         Note
         ----
         AttributeErrors are for when self.message == None. Happens if command has initialize method.
-        """
 
+        """
         if '__module__' in item_obj.__dict__:
             Item = item_obj(client=self.client, message=self.message)
         else:
@@ -154,7 +156,7 @@ class AddItem(Master):
 
         self.is_re_obj = getattr(Item, '_id', False)
         self.name = Item.name
-        self.is_todo_async = inspect.iscoroutinefunction(item_obj.todo)
+        self.is_todo_async = inspect.iscoroutinefunction(item_obj.doit)
 
         if self.is_re_obj:
             if getattr(Item, 'use_asyncio', False):
@@ -167,14 +169,14 @@ class AddItem(Master):
             # run on initialization if True
             if getattr(Item, 'run_on_init', False):
                 if self.is_todo_async:
-                    await Item.todo()
+                    await Item.doit()
                 else:
-                    Item.todo()
+                    Item.doit()
 
             # check if all helper attributes not None
             if self.obj_error_check(Item):
                 try:
-                    await self.message.channel.send("something went wrong 177")
+                    await self.message.channel.send("something went wrong 179")
                     return
                 except AttributeError:
                     pass
@@ -183,7 +185,7 @@ class AddItem(Master):
                     await self.message.channel.send(str(Item))
                     task = self.client.loop.create_task(self.coro_doit(Item))    # add coro_doit to event loop
                     if not task:
-                        await self.message.channel.send("something went wrong 186")
+                        await self.message.channel.send("something went wrong 188")
                 else:
                     await Obj2Dict(Item).make_doc(self.db)
                     try:
