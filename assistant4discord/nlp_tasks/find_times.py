@@ -150,7 +150,7 @@ def sent_time_finder(sent):
 
     in_sent = whats_in_sent(true_sent)
 
-    if 'every' in true_sent:
+    if "every" in true_sent:
         every = True
     else:
         every = False
@@ -165,7 +165,7 @@ def sent_time_finder(sent):
 
             t += times_dct[w] * num
 
-            if w == 'tomorrow':
+            if w == "tomorrow":
                 t -= now.hour * 3600 + now.minute * 60 + now.second
 
         elif w in days_dct:
@@ -186,11 +186,14 @@ def sent_time_finder(sent):
             if every:
                 every = t
 
-            if 'tomorrow' in true_sent:
+            if "tomorrow" in true_sent:
                 t = 0
                 t += 86400 - (now.hour * 3600 + now.minute * 60 + now.second)
 
-            if in_sent['time'] in ['day', 'days', 'd', 'week', 'weeks', 'w'] and in_sent['on'] is False:
+            if (
+                in_sent["time"] in ["day", "days", "d", "week", "weeks", "w"]
+                and in_sent["on"] is False
+            ):
                 t += 86400 - (now.hour * 3600 + now.minute * 60 + now.second)
 
                 if every:
@@ -210,13 +213,13 @@ def sent_time_finder(sent):
                 else:
                     break
 
-            if in_sent['day'] is None and in_sent['time'] is None:
+            if in_sent["day"] is None and in_sent["time"] is None:
                 t -= now.hour * 3600 + now.minute * 60 + now.second
 
         elif w == "on":
 
             # if user writes on <day> skip this
-            if in_sent['day'] is None:
+            if in_sent["day"] is None:
                 d = 0
                 m = now.month
                 y = now.year
@@ -256,21 +259,21 @@ def sent_time_finder(sent):
 
 def whats_in_sent(true_sent):
 
-    in_sent = {'time': None, 'day': None, 'on': False, 'at': False}
+    in_sent = {"time": None, "day": None, "on": False, "at": False}
 
     for word_ in true_sent:
         for time_ in times_dct:
             if word_ == time_:
-                in_sent['time'] = word_
+                in_sent["time"] = word_
 
         for day_ in days_dct:
             if word_ == day_:
-                in_sent['day'] = word_
+                in_sent["day"] = word_
 
-        if word_ == 'on':
-            in_sent['on'] = True
-        elif word_ == 'at':
-            in_sent['at'] = True
+        if word_ == "on":
+            in_sent["on"] = True
+        elif word_ == "at":
+            in_sent["at"] = True
         else:
             pass
 
@@ -309,12 +312,12 @@ def convert_sec(seconds):
     https://stackoverflow.com/questions/4048651/python-function-to-convert-seconds-into-minutes-hours-and-days
     """
     intervals = (
-        ('weeks', 604800),
-        ('days', 86400),
-        ('h', 3600),
-        ('min', 60),
-        ('sec', 1),
-        )
+        ("weeks", 604800),
+        ("days", 86400),
+        ("h", 3600),
+        ("min", 60),
+        ("sec", 1),
+    )
 
     result = []
 
@@ -325,11 +328,11 @@ def convert_sec(seconds):
             seconds -= value * count
 
             if value == 1:
-                name = name.rstrip('s')
+                name = name.rstrip("s")
 
             result.append("{} {}".format(value, name))
 
-    return ', '.join(result)
+    return ", ".join(result)
 
 
 # ex1 = ['tomorrow', 'tomorrow at 12', '1 day', '2 days at 22:00', 'fri', 'mon', 'sat at 9', '10 sec', '1 week', 'at 23:50',
