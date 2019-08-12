@@ -6,6 +6,7 @@ from assistant4discord.assistant.commands.helpers.web_checker import WebChecker
 
 
 class WebComp(WebChecker):
+
     def __init__(self, **kwargs):
         """
         Other Parameters
@@ -89,8 +90,6 @@ class WebComp(WebChecker):
             diff_str = diff_str[:-37]
             self.html_lst = html_lst
 
-            print("checked websites!")
-
             self.created_on = int(time.time())
             return diff_str
 
@@ -157,7 +156,6 @@ class WebComp(WebChecker):
 
     def time_message(self):
         time_to_command, every = sent_time_finder(self.message.content)
-
         return time_to_command, every
 
     def __str__(self):

@@ -26,10 +26,6 @@ class ShowItems(Master):
 
         public: bool
             If True show items for this command public (means that everyone can call <show command> and see a list).
-
-        Note
-        ----
-        Uses self.commands to get to command object and get its all_items.
         """
         item_name = item_obj().name
 

@@ -190,10 +190,7 @@ def sent_time_finder(sent):
                 t = 0
                 t += 86400 - (now.hour * 3600 + now.minute * 60 + now.second)
 
-            if (
-                in_sent["time"] in ["day", "days", "d", "week", "weeks", "w"]
-                and in_sent["on"] is False
-            ):
+            if in_sent["time"] in ["day", "days", "d", "week", "weeks", "w"] and in_sent["on"] is False:
                 t += 86400 - (now.hour * 3600 + now.minute * 60 + now.second)
 
                 if every:
@@ -333,14 +330,3 @@ def convert_sec(seconds):
             result.append("{} {}".format(value, name))
 
     return ", ".join(result)
-
-
-# ex1 = ['tomorrow', 'tomorrow at 12', '1 day', '2 days at 22:00', 'fri', 'mon', 'sat at 9', '10 sec', '1 week', 'at 23:50',
-#        'every day at 22', 'every 2 days at 14', 'every week at 7', 'every 10 h', 'every day']
-#
-# for e in ex1:
-#     print('string:', e)
-#     _ = sent_time_finder(e)[0]
-#     print('date:', timestamp_to_local(_ + time.time()))
-#     print('time to:', convert_sec(_))
-#     print('-----------------------------')

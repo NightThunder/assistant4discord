@@ -151,9 +151,9 @@ class Messenger(Commander):
         sim_arr = self.sim.message_x_command_sim(message.content)
         picked_command_str = self.calls[int(np.argmax(sim_arr))]
 
-        print("message:", message.content)
-        for i in sim_arr.argsort()[-3:][::-1]:
-            print("{}: {:.3f}".format(self.calls[i], sim_arr[i]))
+        # print("message:", message.content)
+        # for i in sim_arr.argsort()[-3:][::-1]:
+        #     print("{}: {:.3f}".format(self.calls[i], sim_arr[i]))
 
         if np.max(sim_arr) < 0.25:
             return None
