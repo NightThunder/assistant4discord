@@ -1,6 +1,7 @@
 from .extensions.mod_class import Mod
 from .helpers.tui import ShowItems, RemoveItem
 from .helpers.mongodb_adder import AddItem
+from .master.master_class import mod_check
 
 
 class Mods(AddItem):
@@ -21,11 +22,9 @@ class Mods(AddItem):
             Mod(initialize=True, commands=self.commands, db=self.db)
         )
 
+    @mod_check
     async def doit(self):
-        if await self.check_rights():
-            await self.AddItem_doit(Mod)
-        else:
-            await self.send("need to be {}".format(self.special["permission"]))
+        await self.AddItem_doit(Mod)
 
 
 class ShowMods(ShowItems):
@@ -55,8 +54,6 @@ class RemoveMod(RemoveItem):
         self.call = "remove mod stevilka"
         self.special = {"permission": "owner", "hidden": True}
 
+    @mod_check
     async def doit(self):
-        if await self.check_rights():
-            await self.RemoveItem_doit(Mod)
-        else:
-            await self.send("need to be {}".format(self.special["permission"]))
+        await self.RemoveItem_doit(Mod)
