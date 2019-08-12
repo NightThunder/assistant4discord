@@ -78,6 +78,7 @@ class Reinitializer:
         """
         command_doc = await self.get_all_docs(obj().name)
 
+        # loop over ALL commands of ALL users in a collection of name obj().name
         for command in command_doc:
             re_obj = obj()
             re_obj.__dict__.update(command)
@@ -92,22 +93,21 @@ class Reinitializer:
                 re_obj.commands = self.messenger.commands
                 re_obj.sim = self.messenger.sim
 
-            await self.timer_check(re_obj)
+            await self.timer_check(re_obj, command)
             await self.add_item(re_obj)
 
-    async def timer_check(self, re_obj):
+    async def timer_check(self, re_obj, command):
         """ Corrections for asyncio.sleep()."""
 
-        created_on = getattr(re_obj, 'created_on', False)
-        time_to_message = getattr(re_obj, 'time_to_message', False)
+        try:
+            created_on = command['created_on']
+            time_to_message = command['time_to_message']
 
-        if created_on and time_to_message:
             new_time_to_message = time_to_message - (int(time.time()) - created_on)
-            replace_lst = [{'time_to_message': time_to_message}, {'$set': {'time_to_message': new_time_to_message}}]
-
+            replace_lst = [{'_id': command['_id']}, {'$set': {'time_to_message': new_time_to_message}}]
             await self.update_doc(re_obj.name, replace_lst)
 
-        else:
+        except KeyError:
             return
 
     async def add_item(self, re_obj):
