@@ -1,7 +1,7 @@
 from .extensions.mod_class import Mod
 from .helpers.tui import ShowItems, RemoveItem
 from .helpers.mongodb_adder import AddItem
-from .master.master_class import mod_check
+from .master.master_class import check_if
 
 
 class Mods(AddItem):
@@ -14,7 +14,7 @@ class Mods(AddItem):
             "Call: mod```"
         )
         self.call = "mod"
-        self.special = {"permission": "owner", "hidden": True}
+        self.special = {"hidden": True}
 
     async def initialize(self):
         """ Initializes owner on start."""
@@ -22,7 +22,7 @@ class Mods(AddItem):
             Mod(initialize=True, commands=self.commands, db=self.db)
         )
 
-    @mod_check
+    @check_if("owner")
     async def doit(self):
         await self.AddItem_doit(Mod)
 
@@ -52,8 +52,8 @@ class RemoveMod(RemoveItem):
             "Call: remove mod <number>```"
         )
         self.call = "remove mod stevilka"
-        self.special = {"permission": "owner", "hidden": True}
+        self.special = {"hidden": True}
 
-    @mod_check
+    @check_if("owner")
     async def doit(self):
         await self.RemoveItem_doit(Mod)

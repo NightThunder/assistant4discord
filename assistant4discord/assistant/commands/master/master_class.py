@@ -1,3 +1,6 @@
+import functools
+
+
 class Master:
 
     def __init__(self, client=None, db=None, message=None, commands=None, similarity=None, saved_channel=None):
@@ -19,7 +22,7 @@ class Master:
         Other Parameters
         ----------------
         special: dict
-            {"permission": "owner" or "mod", "hidden": bool, "method": "w2v or "tf"}
+            {"hidden": bool, "method": "w2v or "tf"}
         saved_channel: str
             Channel string loaded from mongodb when reinitialized (if saved_channel then message is None).
 
@@ -52,55 +55,74 @@ class Master:
             await channel.send(content)
 
 
-class mod_check:
-    """ Decorator for checking permission in special attribute of command."""
+def check_if(arg):
+    """ Decorator for checking mod permissions before running command.
 
-    def __init__(self, original_function):
-        self.original_function = original_function
+    Parameters
+    ----------
+    arg: str
+        Decorator argument ("owner" or "mod").
 
-    def __get__(self, obj, objtype):
-        import functools
-        return functools.partial(self.__call__, obj)
+    References
+    ----------
+    https://stackoverflow.com/questions/9416947/python-class-based-decorator-with-parameters-that-can-decorate-a-method-or-a-fun
+    https://www.youtube.com/watch?v=FsAPt_9Bf3U&feature=youtu.be
 
-    async def __call__(self, obj):
-        check_rights = await self.check_rights(obj)
+    Returns
+    -------
+    Decorator class.
 
-        if check_rights is not False:
-            return await self.original_function(obj)
-        else:
-            return await self.not_a_mod(obj)
+    """
+    class mod_check:
 
-    @staticmethod
-    async def not_a_mod(obj):
-        await obj.message.channel.send("Higher permission needed!")
+        def __init__(self, fun):
+            self.fun = fun
 
-    @staticmethod
-    async def get_mod_docs(obj):
-        """ Get all documents of a collection.
+        def __get__(self, obj, objtype):
+            return functools.partial(self.__call__, obj)
 
-        Returns
-        -------
-        All documents in a collection as a list of dicts.
+        async def __call__(self, obj):
+            check_rights = await self.check_rights(obj)
 
-        """
-        cursor = obj.db["mods"].find({})
-        return await cursor.to_list(length=None)
+            if check_rights is not False:
+                return await self.fun(obj)
+            else:
+                return await self.not_a_mod(obj)
 
-    async def check_rights(self, obj):
-        """ Verify that user owner or mod.
+        @staticmethod
+        async def not_a_mod(obj):
+            """ Dummy function."""
+            await obj.send("Higher permission needed!")
 
-        Use in doit with special for command blocking.
+        @staticmethod
+        async def get_mod_docs(obj):
+            """ Get all documents of a collection.
 
-        """
-        mod_lst = await self.get_mod_docs(obj)
-        owner = mod_lst[0]["mod"]
+            Returns
+            -------
+            All documents in a collection as a list of dicts.
 
-        if obj.special.get("permission") == "owner" and str(obj.message.author) == owner:
-            return True
+            """
+            cursor = obj.db["mods"].find({})
+            return await cursor.to_list(length=None)
 
-        elif obj.special.get("permission") == "mod":
-            for mod in mod_lst:
-                if mod["mod"] == str(obj.message.author):
-                    return True
-        else:
-            return False
+        async def check_rights(self, obj):
+            """ Verify that user is owner or mod.
+
+            Use in doit as decorator @check_if().
+
+            """
+            mod_lst = await self.get_mod_docs(obj)
+            owner = mod_lst[0]["mod"]
+
+            if arg == "owner" and str(obj.message.author) == owner:
+                return True
+
+            elif arg == "mod":
+                for mod in mod_lst:
+                    if mod["mod"] == str(obj.message.author):
+                        return True
+            else:
+                return False
+
+    return mod_check
