@@ -1,5 +1,6 @@
 import asyncio
 import inspect
+import discord
 from assistant4discord.assistant.commands.master.master_class import Master
 
 
@@ -89,16 +90,7 @@ class AddItem(Master):
                 make_db_entry = False
 
             else:
-                # looks in database for a specific document
-                found = await self.find_doc(doc_id)
-
-                if found:
-                    channel = self.client.get_channel(found['channel_id'])
-                else:
-                    return
-
-                # works with reinitializer (dynamic time change) object has static time_to_message
-                await asyncio.sleep(found['time_to_message'])
+                await asyncio.sleep(item_obj.time_to_message)
 
                 # if not found it was deleted by user
                 if not await self.find_doc(doc_id):
@@ -117,7 +109,7 @@ class AddItem(Master):
                         pass
                     else:
                         for i in range(int(len(discord_send) / 2000) + 1):
-                            await channel.send(discord_send[i * 2000: (i + 1) * 2000])
+                            await item_obj.send(discord_send[i * 2000: (i + 1) * 2000])
                 except TypeError:
                     pass
 
@@ -207,9 +199,16 @@ class Obj2Dict:
                 if type(obj.message) != str and obj.message is not None:
                     if attr == 'message':
                         dct.update({'username': str(value.author),
+                                    'author_id': int(value.author.id),
                                     'channel_id': int(value.channel.id),
-                                    'message': str(value.content),
-                                    'message_created_at': str(value.created_at)})
+                                    'original_message': str(value.content),
+                                    'message_received_on': str(value.created_at)})
+
+                        if isinstance(value.channel, discord.DMChannel):
+                            dct.update({'channel_type': 'DMChannel'})
+                        else:
+                            dct.update({'channel_type': 'GroupChannel'})
+
                     else:
                         pass
                 else:
