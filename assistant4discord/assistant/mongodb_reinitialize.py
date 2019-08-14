@@ -27,8 +27,8 @@ class Reinitializer:
     https://www.mongodb.com/cloud/atlas
     https://motor.readthedocs.io/en/stable/tutorial-asyncio.html
     https://www.youtube.com/watch?v=BPvg9bndP1U
-    """
 
+    """
     def __init__(self, db, client, messenger):
         self.db = db
         self.client = client
@@ -40,20 +40,10 @@ class Reinitializer:
         Returns
         -------
         All documents in a collection as a list of dicts.
+
         """
         cursor = self.db[collection_name].find({})
         return await cursor.to_list(length=None)
-
-    async def update_doc(self, collection_name, replace_lst):
-        """ Updates a document.
-
-        Parameters
-        ----------
-        collection_name: str
-        replace_lst: list of dicts
-            [{OLD}, {'$set': {NEW}}]
-        """
-        await self.db[collection_name].update_one(replace_lst[0], replace_lst[1])
 
     async def load_from_db(self, obj):
         """ Makes command object from database.
@@ -75,6 +65,7 @@ class Reinitializer:
         -------
         None if [] in mongodb.
         Initialized object that was created from mongodb JSON with __dict__ .
+
         """
         command_doc = await self.get_all_docs(obj().name)
 
@@ -96,16 +87,21 @@ class Reinitializer:
             await self.timer_check(re_obj, command)
             await self.add_item(re_obj)
 
-    async def timer_check(self, re_obj, command):
-        """ Corrections for asyncio.sleep()."""
+    @staticmethod
+    async def timer_check(re_obj, command):
+        """ Corrections for asyncio.sleep().
 
+        Note
+        ----
+        Only updates local object with time_to_message.
+
+        """
         try:
             created_on = command['created_on']
             time_to_message = command['time_to_message']
 
             new_time_to_message = time_to_message - (int(time.time()) - created_on)
-            replace_lst = [{'_id': command['_id']}, {'$set': {'time_to_message': new_time_to_message}}]
-            await self.update_doc(re_obj.name, replace_lst)
+            re_obj.time_to_message = new_time_to_message
 
         except KeyError:
             return
@@ -123,6 +119,7 @@ class Reinitializer:
         """ Adds all helper class names to a list.
 
         Helper objects can be inherited in extensions. Importing inherited objects results in an error.
+
         """
         helpers = []
 
