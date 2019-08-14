@@ -3,7 +3,7 @@ import functools
 
 class Master:
 
-    def __init__(self, client=None, db=None, message=None, commands=None, similarity=None, saved_channel=None):
+    def __init__(self, client=None, db=None, message=None, commands=None, similarity=None):
         """ Base class for commands.
 
         Parameters
@@ -23,8 +23,10 @@ class Master:
         ----------------
         special: dict
             {"hidden": bool, "method": "w2v or "tf"}
-        saved_channel: str
+        saved_channel: str (assigned on reinitialize)
             Channel string loaded from mongodb when reinitialized (if saved_channel then message is None).
+        channel_type: str (assigned on reinitialize)
+            DMChannel or GroupChannel.
 
         """
         self.client = client
@@ -33,7 +35,8 @@ class Master:
         self.commands = commands
         self.sim = similarity
         self.special = {}
-        self.saved_channel = saved_channel
+        self.saved_channel = None
+        self.channel_type = None
 
     async def send(self, content, is_file=False):
         """ Send message to discord channel.
@@ -47,7 +50,11 @@ class Master:
         if self.message:
             channel = self.client.get_channel(self.message.channel.id)
         else:
-            channel = self.client.get_channel(self.saved_channel)
+            if self.channel_type == "DMChannel":
+                # works for discord.py >= 1.2.0
+                channel = await self.client.fetch_channel(self.saved_channel)
+            else:
+                channel = self.client.get_channel(self.saved_channel)
 
         if is_file:
             await channel.send(file=content)
@@ -73,6 +80,7 @@ def check_if(arg):
     Decorator class.
 
     """
+
     class mod_check:
 
         def __init__(self, fun):
