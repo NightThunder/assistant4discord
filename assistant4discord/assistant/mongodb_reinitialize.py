@@ -77,6 +77,7 @@ class Reinitializer:
 
             try:
                 re_obj.saved_channel = command['channel_id']
+                re_obj.ch_type = command['channel_type']
             except KeyError:
                 pass
 

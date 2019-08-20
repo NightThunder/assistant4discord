@@ -25,7 +25,7 @@ class Master:
             {"hidden": bool, "method": "w2v or "tf"}
         saved_channel: str (assigned on reinitialize)
             Channel string loaded from mongodb when reinitialized (if saved_channel then message is None).
-        channel_type: str (assigned on reinitialize)
+        ch_type: str (assigned on reinitialize)
             DMChannel or GroupChannel.
 
         """
@@ -36,7 +36,7 @@ class Master:
         self.sim = similarity
         self.special = {}
         self.saved_channel = None
-        self.channel_type = None
+        self.ch_type = None
 
     async def send(self, content, is_file=False):
         """ Send message to discord channel.
@@ -50,7 +50,7 @@ class Master:
         if self.message:
             channel = self.client.get_channel(self.message.channel.id)
         else:
-            if self.channel_type == "DMChannel":
+            if self.ch_type == "DMChannel":
                 # works for discord.py >= 1.2.0
                 channel = await self.client.fetch_channel(self.saved_channel)
             else:

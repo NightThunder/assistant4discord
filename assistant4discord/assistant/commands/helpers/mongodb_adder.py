@@ -196,7 +196,7 @@ class Obj2Dict:
 
         for attr, value in obj.__dict__.items():
             if attr in master_attr:
-                if type(obj.message) != str and obj.message is not None:
+                if obj.message is not None:
                     if attr == 'message':
                         dct.update({'username': str(value.author),
                                     'author_id': int(value.author.id),
