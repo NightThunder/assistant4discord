@@ -27,6 +27,8 @@ class WebComp(WebChecker):
             List of links provided by user.
         html_lst: list of str
             Html of website.
+        block: False or None
+            If None then obj_error_check in mongodb_adder returns error.
         created_on: int
             When did doit() ran.
 
@@ -43,6 +45,7 @@ class WebComp(WebChecker):
         self.switch = 0
         self.links = None
         self.html_lst = None
+        self.block = False
         self.created_on = int(time.time())
 
     async def num_of_entries(self, author):
@@ -64,18 +67,21 @@ class WebComp(WebChecker):
             if self.every and self.time_to_message >= 120 and await self.num_of_entries(str(self.message.author)) < 10:
                 pass
             else:
-                return None
+                self.block = None
+                return
 
             self.links = list(set(self.get_links()))
 
             # block
             if len(self.links) > 10:
-                return None
+                self.block = None
+                return
 
             self.html_lst = await self.get_content(self.links)
 
             if None in self.html_lst:
-                return None
+                self.block = None
+                return
 
             self.switch += 1
         else:
