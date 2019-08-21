@@ -1,7 +1,8 @@
 import asyncio
 import inspect
 import discord
-from assistant4discord.assistant.commands.master.master_class import Master
+from assistant4discord.assistant.commands.helpers.master import Master
+from.extend import ExtError
 
 
 class AddItem(Master):
@@ -33,28 +34,6 @@ class AddItem(Master):
         self.name = None
         self.is_todo_async = None
         self.is_re_obj = None
-
-    @staticmethod
-    def obj_error_check(item_obj):
-        """ Check if any attribute None.
-
-        Parameters
-        ----------
-        item_obj: obj
-            Command object.
-
-        Returns
-        -------
-        bool
-            True if found None in object attributes else False.
-        """
-        master_attr = Master().__dict__
-
-        for attr, value in item_obj.__dict__.items():
-            if attr not in master_attr and value is None:
-                return True
-
-        return False
 
     async def delete_doc(self, _id):
         await self.db[self.name].delete_one({'_id': _id})
@@ -97,11 +76,16 @@ class AddItem(Master):
                     return
 
                 # check if to_do is async def
-                if self.is_todo_async:
-                    discord_send = await item_obj.doit()
-                else:
-                    discord_send = item_obj.doit()
+                try:
+                    if self.is_todo_async:
+                        discord_send = await item_obj.doit()
+                    else:
+                        discord_send = item_obj.doit()
 
+                except ExtError as e:
+                    await self.message.channel.send("{}".format(e))
+                    return
+                    
                 # check if something in message if len > 2000 split message
                 # if TypeError this is timer with function and not string
                 try:
@@ -122,68 +106,74 @@ class AddItem(Master):
                     item_obj.time_to_message = item_obj.every
                     await Obj2Dict(item_obj).update_doc(self.db, doc_id)
 
-    async def AddItem_doit(self, item_obj):
+    async def AddItem_doit(self, item):
         """ Core method.
 
         Parameters
-        item_obj: obj
+        item: obj
             Command object passed from commands directory.
 
-        If __module__ in dict of item_obj that means that no Master attributes were given in that case assume only client
+        If __module__ in dict of item that means that no Master attributes were given in that case assume only client
         and message are needed.
         Set self.is_re_obj if _id in attributes (only if called from mongodb_reinitialize). Set self.name. Set self.is_todo_async
         if item_obj has async def doit().
         If is_re_obj skip all initialization steps.
+        Run doit() once if run_on_init.
         Initialization is done for 2 cases. If async add it to event loop else write it to mongodb.
 
-        Note
-        ----
-        AttributeErrors are for when self.message == None. Happens if command has initialize method.
+        Raises
+        ------
+        AttributeError when self.message == None. Happens if command has initialize method.
+        ExtError if something wrong in extension.
 
         """
-        if '__module__' in item_obj.__dict__:
-            Item = item_obj(client=self.client, message=self.message)
+        if '__module__' in item.__dict__:
+            item_obj = item(client=self.client, message=self.message)
         else:
-            Item = item_obj
+            item_obj = item
 
-        self.is_re_obj = getattr(Item, '_id', False)
-        self.name = Item.name
-        self.is_todo_async = inspect.iscoroutinefunction(item_obj.doit)
+        self.is_re_obj = getattr(item_obj, '_id', False)
+        self.name = item_obj.name
+        self.is_todo_async = inspect.iscoroutinefunction(item.doit)
 
         if self.is_re_obj:
-            if getattr(Item, 'use_asyncio', False):
-                task = self.client.loop.create_task(self.coro_doit(Item))
+            if getattr(item_obj, 'use_asyncio', False):
+                task = self.client.loop.create_task(self.coro_doit(item_obj))
                 if not task:
                     return
             else:
                 pass
         else:
             # run on initialization if True
-            if getattr(Item, 'run_on_init', False):
-                if self.is_todo_async:
-                    await Item.doit()
-                else:
-                    Item.doit()
-
-            # check if all helper attributes not None
-            if self.obj_error_check(Item):
+            if getattr(item_obj, 'run_on_init', False):
                 try:
-                    await self.message.channel.send("something went wrong 179")
+                    if self.is_todo_async:
+                        await item_obj.doit()
+                    else:
+                        item_obj.doit()
+
+                except ExtError as e:
+                    try:
+                        await self.message.channel.send("{}".format(e))
+                        return
+
+                    except AttributeError:
+                        raise ExtError
+            else:
+                pass
+
+            if getattr(item_obj, 'use_asyncio', False):                          # check if helper uses asyncio
+                await self.message.channel.send(str(item_obj))
+                task = self.client.loop.create_task(self.coro_doit(item_obj))    # add coro_doit to event loop
+
+                if not task:
                     return
+            else:
+                await Obj2Dict(item_obj).make_doc(self.db)
+                try:
+                    await self.message.channel.send(str(item_obj))
                 except AttributeError:
                     pass
-            else:
-                if getattr(Item, 'use_asyncio', False):                          # check if helper uses asyncio
-                    await self.message.channel.send(str(Item))
-                    task = self.client.loop.create_task(self.coro_doit(Item))    # add coro_doit to event loop
-                    if not task:
-                        await self.message.channel.send("something went wrong 188")
-                else:
-                    await Obj2Dict(Item).make_doc(self.db)
-                    try:
-                        await self.message.channel.send(str(Item))
-                    except AttributeError:
-                        pass
 
 
 class Obj2Dict:
