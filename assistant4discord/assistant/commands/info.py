@@ -1,4 +1,4 @@
-from .master.master_class import Master
+from assistant4discord.assistant.commands.helpers.master import Master
 
 
 class AppInfo(Master):

@@ -1,6 +1,6 @@
 import os
 import discord
-from .master.master_class import Master
+from assistant4discord.assistant.commands.helpers.master import Master
 from .extensions.note_class import Note
 from .helpers.tui import ShowItems, RemoveItem
 from .helpers.mongodb_adder import AddItem
