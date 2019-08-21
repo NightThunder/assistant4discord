@@ -1,5 +1,5 @@
 from assistant4discord.nlp_tasks.message_processing import word2vec_input
-from assistant4discord.assistant.commands.master.master_class import Master
+from assistant4discord.assistant.commands.helpers.master import Master
 
 
 class ShowItems(Master):
@@ -30,8 +30,7 @@ class ShowItems(Master):
         item_name = item_obj().name
 
         if not item_name:
-            await self.message.channel.send("something went wrong 37")
-            return
+            raise NameError
 
         item_str = ""
         n_items = 0
@@ -59,7 +58,7 @@ class ShowItems(Master):
         if n_items != 0:
             await self.message.channel.send(item_str)
         else:
-            await self.message.channel.send("something went wrong 66")
+            await self.message.channel.send("Could not find any items!")
 
 
 class RemoveItem(Master):
@@ -86,13 +85,12 @@ class RemoveItem(Master):
         item_name = item_obj().name
 
         if not item_name:
-            await self.message.channel.send("something went wrong 93")
-            return
+            raise NameError
 
         try:
             to_kill = int(word2vec_input(self.message.content, replace_num=False)[-1])
         except ValueError:
-            await self.message.channel.send("something went wrong 99")
+            await self.message.channel.send("Could not find number at end on message!")
             return
 
         all_items = await self.get_user_docs(item_name, str(self.message.author))
@@ -101,8 +99,8 @@ class RemoveItem(Master):
             to_kill -= 1
 
         if to_kill > len(all_items) - 1:
-            await self.message.channel.send("something went wrong 108")
+            await self.message.channel.send("Could not find and delete that item!")
         else:
             id_to_delete = all_items[to_kill]['_id']
             await self.delete_doc(item_name, id_to_delete)
-            await self.message.channel.send("item {} removed!".format(to_kill))
+            await self.message.channel.send("item {} removed!".format(to_kill + 1 if item_name == 'mods' else to_kill))
