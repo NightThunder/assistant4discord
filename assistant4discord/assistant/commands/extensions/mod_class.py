@@ -1,24 +1,19 @@
-from assistant4discord.assistant.commands.master.master_class import Master
+from assistant4discord.assistant.commands.helpers.extend import Extend, ExtError
 
 
-class Mod(Master):
+class Mod(Extend):
 
     def __init__(self, initialize=False, **kwargs):
         """
         Other Parameters
         ----------------
-        name: str
-            Used for identification.
         initialize: bool (optional)
-        run_on_init: bool
-            If True runs once on initialization.
         mod: str
             Name of new mod.
         """
         super().__init__(**kwargs)
         self.name = 'mods'
         self.initialize = initialize
-        self.run_on_init = True
         self.mod = None
 
     async def doit(self):
@@ -40,7 +35,7 @@ class Mod(Master):
             owner_in_db = await collection.find_one({'mod': str(app_info.owner)})
 
             if owner_in_db:
-                pass
+                raise ExtError
             else:
                 self.mod = str(app_info.owner)
 
@@ -52,33 +47,7 @@ class Mod(Master):
                     self.mod = to_mod
                     return self.mod
 
-            return None
-
-    def get_message(self):
-        """ Get mod name from owner's previous message.
-
-        Loop over all messages (newest to oldest) and find author's second message (first is this command).
-
-        Note
-        ----
-        Expects that only mod name in message. Should be of format <mod name>#<number>.
-
-        Returns
-        -------
-        str
-            New mod name.
-        """
-        c = 0
-
-        for msg in reversed(self.client.cached_messages):
-            if msg.author == self.message.author:
-                c += 1
-
-            if c == 2:
-                to_mod = '{}'.format(msg.content)
-                return to_mod
-
-        return None
+            raise ExtError("Could not find user!")
 
     def __str__(self):
         return 'bot mod: {}'.format(self.mod)

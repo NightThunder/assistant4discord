@@ -1,52 +1,28 @@
-from assistant4discord.assistant.commands.master.master_class import Master
-from assistant4discord.nlp_tasks.find_times import sent_time_finder, timestamp_to_local, convert_sec
 import time
 import numpy as np
+from assistant4discord.nlp_tasks.find_times import sent_time_finder, timestamp_to_local, convert_sec
 from assistant4discord.nlp_tasks.message_processing import word2vec_input
+from assistant4discord.assistant.commands.helpers.extend import Extend, ExtError
 
 
-class Timer(Master):
+class Timer(Extend):
 
     def __init__(self, **kwargs):
         """
         Other Parameters
         ----------------
-        name: str
-            Used for identification.
-        run_on_init: bool
-            If True runs once on initialization.
-        use_asyncio: bool
-            True because asyncio and aiohttp are needed.
-        time_to_message: int
-            Seconds to message.
-        every: bool
-            True if repeated (do again after sleep).
-        switch: int
-            0 if never ran, 1 if ran once or more.
         future_command: obj
             Class name of command to be executed.
-        created_on: int
-            When did doit() ran.
-
-        Note
-        ----
-        All None attributes in __init__ are initialized in doit() method.
-
         """
         super().__init__(**kwargs)
         self.name = "time_it"
-        self.run_on_init = True
         self.use_asyncio = True
-        self.time_to_message = None
-        self.every = None
-        self.switch = 0
         self.future_command = None
-        self.created_on = int(time.time())
 
     async def doit(self):
 
         if self.switch == 0:
-            (self.time_to_message, self.every, future_command_str) = self.message_filter()
+            (self.time_to_message, self.every, future_command_str) = self.get_message()
 
             calls = self.get_command_calls()
             future_command_call = self.message_to_command(future_command_str, calls)
@@ -79,7 +55,7 @@ class Timer(Master):
         picked_command_str = calls[int(np.argmax(sim_arr))]
 
         if np.max(sim_arr) < 0.25:
-            return None
+            raise ExtError('No command found!')
 
         return picked_command_str
 
@@ -91,7 +67,7 @@ class Timer(Master):
 
         return command_calls
 
-    def message_filter(self):
+    def get_message(self):
         """ Get time and command from messsage.
 
         Use sent_time_finder to get time info. Find time in sent and remove it.

@@ -2,51 +2,30 @@ import time
 from html2text import html2text
 from difflib import Differ
 from assistant4discord.nlp_tasks.find_times import sent_time_finder, timestamp_to_local, convert_sec
-from assistant4discord.assistant.commands.helpers.web_checker import WebChecker
+from assistant4discord.assistant.commands.helpers.web_checker import get_content
+from assistant4discord.assistant.commands.helpers.extend import Extend, ExtError
 
 
-class WebComp(WebChecker):
+class WebComp(Extend):
 
     def __init__(self, **kwargs):
         """
         Other Parameters
         ----------------
-        name: str
-            Used for identification.
-        run_on_init: bool
-            If True runs once on initialization.
-        use_asyncio: bool
-            True because asyncio and aiohttp are needed.
-        time_to_message: int
-            Seconds to message.
-        every: bool
-            True if repeated (do again after sleep).
-        switch: int
-            0 if never ran, 1 if ran once or more.
         links: list of str
             List of links provided by user.
         html_lst: list of str
             Html of website.
         block: False or None
             If None then obj_error_check in mongodb_adder returns error.
-        created_on: int
-            When did doit() ran.
 
-        Note
-        ----
-        All None attributes in __init__ are initialized in doit() method.
         """
         super().__init__(**kwargs)
         self.name = "website_comparison"
-        self.run_on_init = True
         self.use_asyncio = True
-        self.time_to_message = None
-        self.every = None
-        self.switch = 0
         self.links = None
         self.html_lst = None
         self.block = False
-        self.created_on = int(time.time())
 
     async def num_of_entries(self, author):
         cursor = self.db[self.name].find({"username": author})
@@ -64,28 +43,28 @@ class WebComp(WebChecker):
             (self.time_to_message, self.every) = self.time_message()
 
             # block
-            if self.every and self.time_to_message >= 120 and await self.num_of_entries(str(self.message.author)) < 10:
+            if self.time_to_message >= 5 and await self.num_of_entries(str(self.message.author)) < 10:
                 pass
             else:
                 self.block = None
-                return
+                raise ExtError('Min time is 120 sec. Max active site checks is 10.')
 
             self.links = list(set(self.get_links()))
 
             # block
             if len(self.links) > 10:
                 self.block = None
-                return
+                raise ExtError('More then 10 links in message!')
 
-            self.html_lst = await self.get_content(self.links)
+            self.html_lst = await get_content(self.links, self.client)
 
             if None in self.html_lst:
                 self.block = None
-                return
+                raise ExtError('Invalid url!')
 
             self.switch += 1
         else:
-            html_lst = await self.get_content(self.links)
+            html_lst = await get_content(self.links, self.client)
 
             for new_html, saved_html, link in zip(html_lst, self.html_lst, self.links):
                 diff = self.get_diff(html2text(new_html), html2text(saved_html))
@@ -97,32 +76,16 @@ class WebComp(WebChecker):
             self.html_lst = html_lst
 
             self.created_on = int(time.time())
-            return diff_str
+
+            if len(diff_str) == 0:
+                return 'Websites {} checked, no difference found.'.format(self.links)
+            else:
+                return diff_str
 
     def get_links(self):
-        """ Get links from discord message.
-
-        Loop over all messages (newest to oldest) and find author's second message (first is this command).
-
-        Note
-        ----
-        Expects that user separated links by any kind and any number of whitespaces.
-
-        Returns
-        -------
-        list
-            Links in user's message.
-        """
-        c = 0
-        for msg in reversed(self.client.cached_messages):
-            if msg.author == self.message.author:
-                c += 1
-
-            if c == 2:
-                links = msg.content.split()
-                return links
-
-        return None
+        """ Get links from discord message. """
+        msg = self.get_message()
+        return msg.split()
 
     @staticmethod
     def get_diff(s1, s2):
@@ -159,10 +122,6 @@ class WebComp(WebChecker):
                 lines += l
 
         return lines
-
-    def time_message(self):
-        time_to_command, every = sent_time_finder(self.message.content)
-        return time_to_command, every
 
     def __str__(self):
 
