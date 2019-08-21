@@ -1,7 +1,8 @@
 from .extensions.mod_class import Mod
 from .helpers.tui import ShowItems, RemoveItem
 from .helpers.mongodb_adder import AddItem
-from .master.master_class import check_if
+from assistant4discord.assistant.commands.helpers.master import check_if
+from assistant4discord.assistant.commands.helpers.extend import ExtError
 
 
 class Mods(AddItem):
@@ -18,9 +19,10 @@ class Mods(AddItem):
 
     async def initialize(self):
         """ Initializes owner on start."""
-        await self.AddItem_doit(
-            Mod(initialize=True, commands=self.commands, db=self.db)
-        )
+        try:
+            await self.AddItem_doit(Mod(initialize=True, commands=self.commands, db=self.db))
+        except ExtError:
+            pass
 
     @check_if("owner")
     async def doit(self):
