@@ -104,7 +104,7 @@ class Reinitializer:
             new_time_to_message = time_to_message - (int(time.time()) - created_on)
             re_obj.time_to_message = new_time_to_message
 
-        except KeyError:
+        except (KeyError, TypeError):
             return
 
     async def add_item(self, re_obj):
