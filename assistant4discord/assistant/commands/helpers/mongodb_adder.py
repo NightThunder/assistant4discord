@@ -2,7 +2,7 @@ import asyncio
 import inspect
 import discord
 from assistant4discord.assistant.commands.helpers.master import Master
-from.extend import ExtError
+from .extend import ExtError
 
 
 class AddItem(Master):
@@ -17,8 +17,8 @@ class AddItem(Master):
             use_asyncio = True
             Uses asyncio, aiohttp, ...
             AddItem saves it to mongodb and initializes a timer. Removed when timer is up. Can also be removed by user.
-    """
 
+    """
     def __init__(self):
         """
         Other Parameters
@@ -29,6 +29,7 @@ class AddItem(Master):
             True if method async.
         is_re_obj: bool or None
             True if object initialized form database.
+
         """
         super().__init__()
         self.name = None
@@ -36,10 +37,10 @@ class AddItem(Master):
         self.is_re_obj = None
 
     async def delete_doc(self, _id):
-        await self.db[self.name].delete_one({'_id': _id})
+        await self.db[self.name].delete_one({"_id": _id})
 
     async def find_doc(self, _id):
-        found = await self.db[self.name].find_one({'_id': _id})
+        found = await self.db[self.name].find_one({"_id": _id})
 
         if found:
             return found
@@ -53,8 +54,8 @@ class AddItem(Master):
         ----------
         item_obj: obj
             Command object.
-        """
 
+        """
         if self.is_re_obj:
             make_db_entry = False
             doc_id = item_obj._id
@@ -85,17 +86,14 @@ class AddItem(Master):
                 except ExtError as e:
                     await self.message.channel.send("{}".format(e))
                     return
-                    
+
                 # check if something in message if len > 2000 split message
-                # if TypeError this is timer with function and not string
-                try:
-                    if len(discord_send) == 0:
-                        pass
-                    else:
-                        for i in range(int(len(discord_send) / 2000) + 1):
-                            await item_obj.send(discord_send[i * 2000: (i + 1) * 2000])
-                except TypeError:
+                # None if doit() doesn't return anything (timer_class)
+                if discord_send is None or len(discord_send) == 0:
                     pass
+                else:
+                    for i in range(int(len(discord_send) / 2000) + 1):
+                        await item_obj.send(discord_send[i * 2000: (i + 1) * 2000])
 
                 # if every is false we are done else we update doc and loop
                 if item_obj.every is False:
@@ -127,17 +125,17 @@ class AddItem(Master):
         ExtError if something wrong in extension.
 
         """
-        if '__module__' in item.__dict__:
+        if "__module__" in item.__dict__:
             item_obj = item(client=self.client, message=self.message)
         else:
             item_obj = item
 
-        self.is_re_obj = getattr(item_obj, '_id', False)
+        self.is_re_obj = getattr(item_obj, "_id", False)
         self.name = item_obj.name
         self.is_todo_async = inspect.iscoroutinefunction(item.doit)
 
         if self.is_re_obj:
-            if getattr(item_obj, 'use_asyncio', False):
+            if getattr(item_obj, "use_asyncio", False):
                 task = self.client.loop.create_task(self.coro_doit(item_obj))
                 if not task:
                     return
@@ -145,7 +143,7 @@ class AddItem(Master):
                 pass
         else:
             # run on initialization if True
-            if getattr(item_obj, 'run_on_init', False):
+            if getattr(item_obj, "run_on_init", False):
                 try:
                     if self.is_todo_async:
                         await item_obj.doit()
@@ -162,7 +160,7 @@ class AddItem(Master):
             else:
                 pass
 
-            if getattr(item_obj, 'use_asyncio', False):                          # check if helper uses asyncio
+            if getattr(item_obj, "use_asyncio", False):                          # check if helper uses asyncio
                 await self.message.channel.send(str(item_obj))
                 task = self.client.loop.create_task(self.coro_doit(item_obj))    # add coro_doit to event loop
 
@@ -172,6 +170,7 @@ class AddItem(Master):
                 await Obj2Dict(item_obj).make_doc(self.db)
                 try:
                     await self.message.channel.send(str(item_obj))
+
                 except AttributeError:
                     pass
 
@@ -187,36 +186,42 @@ class Obj2Dict:
         for attr, value in obj.__dict__.items():
             if attr in master_attr:
                 if obj.message is not None:
-                    if attr == 'message':
-                        dct.update({'username': str(value.author),
-                                    'author_id': int(value.author.id),
-                                    'channel_id': int(value.channel.id),
-                                    'original_message': str(value.content),
-                                    'message_received_on': str(value.created_at)})
+                    if attr == "message":
+                        dct.update(
+                            {
+                                "username": str(value.author),
+                                "author_id": int(value.author.id),
+                                "channel_id": int(value.channel.id),
+                                "original_message": str(value.content),
+                                "message_received_on": str(value.created_at),
+                            }
+                        )
 
                         if isinstance(value.channel, discord.DMChannel):
-                            dct.update({'channel_type': 'DMChannel'})
+                            dct.update({"channel_type": "DMChannel"})
                         else:
-                            dct.update({'channel_type': 'GroupChannel'})
-
+                            dct.update({"channel_type": "GroupChannel"})
                     else:
                         pass
                 else:
                     pass
             else:
-                if attr == 'name':
-                    dct.update({'name': value})
+                if attr == "name":
+                    dct.update({"name": value})
                 else:
-                    dct.update({attr: value})
+                    if value is not None:
+                        dct.update({attr: value})
+                    else:
+                        pass
 
-        dct.update({'text': str(obj)})
+        dct.update({"text": str(obj)})
 
         self.dct = dct
 
     async def make_doc(self, db):
-        collection_name = self.dct['name']
+        collection_name = self.dct["name"]
         return await db[collection_name].insert_one(self.dct)
 
     async def update_doc(self, db, _id):
-        collection_name = self.dct['name']
-        return await db[collection_name].replace_one({'_id': _id}, self.dct)
+        collection_name = self.dct["name"]
+        return await db[collection_name].replace_one({"_id": _id}, self.dct)
