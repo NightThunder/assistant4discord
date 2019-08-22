@@ -13,7 +13,7 @@ class ShowItems(Master):
         return await cursor.to_list(length=None)
 
     async def get_user_docs(self, collection_name, author):
-        cursor = self.db[collection_name].find({'username': author})
+        cursor = self.db[collection_name].find({"username": author})
         return await cursor.to_list(length=None)
 
     async def ShowItems_doit(self, item_obj, public=False):
@@ -26,6 +26,7 @@ class ShowItems(Master):
 
         public: bool
             If True show items for this command public (means that everyone can call <show command> and see a list).
+
         """
         item_name = item_obj().name
 
@@ -39,7 +40,7 @@ class ShowItems(Master):
             all_items = await self.get_all_docs(item_name)
 
             for i, item in enumerate(all_items):
-                item_str += "**{}** - {}".format(i, item['text'])
+                item_str += "**{}** - {}".format(i, item["text"])
 
                 item_str += "\n-----------------------------------\n"
                 n_items += 1
@@ -48,8 +49,8 @@ class ShowItems(Master):
             user_items = await self.get_user_docs(item_name, str(self.message.author))
 
             for i, item in enumerate(user_items):
-                if str(self.message.author) == item['username']:
-                    item_str += "**{}** - {}".format(i, item['text'])
+                if str(self.message.author) == item["username"]:
+                    item_str += "**{}** - {}".format(i, item["text"])
                     item_str += "\n-----------------------------------\n"
                     n_items += 1
 
@@ -70,15 +71,16 @@ class RemoveItem(Master):
         Note
         ----
         Doesn't have public attribute. Items can only be removed by owner.
+
         """
         super().__init__()
 
     async def get_user_docs(self, collection_name, author):
-        cursor = self.db[collection_name].find({'username': author})
+        cursor = self.db[collection_name].find({"username": author})
         return await cursor.to_list(length=None)
 
     async def delete_doc(self, collection_name, _id):
-        await self.db[collection_name].delete_one({'_id': _id})
+        await self.db[collection_name].delete_one({"_id": _id})
 
     async def RemoveItem_doit(self, item_obj):
 
@@ -95,12 +97,12 @@ class RemoveItem(Master):
 
         all_items = await self.get_user_docs(item_name, str(self.message.author))
 
-        if item_name == 'mods':
+        if item_name == "mods":
             to_kill -= 1
 
         if to_kill > len(all_items) - 1:
             await self.message.channel.send("Could not find and delete that item!")
         else:
-            id_to_delete = all_items[to_kill]['_id']
+            id_to_delete = all_items[to_kill]["_id"]
             await self.delete_doc(item_name, id_to_delete)
-            await self.message.channel.send("item {} removed!".format(to_kill + 1 if item_name == 'mods' else to_kill))
+            await self.message.channel.send("item {} removed!".format(to_kill + 1 if item_name == "mods" else to_kill))

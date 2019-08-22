@@ -23,9 +23,9 @@ class Master:
         ----------------
         special: dict
             {"hidden": bool, "method": "w2v or "tf"}
-        saved_channel: str (assigned on reinitialize)
+        saved_channel: int (assigned on reinitialize)
             Channel string loaded from mongodb when reinitialized (if saved_channel then message is None).
-        ch_type: str (assigned on reinitialize)
+        ch_type: int (assigned on reinitialize)
             DMChannel or GroupChannel.
 
         """
@@ -80,9 +80,7 @@ def check_if(arg):
     Decorator class.
 
     """
-
     class mod_check:
-
         def __init__(self, fun):
             self.fun = fun
 

@@ -29,10 +29,6 @@ class Extend(Master):
         created_on: int
             When was init created (when did doit() first run).
 
-        Note
-        ----
-        All None attributes in __init__ are initialized in doit() method.
-
         """
         super().__init__(**kwargs)
         self.name = None
@@ -52,6 +48,7 @@ class Extend(Master):
         -------
         str
             Author's last message in chat.
+
         """
         c = 0
 
@@ -62,7 +59,7 @@ class Extend(Master):
             if c == 2:
                 return msg.content
 
-        raise ExtError('No previous message found!')
+        raise ExtError("No previous message found!")
 
     def time_message(self):
         time_to_command, every = sent_time_finder(self.message.content)

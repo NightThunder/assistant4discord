@@ -76,12 +76,12 @@ class Reinitializer:
             re_obj.client = self.client
 
             try:
-                re_obj.saved_channel = command['channel_id']
-                re_obj.ch_type = command['channel_type']
+                re_obj.saved_channel = command["channel_id"]
+                re_obj.ch_type = command["channel_type"]
             except KeyError:
                 pass
 
-            if re_obj.name == 'time_it':
+            if re_obj.name == "time_it":
                 re_obj.commands = self.messenger.commands
                 re_obj.sim = self.messenger.sim
 
@@ -98,8 +98,8 @@ class Reinitializer:
 
         """
         try:
-            created_on = command['created_on']
-            time_to_message = command['time_to_message']
+            created_on = command["created_on"]
+            time_to_message = command["time_to_message"]
 
             new_time_to_message = time_to_message - (int(time.time()) - created_on)
             re_obj.time_to_message = new_time_to_message
