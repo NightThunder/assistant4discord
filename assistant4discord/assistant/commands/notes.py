@@ -1,16 +1,19 @@
 import os
 import discord
 from assistant4discord.assistant.commands.helpers.master import Master
-from .extensions.note_class import Note
+from .extensions.note_ext import Note
 from .helpers.tui import ShowItems, RemoveItem
 from .helpers.mongodb_adder import AddItem
 
 
 class NoteIt(AddItem):
+
     def __init__(self):
         super().__init__()
         self.help = (
-            "```***Note help***\n" "Make a note from previous message\n" "Call: note```"
+            "```***Note help***\n" 
+            "Make a note from previous message\n" 
+            "Call: note```"
         )
         self.call = "note"
 
@@ -19,6 +22,7 @@ class NoteIt(AddItem):
 
 
 class ShowNotes(ShowItems):
+
     def __init__(self):
         super().__init__()
         self.help = (
@@ -33,6 +37,7 @@ class ShowNotes(ShowItems):
 
 
 class RemoveNote(RemoveItem):
+
     def __init__(self):
         super().__init__()
         self.help = (
@@ -47,6 +52,7 @@ class RemoveNote(RemoveItem):
 
 
 class NotesTxt(Master):
+
     def __init__(self):
         super().__init__()
         self.help = (

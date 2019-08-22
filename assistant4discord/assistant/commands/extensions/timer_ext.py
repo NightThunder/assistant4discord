@@ -13,6 +13,7 @@ class Timer(Extend):
         ----------------
         future_command: obj
             Class name of command to be executed.
+
         """
         super().__init__(**kwargs)
         self.name = "time_it"
@@ -41,12 +42,15 @@ class Timer(Extend):
 
             if self.saved_channel:
                 chosen_one.saved_channel = self.saved_channel
+                chosen_one.ch_type = self.ch_type
             else:
                 chosen_one.message = self.message
 
             self.created_on = int(time.time())
 
             await chosen_one.doit()
+
+            return None
 
     def message_to_command(self, message, calls):
         """ Same as Messenger. """
@@ -55,7 +59,7 @@ class Timer(Extend):
         picked_command_str = calls[int(np.argmax(sim_arr))]
 
         if np.max(sim_arr) < 0.25:
-            raise ExtError('No command found!')
+            raise ExtError("No command found!")
 
         return picked_command_str
 

@@ -10,9 +10,10 @@ class Mod(Extend):
         initialize: bool (optional)
         mod: str
             Name of new mod.
+
         """
         super().__init__(**kwargs)
-        self.name = 'mods'
+        self.name = "mods"
         self.initialize = initialize
         self.mod = None
 
@@ -27,12 +28,13 @@ class Mod(Extend):
         -------
         str
             Name of a new mod or None if user not found.
+
         """
         if self.initialize:
             app_info = await self.commands["AppInfo"].get_app_info()
 
             collection = self.db[self.name.lower()]
-            owner_in_db = await collection.find_one({'mod': str(app_info.owner)})
+            owner_in_db = await collection.find_one({"mod": str(app_info.owner)})
 
             if owner_in_db:
                 raise ExtError
@@ -45,9 +47,8 @@ class Mod(Extend):
             for user in self.client.users:
                 if str(user) == to_mod:
                     self.mod = to_mod
-                    return self.mod
 
             raise ExtError("Could not find user!")
 
     def __str__(self):
-        return 'bot mod: {}'.format(self.mod)
+        return "bot mod: {}".format(self.mod)

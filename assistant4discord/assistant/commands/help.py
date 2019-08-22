@@ -16,7 +16,8 @@ class Help(Master):
         Raises
         ------
         Command not found!
-            If command of that name was noit found
+            If command of that name was not found
+
         """
         message = self.message.content
 

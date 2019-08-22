@@ -1,4 +1,4 @@
-from .extensions.timer_class import Timer
+from .extensions.timer_ext import Timer
 from .helpers.tui import ShowItems, RemoveItem
 from .helpers.mongodb_adder import AddItem
 

@@ -1,4 +1,4 @@
-from .extensions.reminder_class import Reminder
+from .extensions.reminder_ext import Reminder
 from .helpers.tui import ShowItems, RemoveItem
 from .helpers.mongodb_adder import AddItem
 

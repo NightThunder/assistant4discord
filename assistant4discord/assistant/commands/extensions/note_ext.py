@@ -10,6 +10,7 @@ class Note(Extend):
         ----------------
         noted: str
             User's message used as note string.
+
         """
         super().__init__(**kwargs)
         self.name = "note_it"

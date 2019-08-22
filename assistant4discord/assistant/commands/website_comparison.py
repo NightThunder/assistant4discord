@@ -1,4 +1,4 @@
-from .extensions.web_comp_class import WebComp
+from .extensions.web_comp_ext import WebComp
 from .helpers.tui import ShowItems, RemoveItem
 from .helpers.mongodb_adder import AddItem
 

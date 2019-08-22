@@ -1,7 +1,7 @@
 import time
 from html2text import html2text
 from difflib import Differ
-from assistant4discord.nlp_tasks.find_times import sent_time_finder, timestamp_to_local, convert_sec
+from assistant4discord.nlp_tasks.find_times import timestamp_to_local, convert_sec
 from assistant4discord.assistant.commands.helpers.web_checker import get_content
 from assistant4discord.assistant.commands.helpers.extend import Extend, ExtError
 
@@ -43,24 +43,27 @@ class WebComp(Extend):
             (self.time_to_message, self.every) = self.time_message()
 
             # block
-            if self.time_to_message >= 5 and await self.num_of_entries(str(self.message.author)) < 10:
+            if (
+                self.time_to_message >= 120
+                and await self.num_of_entries(str(self.message.author)) < 10
+            ):
                 pass
             else:
                 self.block = None
-                raise ExtError('Min time is 120 sec. Max active site checks is 10.')
+                raise ExtError("Min time is 120 sec. Max active site checks is 10.")
 
             self.links = list(set(self.get_links()))
 
             # block
             if len(self.links) > 10:
                 self.block = None
-                raise ExtError('More then 10 links in message!')
+                raise ExtError("More then 10 links in message!")
 
             self.html_lst = await get_content(self.links, self.client)
 
             if None in self.html_lst:
                 self.block = None
-                raise ExtError('Invalid url!')
+                raise ExtError("Invalid url!")
 
             self.switch += 1
         else:
@@ -78,7 +81,7 @@ class WebComp(Extend):
             self.created_on = int(time.time())
 
             if len(diff_str) == 0:
-                return 'Websites {} checked, no difference found.'.format(self.links)
+                return "Websites {} checked, no difference found.".format(self.links)
             else:
                 return diff_str
 
@@ -104,6 +107,7 @@ class WebComp(Extend):
         References
         ----------
         https://docs.python.org/3/library/difflib.html#differ-example
+
         """
         s1 = s1.splitlines(keepends=True)
         s2 = s2.splitlines(keepends=True)
