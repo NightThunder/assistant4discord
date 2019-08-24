@@ -16,6 +16,7 @@ class NoteIt(AddItem):
             "Call: note```"
         )
         self.call = "note"
+        self.special = {"response": "dm"}
 
     async def doit(self):
         await self.AddItem_doit(Note)
@@ -31,6 +32,7 @@ class ShowNotes(ShowItems):
             "Call: show notes```"
         )
         self.call = "show notes"
+        self.special = {"response": "dm"}
 
     async def doit(self):
         await self.ShowItems_doit(Note)
@@ -46,6 +48,7 @@ class RemoveNote(RemoveItem):
             "Call remove note <number>```"
         )
         self.call = "remove note stevilka"
+        self.special = {"response": "dm"}
 
     async def doit(self):
         await self.RemoveItem_doit(Note)
@@ -61,6 +64,7 @@ class NotesTxt(Master):
             "Call: notes to text```"
         )
         self.call = "notes to text"
+        self.special = {"response": "dm"}
 
     async def get_user_docs(self, author):
         cursor = self.db["note_it"].find({"username": author})

@@ -16,6 +16,7 @@ class RemindMe(AddItem):
             "Warning: at and on MUST be used with times and dates.\n```"
         )
         self.call = "reminder stevilka"
+        self.special = {"response": "dm"}
 
     async def doit(self):
         await self.AddItem_doit(Reminder)
@@ -31,6 +32,7 @@ class ShowReminders(ShowItems):
             "Call: show reminders\n```"
         )
         self.call = "show reminders"
+        self.special = {"response": "dm"}
 
     async def doit(self):
         await self.ShowItems_doit(Reminder)
@@ -47,6 +49,7 @@ class RemoveReminder(RemoveItem):
             "Example: cancel reminder <reminder's number shown in ShowReminders>```"
         )
         self.call = "remove reminder stevilka"
+        self.special = {"response": "dm"}
 
     async def doit(self):
         await self.RemoveItem_doit(Reminder)

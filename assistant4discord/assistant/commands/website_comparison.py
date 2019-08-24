@@ -22,6 +22,7 @@ class WebsiteComparison(AddItem):
             "Warning: max 10 links per message, max 100 total websites, min time check is 120 sec```"
         )
         self.call = "check stevilka"
+        self.special = {"response": "dm"}
 
     async def doit(self):
         await self.AddItem_doit(WebComp(client=self.client, message=self.message, db=self.db))
@@ -37,6 +38,7 @@ class ShowWebsites(ShowItems):
             "Call: show websites```"
         )
         self.call = "show websites"
+        self.special = {"response": "dm"}
 
     async def doit(self):
         await self.ShowItems_doit(WebComp)
@@ -52,6 +54,7 @@ class RemoveWebsite(RemoveItem):
             "Call: remove website <number>```"
         )
         self.call = "remove website stevilka"
+        self.special = {"response": "dm"}
 
     async def doit(self):
         await self.RemoveItem_doit(WebComp)
