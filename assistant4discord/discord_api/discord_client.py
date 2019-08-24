@@ -50,9 +50,7 @@ class MyClient(discord.Client):
 
     async def on_message(self, message):
         """
-            If message is private then @ call is not required. This means that every message is read and processed. If
-            no matching command is found do nothing.
-            @<bot name> is required if message from server. If no matching command is found send error.
+            Use bot with @<bot name>. If no matching command is found send error.
 
             Note
             ----
