@@ -40,9 +40,9 @@ class Timer(Extend):
         else:
             chosen_one = self.commands[self.future_command]
 
-            if self.saved_channel:
-                chosen_one.saved_channel = self.saved_channel
-                chosen_one.ch_type = self.ch_type
+            if self.response_channel:
+                chosen_one.response_channel = self.response_channel
+                chosen_one.channel_type = self.channel_type
             else:
                 chosen_one.message = self.message
 

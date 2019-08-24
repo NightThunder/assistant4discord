@@ -19,7 +19,7 @@ class TimeIt(AddItem):
         self.call = "time stevilka"
 
     async def doit(self):
-        await self.AddItem_doit(Timer(message=self.message, similarity=self.sim, commands=self.commands))
+        await self.AddItem_doit(Timer(client=self.client, message=self.message, similarity=self.sim, commands=self.commands))
 
 
 class ShowTimers(ShowItems):
