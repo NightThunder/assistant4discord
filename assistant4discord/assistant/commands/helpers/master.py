@@ -23,10 +23,10 @@ class Master:
         ----------------
         special: dict
             {"hidden": bool, "method": "w2v or "tf"}
-        saved_channel: int (assigned on reinitialize)
-            Channel string loaded from mongodb when reinitialized (if saved_channel then message is None).
-        ch_type: int (assigned on reinitialize)
+        channel_type: str (assigned in mongodb_adder)
             DMChannel or GroupChannel.
+        response_channel: int (assigned in mongodb_adder)
+            Channel string loaded from mongodb when reinitialized (if saved_channel then message is None).
 
         """
         self.client = client
@@ -35,8 +35,8 @@ class Master:
         self.commands = commands
         self.sim = similarity
         self.special = {}
-        self.saved_channel = None
-        self.ch_type = None
+        self.channel_type = None
+        self.response_channel = None
 
     async def send(self, content, is_file=False):
         """ Send message to discord channel.
@@ -47,14 +47,27 @@ class Master:
         is_file: bool (optional)
 
         """
-        if self.message:
+        if self.message and self.special.get("response", None) == "dm":
+            dm = self.message.author.dm_channel
+
+            # if already dm (private extension command)
+            if dm:
+                channel = self.client.get_channel(dm.id)
+            # if not dm but already has saved_channel (server extension command)
+            elif self.response_channel:
+                channel = self.client.get_channel(self.response_channel)
+            # if not dm and doesn't have saved_channel (regular command)
+            else:
+                dm = await self.message.author.create_dm()
+                channel = self.client.get_channel(dm.id)
+
+        elif self.message:
             channel = self.client.get_channel(self.message.channel.id)
         else:
-            if self.ch_type == "DMChannel":
-                # works for discord.py >= 1.2.0
-                channel = await self.client.fetch_channel(self.saved_channel)
+            if self.channel_type == "DMChannel":
+                channel = await self.client.fetch_channel(self.response_channel)
             else:
-                channel = self.client.get_channel(self.saved_channel)
+                channel = self.client.get_channel(self.response_channel)
 
         if is_file:
             await channel.send(file=content)
