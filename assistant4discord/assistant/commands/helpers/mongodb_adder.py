@@ -19,6 +19,7 @@ class AddItem(Master):
             AddItem saves it to mongodb and initializes a timer. Removed when timer is up. Can also be removed by user.
 
     """
+
     def __init__(self):
         """
         Other Parameters
@@ -35,6 +36,37 @@ class AddItem(Master):
         self.name = None
         self.is_todo_async = None
         self.is_re_obj = None
+
+    async def set_return_channel(self, item_obj):
+        """ Set channel_type and response_channel.
+
+        If special has dm response change response_channel to dm. Else keep channel from where message was sent.
+
+        Parameters
+        ----------
+        item_obj: obj
+            Command object.
+
+        Returns
+        -------
+        Updated command object
+
+        """
+        if isinstance(self.message.channel, discord.DMChannel):
+            channel_type = "DMChannel"
+            response_channel = self.message.channel.id
+        elif self.special.get("response", None) == "dm":
+            channel_type = "DMChannel"
+            dm = await self.message.author.create_dm()
+            response_channel = dm.id
+        else:
+            channel_type = "GroupChannel"
+            response_channel = self.message.channel.id
+
+        item_obj.channel_type = channel_type
+        item_obj.response_channel = response_channel
+
+        return item_obj
 
     async def delete_doc(self, _id):
         await self.db[self.name].delete_one({"_id": _id})
@@ -84,7 +116,7 @@ class AddItem(Master):
                         discord_send = item_obj.doit()
 
                 except ExtError as e:
-                    await self.message.channel.send("{}".format(e))
+                    await item_obj.send("{}".format(e))
                     return
 
                 # check if something in message if len > 2000 split message
@@ -121,7 +153,6 @@ class AddItem(Master):
 
         Raises
         ------
-        AttributeError when self.message == None. Happens if command has initialize method.
         ExtError if something wrong in extension.
 
         """
@@ -134,6 +165,10 @@ class AddItem(Master):
         self.name = item_obj.name
         self.is_todo_async = inspect.iscoroutinefunction(item.doit)
 
+        # if command has initialize==True, don't send anything
+        initialize = getattr(item_obj, "initialize", False)
+
+        # check if called from mongodb_reinitialize
         if self.is_re_obj:
             if getattr(item_obj, "use_asyncio", False):
                 task = self.client.loop.create_task(self.coro_doit(item_obj))
@@ -142,6 +177,11 @@ class AddItem(Master):
             else:
                 pass
         else:
+            # set channel_type and response_channel also update special in item_obj
+            if not initialize:
+                item_obj = await self.set_return_channel(item_obj)
+                item_obj.special = self.special
+
             # run on initialization if True
             if getattr(item_obj, "run_on_init", False):
                 try:
@@ -151,28 +191,27 @@ class AddItem(Master):
                         item_obj.doit()
 
                 except ExtError as e:
-                    try:
-                        await self.message.channel.send("{}".format(e))
-                        return
-
-                    except AttributeError:
-                        raise ExtError
+                    if not initialize:
+                        await item_obj.send("{}".format(e))
+                        return None
+                    else:
+                        return None
             else:
                 pass
 
-            if getattr(item_obj, "use_asyncio", False):                          # check if helper uses asyncio
-                await self.message.channel.send(str(item_obj))
-                task = self.client.loop.create_task(self.coro_doit(item_obj))    # add coro_doit to event loop
+            # check if extension uses asyncio
+            if getattr(item_obj, "use_asyncio", False):
+                if not initialize:
+                    await item_obj.send(str(item_obj))
 
+                # add coro_doit to event loop
+                task = self.client.loop.create_task(self.coro_doit(item_obj))
                 if not task:
                     return
             else:
                 await Obj2Dict(item_obj).make_doc(self.db)
-                try:
-                    await self.message.channel.send(str(item_obj))
-
-                except AttributeError:
-                    pass
+                if not initialize:
+                    await item_obj.send(str(item_obj))
 
 
 class Obj2Dict:
@@ -190,21 +229,22 @@ class Obj2Dict:
                         dct.update(
                             {
                                 "username": str(value.author),
-                                "author_id": int(value.author.id),
-                                "channel_id": int(value.channel.id),
-                                "original_message": str(value.content),
-                                "message_received_on": str(value.created_at),
+                                "author_id": value.author.id,
+                                "channel_id": value.channel.id,
+                                "original_message": value.content,
+                                "message_received_on": value.created_at,
                             }
                         )
-
-                        if isinstance(value.channel, discord.DMChannel):
-                            dct.update({"channel_type": "DMChannel"})
-                        else:
-                            dct.update({"channel_type": "GroupChannel"})
                     else:
                         pass
+
+                if attr == "channel_type":
+                    dct.update({"channel_type": value})
+                elif attr == "response_channel":
+                    dct.update({"response_channel": value})
                 else:
                     pass
+
             else:
                 if attr == "name":
                     dct.update({"name": value})
