@@ -75,12 +75,6 @@ class Reinitializer:
             re_obj.__dict__.update(command)
             re_obj.client = self.client
 
-            try:
-                re_obj.saved_channel = command["channel_id"]
-                re_obj.ch_type = command["channel_type"]
-            except KeyError:
-                pass
-
             if re_obj.name == "time_it":
                 re_obj.commands = self.messenger.commands
                 re_obj.sim = self.messenger.sim
