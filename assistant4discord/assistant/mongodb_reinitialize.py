@@ -95,7 +95,7 @@ class Reinitializer:
             created_on = command["created_on"]
             time_to_message = command["time_to_message"]
 
-            new_time_to_message = time_to_message - (int(time.time()) - created_on)
+            new_time_to_message = time_to_message - (time.time() - created_on)
             re_obj.time_to_message = new_time_to_message
 
         except (KeyError, TypeError):

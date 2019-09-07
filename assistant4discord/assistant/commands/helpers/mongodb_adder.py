@@ -79,6 +79,50 @@ class AddItem(Master):
         else:
             return None
 
+    @staticmethod
+    def correct_times(item_obj):
+        """ Correction for 'at' keyword in message, correction for server downtime.
+
+        Used for updating time_to_message attribute in item_obj.
+
+        Examples
+        --------
+        In [1]: obj_time = -1000
+        In [2]: every_time = 30
+        In [3]: k = abs(obj_time // every_time) - 1
+        In [4]: k
+        Out[4]: 33
+        In [5]: new_time = abs(obj_time) - k * every_time
+        In [5]: new_time
+        Out[5]: 10
+
+        In [6]: obj_time = -10
+        In [7]: every_time = 30
+        In [8]: k = abs(obj_time // every_time) - 1
+        In [9]: k
+        Out[9]: 0
+        In [10]: new_time = every_time - abs(obj_time)
+        In [11]: new_time
+        Out[11]: 20
+
+        Returns
+        -------
+        Corrected time int
+
+        """
+        obj_time = item_obj.time_to_message
+        every_time = item_obj.every
+        k = abs(obj_time // every_time) - 1
+
+        if obj_time >= 0:
+            new_time = every_time
+        elif obj_time < 0 and k != 0:
+            new_time = abs(obj_time) - k * every_time
+        else:
+            new_time = every_time - abs(obj_time)
+
+        return new_time
+
     async def coro_doit(self, item_obj):
         """ loop.create_task function.
 
@@ -132,8 +176,7 @@ class AddItem(Master):
                     await self.delete_doc(doc_id)
                     return
                 else:
-                    # correction if 'at' keyword in message
-                    item_obj.time_to_message = item_obj.every
+                    item_obj.time_to_message = self.correct_times(item_obj)
                     await Obj2Dict(item_obj).update_doc(self.db, doc_id)
 
     async def AddItem_doit(self, item):
