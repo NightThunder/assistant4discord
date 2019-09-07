@@ -8,7 +8,7 @@ import math
 
 
 # this is needed so that commands that use calls from different commands don't get mixed up
-boosted = {"similar": 1000, "similarity": 1000, "help": 10, "number": 10, "time": 100}
+boosted = {"similar": 1000, "similarity": 1000, "help": 10, "number": 10, "time": 100, "latex": 1000}
 
 
 class w2vSimilarity:
