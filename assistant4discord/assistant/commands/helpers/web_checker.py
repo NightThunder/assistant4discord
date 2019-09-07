@@ -4,19 +4,29 @@ from aiohttp.client_exceptions import InvalidURL
 
 
 async def fetch(session, url):
+
     try:
         async with session.get(url) as response:
             if response.status != 200:
                 response.raise_for_status()
 
-            return await response.text()
+            try:
+                return await response.text()        # string
+            except UnicodeDecodeError:
+                return await response.read()        # bytes
 
     except InvalidURL:
         return None
 
 
 async def fetch_all(session, urls, client):
-    results = await asyncio.gather(*[client.loop.create_task(fetch(session, url)) for url in urls])
+
+    # if only one url of type str else it's a list of urls
+    if type(urls) == str:
+        results = await fetch(session, urls)
+    else:
+        results = await asyncio.gather(*[client.loop.create_task(fetch(session, url)) for url in urls])
+
     return results
 
 
