@@ -7,13 +7,9 @@
 <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 </p>
 
------------------------
-
 ## Contents
 - [Overview](#overview)
-
 - [Features](#features)
-
 - [Commands](#commands)
     - [set reminders](#reminders)
     - [set timers](#timers)
@@ -24,11 +20,9 @@
         - [bot info](#info)
         - [set mods](#mods)
         - [vector model](#vector-model)
-
 - [Setup](#setup)
     - [local](#local)
     - [cloud](#cloud)
-
 - [Making custom commands](#making-custom-commands)
 
 ## Overview
