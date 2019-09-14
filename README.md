@@ -56,7 +56,7 @@
 ### Latex
 using: https://www.codecogs.com/latex/eqneditor.php  
 [Example output](https://i.imgur.com/vHVGF4W.png)  
-[Produced png](https://cdn.discordapp.com/attachments/599894710546595840/622458076955541523/latex_img.png)).
+[Produced png](https://cdn.discordapp.com/attachments/599894710546595840/622458076955541523/latex_img.png)
 
 ### Info
 
