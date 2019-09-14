@@ -54,7 +54,7 @@
 ### Notes
 
 ### Latex
-![example](https://imgur.com/a/ldGm9pg)
+![example](https://i.imgur.com/vHVGF4W.png)
 
 ### Info
 
