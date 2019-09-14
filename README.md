@@ -9,4 +9,54 @@
 
 -----------------------
 
-TODO: write readme
+## Contents
+- [Overview](#overview)
+
+- [Features](#features)
+
+- [Commands](#commands)
+    - [set reminders](#reminders)
+    - [set timers](#timers)
+    - [check for changes in a website](#website-comparrsion)
+    - [take notes](#notes)
+    - [text to latex](#latex)
+    - others
+        - [bot info](#info)
+        - [set mods](#mods)
+        - [vector model](#vector-model)
+
+- [Setup](#setup)
+    - [local](#local)
+    - [cloud](#cloud)
+
+- [Making custom commands](#making-custom-commands)
+
+## Overview
+
+## Features
+
+## Commands
+
+### Reminders
+
+### Timers
+
+### Website comparrsion
+
+### Notes
+
+### Latex
+
+### Info
+
+### Mods
+
+### Vector model
+
+## Setup
+
+### Local
+
+### Cloud
+
+## Making custom commands
