@@ -47,6 +47,7 @@ class Mod(Extend):
             for user in self.client.users:
                 if str(user) == to_mod:
                     self.mod = to_mod
+                    return
 
             raise ExtError("Could not find user!")
 
