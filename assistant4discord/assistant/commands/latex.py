@@ -9,8 +9,9 @@ class TextToLatex(Master):
     def __init__(self):
         super().__init__()
         self.help = (
-            "```***Ping help***\n"
-            "Ping discord server and return response time in ms.\n"
+            "```***TextToLatex help***\n"
+            "Convert latex text to png.\n"
+            "Note: using https://www.codecogs.com/latex/eqneditor.php\n"
             "Call: latex```"
         )
         self.call = "latex"
