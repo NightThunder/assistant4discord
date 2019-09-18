@@ -10,7 +10,8 @@ class Mods(AddItem):
         super().__init__()
         self.help = (
             "```***Mods help***\n" 
-            "Add a moderator. Owner only.\n" 
+            "Add a moderator. Owner only.\n"
+            "Minor bug: owner doesn't count when removing mods (first mod is number 0 etc.)\n" 
             "Call: mod```"
         )
         self.call = "mod"

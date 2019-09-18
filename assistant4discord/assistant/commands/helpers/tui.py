@@ -1,4 +1,4 @@
-from assistant4discord.nlp_tasks.message_processing import word2vec_input
+from assistant4discord.nlp_tasks.message_processing import remove_punctuation
 from assistant4discord.assistant.commands.helpers.master import Master
 
 
@@ -89,20 +89,31 @@ class RemoveItem(Master):
         if not item_name:
             raise NameError
 
-        try:
-            to_kill = int(word2vec_input(self.message.content, replace_num=False)[-1])
-        except ValueError:
-            await self.send("Could not find number at end on message!")
+        msg = remove_punctuation(self.message.content)
+        to_remove = [int(msg) for msg in msg.split() if msg.isdigit()]
+
+        if len(to_remove) == 0:
+            await self.send("Could not find any index!")
             return
 
         all_items = await self.get_user_docs(item_name, str(self.message.author))
 
-        if item_name == "mods":
-            to_kill -= 1
+        out_msg = 'Removed items with index'
+        out_msg_ = out_msg
+        err_out_msg = 'Could not remove items with index'
+        err_out_msg_ = err_out_msg
 
-        if to_kill > len(all_items) - 1:
-            await self.send("Could not find and delete that item!")
+        for i in to_remove:
+            if i > len(all_items) - 1:
+                err_out_msg += ' {},'.format(str(i))
+            else:
+                id_to_delete = all_items[i]["_id"]
+                await self.delete_doc(item_name, id_to_delete)
+                out_msg += ' {},'.format(str(i))
+
+        if err_out_msg != err_out_msg_ and out_msg != out_msg_:
+            await self.send(err_out_msg[:-1] + '\n' + out_msg[:-1])
+        elif out_msg != out_msg_:
+            await self.send(out_msg[:-1])
         else:
-            id_to_delete = all_items[to_kill]["_id"]
-            await self.delete_doc(item_name, id_to_delete)
-            await self.send("item {} removed!".format(to_kill + 1 if item_name == "mods" else to_kill))
+            await self.send(err_out_msg[:-1])
