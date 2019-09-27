@@ -1,4 +1,4 @@
-from assistant4discord.nlp_tasks.message_processing import word2vec_input
+from a4d.nlp_tasks.message_processing import word2vec_input
 import datetime
 from datetime import date
 import time
@@ -75,7 +75,7 @@ def sent_time_finder(sent):
 
     Note
     ----
-    Naive (bad) implementation. Timezones not supported, works with local time only.
+    Naive implementation. Timezones not supported, works with local time only.
 
     Examples
     --------
@@ -290,7 +290,7 @@ def timestamp_to_local(timestamp):
     str
         %d.%m.%Y @ %H:%M:%S
     """
-    return datetime.datetime.fromtimestamp(int(timestamp)).strftime("%d.%m.%Y @ %H:%M:%S")
+    return datetime.datetime.fromtimestamp(timestamp).strftime("%d.%m.%Y @ %H:%M:%S")
 
 
 def convert_sec(seconds):

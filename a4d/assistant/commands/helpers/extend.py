@@ -1,6 +1,6 @@
 import time
-from assistant4discord.assistant.commands.helpers.master import Master
-from assistant4discord.nlp_tasks.find_times import sent_time_finder
+from a4d.assistant.commands.helpers.master import Master
+from a4d.nlp_tasks.find_times import sent_time_finder
 
 
 class ExtError(Exception):
@@ -37,7 +37,7 @@ class Extend(Master):
         self.time_to_message = None
         self.every = None
         self.switch = 0
-        self.created_on = int(time.time())
+        self.created_on = time.time()
 
     def get_message(self):
         """ Get message from discord.

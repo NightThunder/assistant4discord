@@ -1,8 +1,8 @@
 import time
 import numpy as np
-from assistant4discord.nlp_tasks.find_times import sent_time_finder, timestamp_to_local, convert_sec
-from assistant4discord.nlp_tasks.message_processing import word2vec_input
-from assistant4discord.assistant.commands.helpers.extend import Extend, ExtError
+from a4d.nlp_tasks.find_times import sent_time_finder, timestamp_to_local, convert_sec
+from a4d.nlp_tasks.message_processing import word2vec_input
+from a4d.assistant.commands.helpers.extend import Extend, ExtError
 
 
 class Timer(Extend):
@@ -46,7 +46,7 @@ class Timer(Extend):
             else:
                 chosen_one.message = self.message
 
-            self.created_on = int(time.time())
+            self.created_on = time.time()
 
             await chosen_one.doit()
 
