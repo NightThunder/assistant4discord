@@ -1,6 +1,6 @@
 from gensim.models import Word2Vec, KeyedVectors
 from gensim.test.utils import get_tmpfile
-from assistant4discord.nlp_tasks.message_processing import word2vec_input
+from a4d.nlp_tasks.message_processing import word2vec_input
 import os
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity

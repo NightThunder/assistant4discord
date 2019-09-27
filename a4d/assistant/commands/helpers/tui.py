@@ -1,5 +1,5 @@
-from assistant4discord.nlp_tasks.message_processing import remove_punctuation
-from assistant4discord.assistant.commands.helpers.master import Master
+from a4d.nlp_tasks.message_processing import remove_punctuation
+from a4d.assistant.commands.helpers.master import Master
 
 
 class ShowItems(Master):

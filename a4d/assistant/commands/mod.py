@@ -1,7 +1,7 @@
 from .extensions.mod_ext import Mod
 from .helpers.tui import ShowItems, RemoveItem
 from .helpers.mongodb_adder import AddItem
-from assistant4discord.assistant.commands.helpers.master import check_if
+from a4d.assistant.commands.helpers.master import check_if
 
 
 class Mods(AddItem):

@@ -1,5 +1,5 @@
-from assistant4discord.assistant.commands.helpers.extend import Extend
-from assistant4discord.nlp_tasks.find_times import timestamp_to_local
+from a4d.assistant.commands.helpers.extend import Extend
+from a4d.nlp_tasks.find_times import timestamp_to_local
 
 
 class Note(Extend):

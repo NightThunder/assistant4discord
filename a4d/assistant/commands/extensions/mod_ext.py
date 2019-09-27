@@ -1,4 +1,4 @@
-from assistant4discord.assistant.commands.helpers.extend import Extend, ExtError
+from a4d.assistant.commands.helpers.extend import Extend, ExtError
 
 
 class Mod(Extend):

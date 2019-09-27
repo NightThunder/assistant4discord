@@ -3,7 +3,7 @@ import time
 import os
 import inspect
 from pathlib import Path
-from assistant4discord.assistant.commands.helpers.mongodb_adder import AddItem
+from a4d.assistant.commands.helpers.mongodb_adder import AddItem
 
 
 class Reinitializer:
@@ -124,7 +124,7 @@ class Reinitializer:
         for file in file_lst:
             if file.endswith(".py") and "__init__" not in file:
 
-                module_name = "assistant4discord.assistant.commands.helpers.{}".format(file[:-3])
+                module_name = "a4d.assistant.commands.helpers.{}".format(file[:-3])
 
                 module = import_module(module_name)
 
@@ -146,7 +146,7 @@ class Reinitializer:
         for file in file_lst:
             if file.endswith(".py") and "__init__" not in file:
 
-                module_name = "assistant4discord.assistant.commands.extensions.{}".format(file[:-3])
+                module_name = "a4d.assistant.commands.extensions.{}".format(file[:-3])
 
                 module = import_module(module_name)
 

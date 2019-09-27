@@ -1,5 +1,5 @@
-from assistant4discord.nlp_tasks.w2v import w2vSimilarity
-from assistant4discord.nlp_tasks.tf import tfSimilarity
+from a4d.nlp_tasks.w2v import w2vSimilarity
+from a4d.nlp_tasks.tf import tfSimilarity
 from importlib import import_module
 import os
 import inspect
@@ -52,7 +52,7 @@ class Commander:
         self.set_master_attributes()
 
     def get_commands(self):
-        """ Load commands from assistant4discord/assistant/commands/. Ignore directories inside /commands
+        """ Load commands from a4d/assistant/commands/. Ignore directories inside /commands
 
         Note
         ----
@@ -73,7 +73,7 @@ class Commander:
         for file in file_lst:
             if file.endswith(".py") and "__init__" not in file:
 
-                module_name = "assistant4discord.assistant.commands.{}".format(file[:-3])
+                module_name = "a4d.assistant.commands.{}".format(file[:-3])
                 module = import_module(module_name)
 
                 for name, obj in inspect.getmembers(module):
@@ -137,7 +137,7 @@ class Messenger(Commander):
         return initialized
 
     def message_to_command(self, message):
-        """ Uses message_x_command_sim from assistant4discord/nlp_tasks/ to get the command that matches the most with user input.
+        """ Uses message_x_command_sim from a4d/nlp_tasks/ to get the command that matches the most with user input.
 
         Parameters
         ----------

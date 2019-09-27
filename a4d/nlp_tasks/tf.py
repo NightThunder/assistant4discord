@@ -1,6 +1,6 @@
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from assistant4discord.nlp_tasks.message_processing import replace_numbers
+from a4d.nlp_tasks.message_processing import replace_numbers
 
 
 class tfSimilarity:

@@ -1,8 +1,8 @@
 import discord
 import logging
-from assistant4discord.data.logger import setup_logger
-from assistant4discord.assistant.messenger import Messenger
-from assistant4discord.assistant.mongodb_reinitialize import Reinitializer
+from a4d.data.logger import setup_logger
+from a4d.assistant.messenger import Messenger
+from a4d.assistant.mongodb_reinitialize import Reinitializer
 import motor.motor_asyncio
 
 
@@ -83,7 +83,7 @@ class MyClient(discord.Client):
 def run(method, discord_token, mongodb_token, log_chat, model_name=None):
 
     mongodb_client = motor.motor_asyncio.AsyncIOMotorClient(mongodb_token)
-    db = mongodb_client["assistant4discord"]
+    db = mongodb_client["a4d"]
 
     client = MyClient()
 

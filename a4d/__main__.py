@@ -1,4 +1,4 @@
-from assistant4discord.discord_api.discord_client import run
+from a4d.discord_api.discord_client import run
 import os
 
 

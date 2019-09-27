@@ -1,7 +1,7 @@
 import os
 import discord
-from assistant4discord.assistant.commands.helpers.master import Master
-from assistant4discord.assistant.commands.helpers.web_checker import get_content
+from a4d.assistant.commands.helpers.master import Master
+from a4d.assistant.commands.helpers.web_checker import get_content
 
 
 class TextToLatex(Master):

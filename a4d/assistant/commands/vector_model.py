@@ -1,5 +1,5 @@
 from .helpers.master import Master
-from assistant4discord.nlp_tasks.message_processing import word2vec_input
+from a4d.nlp_tasks.message_processing import word2vec_input
 
 
 class Word2WordSim(Master):
