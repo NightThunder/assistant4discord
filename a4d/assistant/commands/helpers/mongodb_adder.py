@@ -1,7 +1,8 @@
 import asyncio
 import inspect
 import discord
-from assistant4discord.assistant.commands.helpers.master import Master
+import time
+from a4d.assistant.commands.helpers.master import Master
 from .extend import ExtError
 
 
@@ -80,10 +81,23 @@ class AddItem(Master):
             return None
 
     @staticmethod
-    def correct_times(item_obj):
+    def correct_times(item_obj, t1, n):
         """ Correction for 'at' keyword in message, correction for server downtime.
 
+        Parameters
+        ----------
+        item_obj: obj
+            Command object.
+        t1: float
+            Needed time for coro_doit() functions.
+            Used for time adjustment, item_obj.send (~0.2 sec) and item_obj.doit (~0.3 sec for timer).
+        n: int
+            Loop counter. Important if first run.
+
         Used for updating time_to_message attribute in item_obj.
+
+        Content that couldn't be sent when it was supposed to (due to shutdown) is sent on next bot start. When it's
+        possible send one event immediately and adjust next one accordingly so it lines up with what was supposed to happen.
 
         Examples
         --------
@@ -95,6 +109,7 @@ class AddItem(Master):
         In [5]: new_time = abs(obj_time) - k * every_time
         In [5]: new_time
         Out[5]: 10
+        missed 33 times, 10 sec to 34th message
 
         In [6]: obj_time = -10
         In [7]: every_time = 30
@@ -104,6 +119,7 @@ class AddItem(Master):
         In [10]: new_time = every_time - abs(obj_time)
         In [11]: new_time
         Out[11]: 20
+        missed once, 20 sec to next message
 
         Returns
         -------
@@ -114,14 +130,26 @@ class AddItem(Master):
         every_time = item_obj.every
         k = abs(obj_time // every_time) - 1
 
+        # time that was needed for coro_doit() functions
+        new_fix = 0
+
         if obj_time >= 0:
             new_time = every_time
         elif obj_time < 0 and k != 0:
             new_time = abs(obj_time) - k * every_time
+            new_fix = time.time() - t1
         else:
             new_time = every_time - abs(obj_time)
+            new_fix = time.time() - t1
 
-        return new_time
+        if n == 0 and new_fix == 0:
+            new_fix = time.time() - t1 - every_time
+        elif n != 0 and new_fix == 0:
+            new_fix = time.time() - t1 - obj_time
+        else:
+            pass
+
+        return new_time - new_fix
 
     async def coro_doit(self, item_obj):
         """ loop.create_task function.
@@ -138,6 +166,9 @@ class AddItem(Master):
         else:
             make_db_entry = True
 
+        t2 = 0       # time correction for Obj2dict
+        n_run = 0    # loop counter
+
         while True:
 
             if make_db_entry:
@@ -146,6 +177,9 @@ class AddItem(Master):
                 make_db_entry = False
 
             else:
+                t1 = time.time()    # measures how long coro_doit() takes to complete
+
+                item_obj.time_to_message = item_obj.time_to_message - t2
                 await asyncio.sleep(item_obj.time_to_message)
 
                 # if not found it was deleted by user
@@ -176,8 +210,11 @@ class AddItem(Master):
                     await self.delete_doc(doc_id)
                     return
                 else:
-                    item_obj.time_to_message = self.correct_times(item_obj)
+                    item_obj.time_to_message = self.correct_times(item_obj, t1, n_run)
+                    n_run += 1
+                    t2_ = time.time()
                     await Obj2Dict(item_obj).update_doc(self.db, doc_id)
+                    t2 = time.time() - t2_
 
     async def AddItem_doit(self, item):
         """ Core method.
