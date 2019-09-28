@@ -38,6 +38,17 @@ class AddItem(Master):
         self.is_todo_async = None
         self.is_re_obj = None
 
+    async def delete_doc(self, _id):
+        await self.db[self.name].delete_one({"_id": _id})
+
+    async def find_doc(self, _id):
+        found = await self.db[self.name].find_one({"_id": _id})
+
+        if found:
+            return found
+        else:
+            return None
+
     async def set_return_channel(self, item_obj):
         """ Set channel_type and response_channel.
 
@@ -68,17 +79,6 @@ class AddItem(Master):
         item_obj.response_channel = response_channel
 
         return item_obj
-
-    async def delete_doc(self, _id):
-        await self.db[self.name].delete_one({"_id": _id})
-
-    async def find_doc(self, _id):
-        found = await self.db[self.name].find_one({"_id": _id})
-
-        if found:
-            return found
-        else:
-            return None
 
     @staticmethod
     def correct_times(item_obj, t1, n):
@@ -211,15 +211,17 @@ class AddItem(Master):
                     return
                 else:
                     item_obj.time_to_message = self.correct_times(item_obj, t1, n_run)
-                    n_run += 1
                     t2_ = time.time()
+                    item_obj.created_on = t2_ - t2      # updates object's time
                     await Obj2Dict(item_obj).update_doc(self.db, doc_id)
                     t2 = time.time() - t2_
+                    n_run += 1
 
     async def AddItem_doit(self, item):
         """ Core method.
 
         Parameters
+        ----------
         item: obj
             Command object passed from commands directory.
 

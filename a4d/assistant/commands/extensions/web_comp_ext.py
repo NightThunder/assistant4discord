@@ -1,4 +1,3 @@
-import time
 from html2text import html2text
 from difflib import Differ
 from a4d.nlp_tasks.find_times import timestamp_to_local, convert_sec
@@ -77,8 +76,6 @@ class WebComp(Extend):
 
             diff_str = diff_str[:-37]
             self.html_lst = html_lst
-
-            self.created_on = time.time()
 
             if len(diff_str) == 0:
                 return "Websites {} checked, no difference found.".format(self.links)

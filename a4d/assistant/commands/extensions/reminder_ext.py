@@ -1,4 +1,3 @@
-import time
 from a4d.nlp_tasks.find_times import timestamp_to_local, convert_sec
 from a4d.assistant.commands.helpers.extend import Extend
 
@@ -26,7 +25,6 @@ class Reminder(Extend):
             self.switch += 1
             return self.to_remind
         else:
-            self.created_on = time.time()
             return self.to_remind
 
     def __str__(self):

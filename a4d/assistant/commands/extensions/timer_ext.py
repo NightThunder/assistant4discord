@@ -1,4 +1,3 @@
-import time
 import numpy as np
 from a4d.nlp_tasks.find_times import sent_time_finder, timestamp_to_local, convert_sec
 from a4d.nlp_tasks.message_processing import word2vec_input
@@ -45,8 +44,6 @@ class Timer(Extend):
                 chosen_one.channel_type = self.channel_type
             else:
                 chosen_one.message = self.message
-
-            self.created_on = time.time()
 
             await chosen_one.doit()
 
