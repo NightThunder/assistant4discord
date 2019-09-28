@@ -3,6 +3,7 @@ import os
 
 
 DISCORD_TOKEN = os.environ['DISCORD_TOKEN']
+# MONGODB_TOKEN = 'mongodb://localhost:27017/'
 MONGODB_TOKEN = os.environ['MONGODB_TOKEN']
 
 
