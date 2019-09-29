@@ -208,11 +208,14 @@ Small word2vec model made with Reddit can be found [here](https://github.com/Nig
 1. have python3 working
 2. download assistant4discord zip and extract it to a folder
 3. make python [virtual environment](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/)
-(recommended) and pip install everything in requirements.txt (pip3 install -r requirements.txt)
+(recommended) and pip install everything in requirements.txt:
+
+    `pip3 install -r requirements.txt`
+    
 4. get your discord bot token from [here](https://discordapp.com/developers/applications/)
 5. install MongoDB, see [documentation](https://docs.mongodb.com/manual/administration/install-community/)
 
-   if on Ubuntu and the documentation way doesn't work you can try:  
+   if on Ubuntu and the documentation's way doesn't work you can try:  
    `sudo apt-get update`  
    `sudo apt-get install mongodb`  
    `sudo service mongodb status`  
@@ -234,9 +237,9 @@ Small word2vec model made with Reddit can be found [here](https://github.com/Nig
     - w2v, you can download my model from [here](https://github.com/NightThunder/RAT/releases) and
       extract it to a4d/data/models
 
-8. run run_assistant.py, invite your bot to a server and that's it!
+8. run run_assistant.py and invite your bot to a server
     
-video tutorial for steps 1, 4 and 8: [How to Create a Discord Bot With Python](https://youtu.be/xdg39s4HSJQ)
+video tutorial for steps 1, 4 and 8 [How to Create a Discord Bot With Python](https://youtu.be/xdg39s4HSJQ)
 
 ### Cloud (recommended)
 
@@ -244,6 +247,45 @@ video tutorial for steps 1, 4 and 8: [How to Create a Discord Bot With Python](h
 2. get your discord bot token from [here](https://discordapp.com/developers/applications/)
 3. setup [MongoDB atlas](https://www.mongodb.com/cloud/atlas) 
 
-    - make an account and setup your cluster, [tutorial](https://youtu.be/_d8CBOtadRA)
+    - make an account and create a cluster (free), [tutorial](https://youtu.be/_d8CBOtadRA), [documentation](https://docs.atlas.mongodb.com/getting-started/)
+    - wait until your cluster is created
+    - go to Network Access under security, click add ip address and allow access from anywhere
+    - go to clusters and click connect, create a MongoDB user, under connection method chose 
+      Connect Your Application
+    - chose Python 3.4 or later and copy your connection string (if you chose 3.6 or later you also
+      need to install dnspython)
 
+4. chose method
+    
+    - open run_assistant.py
+    - tf, doesn't require any further setup
+    - w2v, you can download my model from [here](https://github.com/NightThunder/RAT/releases) and
+      extract it to a4d/data/models (also delete .gitignore that's in this folder)
+
+5. setup [Heroku](https://www.heroku.com)
+
+    - make an account and create a new app (free)
+    - go to settings, reveal config vars, add DISCORD_TOKEN and MONGODB_TOKEN from steps 2. and 3.
+    - to change server timezone add TZ to config vars and set it to your timezone ([list of all timezones](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones))
+    - install [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli)
+    - go to folder where you extracted a4d, open terminal and write the following commands:  
+    `heroku login`  
+    `git init`  
+    `heroku git:clone -a <Heroku app name>`  
+    `git add .`  
+    `git commit -am <any commit message>`  
+    `git push heroku master`  
+    additional commands:  
+    `heroku logs -a <Heroku app name>`  
+    `heroku ps -a <Heroku app name>` 
+    
+    - turn on your Heroku app (resources tab)
+
+6. invite your bot to a server 
+
+video tutorial for step 4. [How to Host a Discord Bot on Heroku for Free](https://youtu.be/BPvg9bndP1U)
+
+Note that you can also run a4d locally instead from Heroku using MongoDB atlas (see steps 3. and 6. of local setup).
+    
 ## Making custom commands
+TODO: write some examples
