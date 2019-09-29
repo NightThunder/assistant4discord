@@ -21,7 +21,7 @@
     - [vector model](#vector-model)
 - [Setup](#setup)
     - [local](#local)
-    - [cloud](#cloud)
+    - [cloud](#cloud-(recommended))
 - [Making custom commands](#making-custom-commands)
 
 ## Overview
@@ -50,7 +50,7 @@ Additionally it offers input to command matching using
 ## Default commands
 
 ### Info and help
-Display basic bot information.
+Display basic bot information.  
 _Example_:
 ```
 command: @assistant info
@@ -130,7 +130,8 @@ output:  0 - command: Ping
 
 ### Website comparrsion
 Compares website text and detects changes using python's difflib. Intended for simple websites
-(like those 90s style websites that college professors have).  
+(like those 90s style websites that college professors have). By default website checking can be done
+once every 2 min. Every user can have max 10 active requests that each check at most 10 different urls. 
 _Example:_
 ```
 input:   https://www.reddit.com/r/Python/new/.json?limit=1
@@ -201,6 +202,14 @@ output:  whatsapp: 0.71 irc: 0.71 teamspeak: 0.67 skype: 0.66 ...
 ```
 Small word2vec model made with Reddit can be found [here](https://github.com/NightThunder/RAT/releases). 
 
+Why use this? Say you have a reminder and you want to remove it but don't remember what's the right command. In standard
+input to command matching wrong but similar command string wouldn't work because it wasn't explicitly programmed as a 
+command option. W2v model represents words as vectors, words that have similar meanings (are used similarly) are grouped
+together. Input to command matching is done by comparing defined (right) commands to a given command that can be different
+then the defined one. For each pair of commands (each defined command and given command) a similarity score is
+calculated using cosine similarity. Output command is then the command that has the highest similarity score. In reminder
+example the right command is "remove" but if you wrote "delete" instead the bot would still know what to do.
+
 ## Setup
 
 ### Local
@@ -239,7 +248,7 @@ Small word2vec model made with Reddit can be found [here](https://github.com/Nig
 
 8. run run_assistant.py and invite your bot to a server
     
-video tutorial for steps 1, 4 and 8 [How to Create a Discord Bot With Python](https://youtu.be/xdg39s4HSJQ)
+Video tutorial for steps 1, 4 and 8 [How to Create a Discord Bot With Python](https://youtu.be/xdg39s4HSJQ).
 
 ### Cloud (recommended)
 
@@ -283,7 +292,12 @@ video tutorial for steps 1, 4 and 8 [How to Create a Discord Bot With Python](ht
 
 6. invite your bot to a server 
 
-video tutorial for step 4. [How to Host a Discord Bot on Heroku for Free](https://youtu.be/BPvg9bndP1U)
+Video tutorial for step 4. [How to Host a Discord Bot on Heroku for Free](https://youtu.be/BPvg9bndP1U).    
+
+Heroku gives you 550 free hours each month. After that your app shuts down until next month. You can
+get more free hours by providing credit card information (still free, only needs verification) or you can make
+2 accounts and switch once a month.
+
 
 Note that you can also run a4d locally instead from Heroku using MongoDB atlas (see steps 3. and 6. of local setup).
     
