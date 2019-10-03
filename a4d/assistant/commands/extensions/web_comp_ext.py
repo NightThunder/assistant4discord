@@ -35,16 +35,18 @@ class WebComp(Extend):
             return 0
 
     async def doit(self):
-
-        diff_str = ""
+        min_time = 120        # min time between two website visits
+        max_num_entries = 10  # max db entries for user
+        max_num_links = 10    # max links allowed per entry
 
         if self.switch == 0:
             (self.time_to_message, self.every) = self.time_message()
 
             # block
             if (
-                self.time_to_message >= 120
-                and await self.num_of_entries(str(self.message.author)) < 10
+                self.time_to_message >= min_time
+                and await self.num_of_entries(str(self.message.author))
+                < max_num_entries
             ):
                 pass
             else:
@@ -54,7 +56,7 @@ class WebComp(Extend):
             self.links = list(set(self.get_links()))
 
             # block
-            if len(self.links) > 10:
+            if len(self.links) > max_num_links:
                 self.block = None
                 raise ExtError("More then 10 links in message!")
 
@@ -68,19 +70,29 @@ class WebComp(Extend):
         else:
             html_lst = await get_content(self.links, self.client)
 
+            diff_str = ""
+            no_diff_links = []
+
             for new_html, saved_html, link in zip(html_lst, self.html_lst, self.links):
                 diff = self.get_diff(html2text(new_html), html2text(saved_html))
                 if len(diff) != 0:
                     diff_str += "{}\n{}".format(link, diff)
-                    diff_str += "\n-----------------------------------\n"
+                    diff_str += "\n" + 35 * "-" + "\n"
+                else:
+                    no_diff_links.append(link)
 
             diff_str = diff_str[:-37]
             self.html_lst = html_lst
 
-            if len(diff_str) == 0:
-                return "Websites {} checked, no difference found.".format(self.links)
-            else:
+            if len(diff_str) == 0 and len(no_diff_links) != 0:
+                return "No difference in {}.".format(self.links)
+            elif len(diff_str) != 0 and len(no_diff_links) == 0:
                 return diff_str
+            elif len(diff_str) != 0 and len(no_diff_links) != 0:
+                return diff_str + "\n" + "No difference in {}.".format(no_diff_links)
+            else:
+                # this should never happen
+                raise ExtError("Error: no difference and no links!")
 
     def get_links(self):
         """ Get links from discord message. """
