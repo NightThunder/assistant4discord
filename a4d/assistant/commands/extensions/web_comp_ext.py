@@ -77,11 +77,11 @@ class WebComp(Extend):
                 diff = self.get_diff(html2text(new_html), html2text(saved_html))
                 if len(diff) != 0:
                     diff_str += "{}\n{}".format(link, diff)
-                    diff_str += "\n" + 35 * "-" + "\n"
+                    diff_str += "\n" + 50 * "=" + "\n"
                 else:
                     no_diff_links.append(link)
 
-            diff_str = diff_str[:-37]
+            diff_str = diff_str[:-52]
             self.html_lst = html_lst
 
             if len(diff_str) == 0 and len(no_diff_links) != 0:
@@ -127,12 +127,14 @@ class WebComp(Extend):
 
         lines = ""
         for l in result:
-            if l.startswith("  "):
+            if l.startswith('?'):
                 continue
-            elif not l.endswith("\n"):
+            elif len(l) < 3:
+                continue
+            elif l.endswith("\n"):
                 lines += l + "\n"
             else:
-                lines += l
+                pass
 
         return lines
 
