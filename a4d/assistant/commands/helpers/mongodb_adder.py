@@ -81,75 +81,39 @@ class AddItem(Master):
         return item_obj
 
     @staticmethod
-    def correct_times(item_obj, t1, n):
+    def correct_times(item_obj, t_run):
         """ Correction for 'at' keyword in message, correction for server downtime.
 
         Parameters
         ----------
         item_obj: obj
             Command object.
-        t1: float
+        t_run: float
             Needed time for coro_doit() functions.
             Used for time adjustment, item_obj.send (~0.2 sec) and item_obj.doit (~0.3 sec for timer).
-        n: int
-            Loop counter. Important if first run.
 
         Used for updating time_to_message attribute in item_obj.
 
         Content that couldn't be sent when it was supposed to (due to shutdown) is sent on next bot start. When it's
         possible send one event immediately and adjust next one accordingly so it lines up with what was supposed to happen.
 
-        Examples
-        --------
-        In [1]: obj_time = -1000
-        In [2]: every_time = 30
-        In [3]: k = abs(obj_time // every_time) - 1
-        In [4]: k
-        Out[4]: 33
-        In [5]: new_time = abs(obj_time) - k * every_time
-        In [5]: new_time
-        Out[5]: 10
-        missed 33 times, 10 sec to 34th message
-
-        In [6]: obj_time = -10
-        In [7]: every_time = 30
-        In [8]: k = abs(obj_time // every_time) - 1
-        In [9]: k
-        Out[9]: 0
-        In [10]: new_time = every_time - abs(obj_time)
-        In [11]: new_time
-        Out[11]: 20
-        missed once, 20 sec to next message
-
         Returns
         -------
-        Corrected time int
+        New time to message.
 
         """
-        obj_time = item_obj.time_to_message
-        every_time = item_obj.every
-        k = abs(obj_time // every_time) - 1
+        t_now = time.time()
+        t_fix = t_now - t_run
 
-        # time that was needed for coro_doit() functions
-        new_fix = 0
+        x = t_now - item_obj.created_on
 
-        if obj_time >= 0:
-            new_time = every_time
-        elif obj_time < 0 and k != 0:
-            new_time = abs(obj_time) - k * every_time
-            new_fix = time.time() - t1
+        if item_obj.time_to_message >= 0:
+            t = item_obj.every - t_fix
         else:
-            new_time = every_time - abs(obj_time)
-            new_fix = time.time() - t1
+            k = x // item_obj.every
+            t = x - k * item_obj.every - t_fix
 
-        if n == 0 and new_fix == 0:
-            new_fix = time.time() - t1 - every_time
-        elif n != 0 and new_fix == 0:
-            new_fix = time.time() - t1 - obj_time
-        else:
-            pass
-
-        return new_time - new_fix
+        return t
 
     async def coro_doit(self, item_obj):
         """ loop.create_task function.
@@ -167,7 +131,6 @@ class AddItem(Master):
             make_db_entry = True
 
         t2 = 0       # time correction for Obj2dict
-        n_run = 0    # loop counter
 
         while True:
 
@@ -210,12 +173,11 @@ class AddItem(Master):
                     await self.delete_doc(doc_id)
                     return
                 else:
-                    item_obj.time_to_message = self.correct_times(item_obj, t1, n_run)
+                    item_obj.time_to_message = self.correct_times(item_obj, t1)
                     t2_ = time.time()
-                    item_obj.created_on = t2_ - t2      # updates object's time
+                    item_obj.created_on = t2_      # updates object's time
                     await Obj2Dict(item_obj).update_doc(self.db, doc_id)
                     t2 = time.time() - t2_
-                    n_run += 1
 
     async def AddItem_doit(self, item):
         """ Core method.
