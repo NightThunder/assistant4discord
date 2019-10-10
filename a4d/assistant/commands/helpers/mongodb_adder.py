@@ -89,7 +89,7 @@ class AddItem(Master):
         item_obj: obj
             Command object.
         t_run: float
-            Needed time for coro_doit() functions.
+            Needed time for coro_doit() functions. Run time + asyncio sleep time.
             Used for time adjustment, item_obj.send (~0.2 sec) and item_obj.doit (~0.3 sec for timer).
 
         Used for updating time_to_message attribute in item_obj.
@@ -103,7 +103,7 @@ class AddItem(Master):
 
         """
         t_now = time.time()
-        t_fix = t_now - t_run
+        t_fix = t_now - t_run - item_obj.time_to_message
 
         x = t_now - item_obj.created_on
 
