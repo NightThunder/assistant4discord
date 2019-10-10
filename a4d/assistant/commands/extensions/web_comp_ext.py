@@ -35,7 +35,7 @@ class WebComp(Extend):
             return 0
 
     async def doit(self):
-        min_time = 120        # min time between two website visits
+        min_time = 20        # min time between two website visits
         max_num_entries = 10  # max db entries for user
         max_num_links = 10    # max links allowed per entry
 
@@ -127,14 +127,16 @@ class WebComp(Extend):
 
         lines = ""
         for l in result:
-            if l.startswith('?'):
+            if l.startswith(' '):
                 continue
             elif len(l) < 3:
                 continue
-            elif l.endswith("\n"):
-                lines += l + "\n"
+            # elif l.startswith('?'):
+            #     continue
+            elif l.startswith("?"):
+                lines += '?' + ' ' + l[1:]
             else:
-                pass
+                lines += '\n' + l
 
         return lines
 
