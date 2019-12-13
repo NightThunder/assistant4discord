@@ -22,7 +22,7 @@
 - [Setup](#setup)
     - [local](#local)
     - [cloud](#cloud-(recommended))
-    - [Testing](#test)
+    - [Testing](#testing)
 - [Making custom commands](#making-custom-commands)
 
 ## Overview
