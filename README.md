@@ -22,6 +22,7 @@
 - [Setup](#setup)
     - [local](#local)
     - [cloud](#cloud-(recommended))
+    - [Testing](#testing)
 - [Making custom commands](#making-custom-commands)
 
 ## Overview
@@ -296,10 +297,50 @@ Video tutorial for step 4. [How to Host a Discord Bot on Heroku for Free](https:
 
 Heroku gives you 550 free hours each month. After that your app shuts down until next month. You can
 get more free hours by providing credit card information (still free, only needs verification) or you can make
-2 accounts and switch once a month.
+2 accounts and switch once a month.  
+
+Note that you can also run a4d locally instead from Heroku using MongoDB atlas (see steps 3. and 6. of local setup).  
+
+### Testing
+
+1. have python3 working
+2. download assistant4discord zip and extract it to a folder
+3. make python [virtual environment](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/)
+(recommended) and pip install everything in requirements.txt:
+
+    `pip3 install -r requirements.txt`
+    
+4. get your discord bot token from [here](https://discordapp.com/developers/applications/)
+
+5. setup [MongoDB atlas](https://www.mongodb.com/cloud/atlas) 
+
+    - make an account and create a cluster (free), [tutorial](https://youtu.be/_d8CBOtadRA), [documentation](https://docs.atlas.mongodb.com/getting-started/)
+    - wait until your cluster is created
+    - go to Network Access under security, click add ip address and allow access from anywhere
+    - go to clusters and click connect, create a MongoDB user, under connection method chose 
+      Connect Your Application
+    - chose Python 3.4 or later and copy your connection string (if you chose 3.6 or later you also
+      need to install dnspython)
+
+6. configure environment variables in run_assistant.py
+
+    - set MONGODB_TOKEN = <your MongoDB token from step 5>
+    - set DISCORD_TOKEN = <your discord token from step 4>
+    
+    Note: if you intend to share your code it is good practice to configure environment variables
+    in your IDE. If you use PyCharm go to Run->Edit Configurations->Chose assistant.py->click Environment variables on 
+    right hand side->set all your tokens->apply and close
+
+7. chose method
+
+    - tf, doesn't require any further setup
+    - w2v, you can download my model from [here](https://github.com/NightThunder/RAT/releases) and
+      extract it to a4d/data/models
+
+8. run run_assistant.py and invite your bot to a server  
 
 
-Note that you can also run a4d locally instead from Heroku using MongoDB atlas (see steps 3. and 6. of local setup).
+
     
 ## Making custom commands
 TODO: write some examples
