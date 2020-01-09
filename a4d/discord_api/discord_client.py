@@ -70,7 +70,7 @@ class MyClient(discord.Client):
         if message.author == self.user:
             return
 
-        if message.content.startswith("<@{}>".format(self.user.id)):
+        if message.content.startswith("<@{}>".format(self.user.id)) or message.content.startswith("<@!{}>".format(self.user.id)):
             message.content = message.content[22:]
             messenger = self.messenger.message_to_command(message)
 
